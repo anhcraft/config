@@ -19,7 +19,9 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(AttributeModifierAdapter.class, new AttributeModifierAdapter());
         handler.registerTypeAdapter(BlockVector.class, new BlockVectorAdapter());
         handler.registerTypeAdapter(Pattern.class, new PatternAdapter());
-        handler.registerTypeAdapter(BoundingBox.class, new BoundingBoxAdapter());
+        if(NMSVersion.current().compare(NMSVersion.v1_13_R1) >= 0) {
+            handler.registerTypeAdapter(BoundingBox.class, new BoundingBoxAdapter());
+        }
         handler.registerTypeAdapter(Color.class, new ColorAdapter());
         handler.registerTypeAdapter(PotionEffect.class, new PotionEffectAdapter());
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
