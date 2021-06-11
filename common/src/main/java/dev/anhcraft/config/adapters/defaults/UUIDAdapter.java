@@ -1,4 +1,4 @@
-package adapters;
+package dev.anhcraft.config.adapters.defaults;
 
 import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.ConfigSerializer;
@@ -15,16 +15,13 @@ import java.util.UUID;
 public class UUIDAdapter implements TypeAdapter<UUID> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull UUID value) throws Exception {
-        return SimpleForm.of("UUID:" + value.toString());
+        return SimpleForm.of(value.toString());
     }
 
     @Override
     public @Nullable UUID complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws InvalidValueException {
         if (value.isString()) {
-            String str = Objects.requireNonNull(value.asString());
-            if (str.startsWith("UUID:")) {
-                return UUID.fromString(str.substring("UUID:".length()));
-            }
+            return UUID.fromString(Objects.requireNonNull(value.asString()));
         }
         throw new InvalidValueException("Failed to convert to UUID");
     }

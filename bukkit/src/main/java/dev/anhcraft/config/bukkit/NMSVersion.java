@@ -20,7 +20,7 @@ public enum NMSVersion {
     v1_16_R2,
     v1_16_R3;
 
-    private static NMSVersion current;
+    private static final NMSVersion current;
 
     static {
         //noinspection ConstantConditions

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class ConfigHandler {
     private final Map<String, TypeAdapter<?>> typeAdapters = new HashMap<>();
@@ -28,6 +29,7 @@ public abstract class ConfigHandler {
         registerTypeAdapter(Long.class, new LongAdapter());
         registerTypeAdapter(Float.class, new FloatAdapter());
         registerTypeAdapter(Double.class, new DoubleAdapter());
+        registerTypeAdapter(UUID.class, new UUIDAdapter());
     }
 
     /**

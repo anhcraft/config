@@ -11,7 +11,7 @@ public class CommonConfigTest extends TestPlatform {
     @Test
     public void playerInfo() throws Exception {
         YamlConfiguration conf = new YamlConfiguration();
-        conf.set("player", "UUID:2c8d5050-eae7-438d-88c4-c29fbcebede9");
+        conf.set("player", "2c8d5050-eae7-438d-88c4-c29fbcebede9");
         conf.set("points", 100);
         conf.set("homes", Arrays.asList("20 15 -8", "-7 20 13", "47 19 51"));
         PlayerInfo obj = deserialize(PlayerInfo.class, conf);

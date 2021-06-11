@@ -1,4 +1,3 @@
-import adapters.UUIDAdapter;
 import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.ConfigHandler;
 import dev.anhcraft.config.ConfigSerializer;
@@ -8,12 +7,11 @@ import dev.anhcraft.config.struct.SimpleForm;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class TestPlatform {
     protected void registerAdapters(ConfigHandler handler) {
-        handler.registerTypeAdapter(UUID.class, new UUIDAdapter());
+        //handler.registerTypeAdapter(UUID.class, new UUIDAdapter());
     }
 
     protected <T> SimpleForm serialize(Class<? extends T> clazz, T object) throws Exception {
