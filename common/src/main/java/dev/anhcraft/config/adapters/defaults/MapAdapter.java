@@ -51,8 +51,8 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
                 section.set((String) key, serializer.transform(valueType, entry.getValue()));
             } else {
                 SimpleForm sp = serializer.transform(keyType, key);
-                if(sp != null && sp.isString()) {
-                    section.set(Objects.requireNonNull(sp.asString()), serializer.transform(valueType, entry.getValue()));
+                if(sp != null) {
+                    section.set(Objects.requireNonNull(sp.getObject().toString()), serializer.transform(valueType, entry.getValue()));
                 }
             }
         }

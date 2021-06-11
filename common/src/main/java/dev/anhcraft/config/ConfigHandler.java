@@ -1,8 +1,7 @@
 package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapters.TypeAdapter;
-import dev.anhcraft.config.adapters.defaults.EnumAdapter;
-import dev.anhcraft.config.adapters.defaults.MapAdapter;
+import dev.anhcraft.config.adapters.defaults.*;
 import dev.anhcraft.config.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +20,14 @@ public abstract class ConfigHandler {
         this.configProvider = configProvider;
         registerTypeAdapter(Enum.class, new EnumAdapter());
         registerTypeAdapter(Map.class, new MapAdapter());
+        registerTypeAdapter(Character.class, new CharacterAdapter());
+        registerTypeAdapter(Boolean.class, new BooleanAdapter());
+        registerTypeAdapter(Byte.class, new ByteAdapter());
+        registerTypeAdapter(Short.class, new ShortAdapter());
+        registerTypeAdapter(Integer.class, new IntegerAdapter());
+        registerTypeAdapter(Long.class, new LongAdapter());
+        registerTypeAdapter(Float.class, new FloatAdapter());
+        registerTypeAdapter(Double.class, new DoubleAdapter());
     }
 
     /**

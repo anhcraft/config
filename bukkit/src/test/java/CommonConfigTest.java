@@ -90,4 +90,19 @@ public class CommonConfigTest extends TestPlatform {
         ConfigSection configSection2 = Objects.requireNonNull(serialize(Menu.class, m).asSection());
         Assertions.assertEquals(configSection.stringify(), configSection2.stringify());
     }
+
+    @Test
+    public void codeMap() throws Exception {
+        CodeMap map = new CodeMap();
+        map.table1.put('a',  "ALPHA");
+        map.table1.put('b',  "BETA");
+        map.table2.put((byte) 1,  "DELTA");
+        map.table2.put((byte) 2,  "OMEGA");
+        ConfigSection configSection = Objects.requireNonNull(serialize(CodeMap.class, map).asSection());
+        map = deserialize(CodeMap.class, ((YamlConfigSection) configSection).getBackend());
+        Assertions.assertEquals("ALPHA", map.table1.get('a'));
+        Assertions.assertEquals("BETA", map.table1.get('b'));
+        Assertions.assertEquals("DELTA", map.table2.get((byte) 1));
+        Assertions.assertEquals("OMEGA", map.table2.get((byte) 2));
+    }
 }
