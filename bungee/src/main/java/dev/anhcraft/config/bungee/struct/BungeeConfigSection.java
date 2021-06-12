@@ -80,14 +80,14 @@ public class BungeeConfigSection implements ConfigSection {
         Configuration conf = new Configuration();
         for (String k : config.getKeys()) {
             Object v = config.get(k);
-            if(v instanceof Configuration) {
-                conf.set(k, deepClone((Configuration) v));
-            } else {
+            //if(v instanceof Configuration) {
+            //    conf.set(k, deepClone((Configuration) v));
+            //} else {
                 // TODO deep copy here :D
                 conf.set(k, ObjectUtil.shallowCopy(v));
-            }
+            //}
         }
-        return conf;
+        return config;
     }
 
     @Override
