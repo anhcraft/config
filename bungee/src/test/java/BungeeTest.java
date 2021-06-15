@@ -15,9 +15,9 @@ public class BungeeTest extends TestPlatform {
         conf.set("points", 100);
         conf.set("homes", Arrays.asList("20 15 -8", "-7 20 13", "47 19 51"));
         PlayerInfo obj = deserialize(PlayerInfo.class, conf);
-        Assertions.assertEquals(obj.player, UUID.fromString("2c8d5050-eae7-438d-88c4-c29fbcebede9"));
-        Assertions.assertEquals(obj.points, 100);
-        Assertions.assertEquals(obj.homes, Arrays.asList("20 15 -8", "-7 20 13", "47 19 51"));
+        Assertions.assertEquals(UUID.fromString("2c8d5050-eae7-438d-88c4-c29fbcebede9"), obj.player);
+        Assertions.assertEquals(100, obj.points);
+        Assertions.assertEquals(Arrays.asList("20 15 -8", "-7 20 13", "47 19 51"), obj.homes);
     }
 
     @Test
@@ -29,8 +29,8 @@ public class BungeeTest extends TestPlatform {
         RoleTable obj = deserialize(RoleTable.class, conf);
         Assertions.assertFalse(obj.groups.isEmpty());
         Assertions.assertNotNull(obj.groups.get("a"));
-        Assertions.assertEquals(obj.groups.get("a").name, "a");
-        Assertions.assertArrayEquals(obj.groups.get("a").permissions, new String[]{"test.a", "test.b", "test.c"});
+        Assertions.assertEquals("a", obj.groups.get("a").name);
+        Assertions.assertArrayEquals(new String[]{"test.a", "test.b", "test.c"}, obj.groups.get("a").permissions);
         Assertions.assertTrue(obj.inheritable);
     }
 
@@ -85,8 +85,8 @@ public class BungeeTest extends TestPlatform {
         m = deserialize(Menu.class, ((BungeeConfigSection) configSection).getBackend());
         List<Ingredient> a = m.recipes.get(Recipe.TOFU_CURRY);
         Assertions.assertNotNull(a);
-        Assertions.assertEquals(a.get(0).name, "Tofu");
-        Assertions.assertEquals(a.get(2).amount, 3);
+        Assertions.assertEquals("Tofu", a.get(0).name);
+        Assertions.assertEquals(3, a.get(2).amount);
         ConfigSection configSection2 = Objects.requireNonNull(serialize(Menu.class, m).asSection());
         Assertions.assertEquals(configSection.stringify(), configSection2.stringify());
     }
