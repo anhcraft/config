@@ -11,6 +11,13 @@
 
     <artifactId>config.neep</artifactId>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>dev.anhcraft</groupId>
@@ -18,9 +25,9 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.anhcraft</groupId>
-            <artifactId>neep</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <groupId>com.github.anhcraft</groupId>
+            <artifactId>Neep</artifactId>
+            <version>1.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>dev.anhcraft</groupId>
