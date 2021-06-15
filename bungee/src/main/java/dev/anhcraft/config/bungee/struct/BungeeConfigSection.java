@@ -32,7 +32,12 @@ public class BungeeConfigSection implements ConfigSection {
     @SuppressWarnings("unchecked")
     private <A, B> B wrap(A o) {
         if (o instanceof Configuration) {
-            return (B) new BungeeConfigSection(provider, (Configuration) o);
+            try {
+                return (B) new BungeeConfigSection(provider, deepClone((Configuration) o));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         } else if (o instanceof List<?>) {
             ((List<?>) o).replaceAll(this::wrap);
             return (B) o;
@@ -87,7 +92,7 @@ public class BungeeConfigSection implements ConfigSection {
                 conf.set(k, ObjectUtil.shallowCopy(v));
             //}
         }
-        return config;
+        return conf;
     }
 
     @Override
