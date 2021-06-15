@@ -26,10 +26,14 @@ public class CommonConfigTest extends TestPlatform {
         YamlConfiguration conf = new YamlConfiguration();
         conf.set("groups.a.name", "a");
         conf.set("groups.a.permissions", Arrays.asList("test.a", "test.b", "test.c"));
-        conf.set("inheritable", true);
-        RoleTable obj = deserialize(RoleTable.class, conf);
+        conf.set("inheritable", true);        RoleTable obj = deserialize(RoleTable.class, conf.getRoot(), d -> {
+            d.setMiddleware(new EntryKeyInjector(entrySchema -> {
+                return entrySchema.getKey().equals("groups") ? "id" : null;
+            }));
+        });
         Assertions.assertFalse(obj.groups.isEmpty());
         Assertions.assertNotNull(obj.groups.get("a"));
+        Assertions.assertEquals("a", obj.groups.get("a").id);
         Assertions.assertEquals(obj.groups.get("a").name, "a");
         Assertions.assertArrayEquals(obj.groups.get("a").permissions, new String[]{"test.a", "test.b", "test.c"});
         Assertions.assertTrue(obj.inheritable);
