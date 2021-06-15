@@ -6,6 +6,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,7 +31,11 @@ public class ObjectUtil {
 
     @NotNull
     public static Object newInstance(@NotNull Class<?> clazz) throws InstantiationException {
-        return unsafe.allocateInstance(clazz);
+        try {
+            return clazz.getDeclaredConstructor().newInstance();
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            return unsafe.allocateInstance(clazz);
+        }
     }
 
     @NotNull
