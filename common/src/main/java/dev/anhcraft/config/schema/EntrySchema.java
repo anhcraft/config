@@ -15,17 +15,23 @@ public class EntrySchema {
     private final Description description;
     private final Validation validation;
     private final Examples examples;
+    private final boolean consistent;
+    private final boolean virtual;
 
     public EntrySchema(@NotNull Field field,
                        @Nullable Path path,
                        @Nullable Description description,
                        @Nullable Validation validation,
-                       @Nullable Examples examples) {
+                       @Nullable Examples examples,
+                       boolean consistent,
+                       boolean virtual) {
         this.field = field;
         this.path = path;
         this.description = description;
         this.validation = validation;
         this.examples = examples;
+        this.consistent = consistent;
+        this.virtual = virtual;
     }
 
     @NotNull
@@ -56,5 +62,13 @@ public class EntrySchema {
     @NotNull
     public String getKey() {
         return path == null ? field.getName() : path.value();
+    }
+
+    public boolean isConsistent() {
+        return consistent;
+    }
+
+    public boolean isVirtual() {
+        return virtual;
     }
 }
