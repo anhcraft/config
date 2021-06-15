@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * The description should be clear to give users good understanding of the setting(s).<br>
  * However, it must not contain any examples. For more details, take a look at {@link Example}.<br>
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Description {
     String[] value();
