@@ -29,6 +29,14 @@ public abstract class ConfigHandler {
         registerTypeAdapter(Long.class, new LongAdapter());
         registerTypeAdapter(Float.class, new FloatAdapter());
         registerTypeAdapter(Double.class, new DoubleAdapter());
+        registerTypeAdapter(char.class, new CharacterAdapter());
+        registerTypeAdapter(boolean.class, new BooleanAdapter());
+        registerTypeAdapter(byte.class, new ByteAdapter());
+        registerTypeAdapter(short.class, new ShortAdapter());
+        registerTypeAdapter(int.class, new IntegerAdapter());
+        registerTypeAdapter(long.class, new LongAdapter());
+        registerTypeAdapter(float.class, new FloatAdapter());
+        registerTypeAdapter(double.class, new DoubleAdapter());
         registerTypeAdapter(UUID.class, new UUIDAdapter());
     }
 

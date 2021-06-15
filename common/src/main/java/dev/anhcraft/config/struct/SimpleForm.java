@@ -40,7 +40,7 @@ public class SimpleForm {
     }
 
     @Nullable
-    public static SimpleForm of(@NotNull Object object) throws Exception {
+    public static SimpleForm of(@Nullable Object object) throws Exception {
         return object instanceof SimpleForm ? (SimpleForm) object : (isAllowed(object) ? new SimpleForm(object) : null);
     }
 
