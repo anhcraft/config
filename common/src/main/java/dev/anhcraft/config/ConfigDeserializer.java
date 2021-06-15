@@ -121,6 +121,7 @@ public class ConfigDeserializer extends ConfigHandler {
     @NotNull
     public <T> T transformConfig(@NotNull ConfigSchema configSchema, @NotNull ConfigSection configSection, @NotNull T object) throws Exception {
         for (EntrySchema entrySchema : configSchema.getEntrySchemas()) {
+            if(entrySchema.isConsistent()) continue;
             Field field = entrySchema.getField();
             Validation validation = entrySchema.getValidation();
             String key = entrySchema.getKey();

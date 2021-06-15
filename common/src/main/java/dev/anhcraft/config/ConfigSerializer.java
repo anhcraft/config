@@ -87,6 +87,7 @@ public class ConfigSerializer extends ConfigHandler {
                                              @NotNull ConfigSection configSection,
                                              @NotNull T object) throws Exception {
         for (EntrySchema entrySchema : configSchema.getEntrySchemas()) {
+            if(entrySchema.isVirtual()) continue;
             Field field = entrySchema.getField();
             String key = entrySchema.getKey();
             Object val = field.get(object);

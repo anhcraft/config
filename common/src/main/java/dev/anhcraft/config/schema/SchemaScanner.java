@@ -61,7 +61,9 @@ public class SchemaScanner {
             Description description = field.getAnnotation(Description.class);
             Validation validation = field.getAnnotation(Validation.class);
             Examples examples = field.getAnnotation(Examples.class);
-            entries.add(new EntrySchema(field, path, description, validation, examples));
+            Consistent consistent = field.getAnnotation(Consistent.class);
+            Virtual virtual = field.getAnnotation(Virtual.class);
+            entries.add(new EntrySchema(field, path, description, validation, examples, consistent != null, virtual != null));
         }
     }
 }
