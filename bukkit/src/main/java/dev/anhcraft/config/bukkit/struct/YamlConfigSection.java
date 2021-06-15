@@ -3,6 +3,7 @@ package dev.anhcraft.config.bukkit.struct;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import dev.anhcraft.config.utils.ObjectUtil;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -13,13 +14,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class YamlConfigSection implements ConfigSection {
-    private final YamlConfiguration backend;
+    private final ConfigurationSection backend;
 
     public YamlConfigSection() {
         this(new YamlConfiguration());
     }
 
-    public YamlConfigSection(@NotNull YamlConfiguration backend) {
+    public YamlConfigSection(@NotNull ConfigurationSection backend) {
         this.backend = backend;
     }
 
@@ -28,12 +29,12 @@ public class YamlConfigSection implements ConfigSection {
         return backend.getKeys(false).isEmpty();
     }
 
-    private YamlConfiguration copy(MemorySection section, YamlConfiguration conf){
+    private YamlConfiguration copy(ConfigurationSection section, YamlConfiguration conf){
         for(Map.Entry<String, Object> k : section.getValues(false).entrySet()){
             if(k.getValue() instanceof YamlConfiguration) {
                 conf.set(k.getKey(), k.getValue());
-            } else if(k.getValue() instanceof MemorySection) {
-                conf.set(k.getKey(), copy((MemorySection) k.getValue(), new YamlConfiguration()));
+            } else if(k.getValue() instanceof ConfigurationSection) {
+                conf.set(k.getKey(), copy((ConfigurationSection) k.getValue(), new YamlConfiguration()));
             } else {
                 conf.set(k.getKey(), k.getValue());
             }
@@ -102,11 +103,15 @@ public class YamlConfigSection implements ConfigSection {
 
     @Override
     public @NotNull String stringify() {
-        return backend.saveToString();
+        if(backend instanceof YamlConfiguration) {
+            return ((YamlConfiguration) backend).saveToString();
+        } else {
+            return copy(backend, new YamlConfiguration()).saveToString();
+        }
     }
 
     @NotNull
-    public YamlConfiguration getBackend() {
+    public ConfigurationSection getBackend() {
         return backend;
     }
 }

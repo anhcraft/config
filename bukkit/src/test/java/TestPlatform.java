@@ -5,7 +5,6 @@ import dev.anhcraft.config.bukkit.BukkitConfigProvider;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.util.function.Consumer;
 
@@ -28,13 +27,13 @@ public class TestPlatform {
         return serializer.transform(clazz, object);
     }
 
-    protected <T> T deserialize(Class<? extends T> clazz, YamlConfiguration config) throws Exception {
+    protected <T> T deserialize(Class<? extends T> clazz, ConfigurationSection config) throws Exception {
         return deserialize(clazz, config, configDeserializer -> {
         });
     }
 
     protected <T> T deserialize(Class<? extends T> clazz,
-                              YamlConfiguration config,
+                              ConfigurationSection config,
                               Consumer<ConfigDeserializer> consumer) throws Exception {
         ConfigDeserializer deserializer = BukkitConfigProvider.YAML.createDeserializer();
         registerAdapters(deserializer);
