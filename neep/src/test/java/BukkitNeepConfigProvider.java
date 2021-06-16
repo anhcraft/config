@@ -1,3 +1,4 @@
+import dev.anhcraft.config.NeepConfigSection;
 import dev.anhcraft.config.bukkit.BukkitConfigProvider;
 import dev.anhcraft.config.struct.ConfigSection;
 import org.jetbrains.annotations.NotNull;

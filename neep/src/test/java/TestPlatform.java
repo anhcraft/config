@@ -1,6 +1,7 @@
 import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.ConfigHandler;
 import dev.anhcraft.config.ConfigSerializer;
+import dev.anhcraft.config.NeepConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import dev.anhcraft.neep.struct.container.NeepSection;
 
