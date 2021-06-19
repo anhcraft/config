@@ -1,8 +1,12 @@
 import configs.*;
+import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
+import dev.anhcraft.config.schema.ConfigSchema;
 import dev.anhcraft.config.struct.ConfigSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +35,11 @@ public class CommonConfigTest extends TestPlatform {
             d.setMiddleware(new EntryKeyInjector(entrySchema -> {
                 return entrySchema.getKey().equals("groups") ? "id" : null;
             }));
+            d.setCallback((deserializer, configSchema, value) -> {
+                if(value instanceof UserGroup) {
+                    Assertions.assertEquals(((UserGroup) value).getPerm(), "test.a,test.b,test.c");
+                }
+            });
         });
         Assertions.assertFalse(obj.groups.isEmpty());
         Assertions.assertNotNull(obj.groups.get("a"));

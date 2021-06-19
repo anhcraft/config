@@ -1,4 +1,5 @@
 import configs.*;
+import dev.anhcraft.config.NeepConfigSection;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.neep.NeepConfig;
 import org.junit.jupiter.api.Assertions;

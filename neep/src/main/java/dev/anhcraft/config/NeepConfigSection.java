@@ -1,3 +1,5 @@
+package dev.anhcraft.config;
+
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import dev.anhcraft.config.utils.ObjectUtil;
