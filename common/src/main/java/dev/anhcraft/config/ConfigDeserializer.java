@@ -15,10 +15,7 @@ import dev.anhcraft.config.utils.TypeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -164,6 +161,21 @@ public class ConfigDeserializer extends ConfigHandler {
                 if (!ClassUtil.isAssignable(field.getType(), complex.getClass())) continue;
             }
             field.set(object, complex);
+        }
+        for (Method m : configSchema.getPostHandlers()){
+            try {
+                if (m.getParameterCount() == 0) {
+                    m.invoke(object);
+                } else if (m.getParameterCount() == 1) {
+                    m.invoke(object, this);
+                } else if (m.getParameterCount() == 2) {
+                    m.invoke(object, this, configSchema);
+                } else if (m.getParameterCount() == 3) {
+                    m.invoke(object, this, configSchema, configSection);
+                }
+            } catch (InvocationTargetException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         if (callback != null) {
             callback.accept(this, configSchema, object);

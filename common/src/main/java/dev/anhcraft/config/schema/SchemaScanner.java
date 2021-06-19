@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class SchemaScanner {
@@ -25,22 +26,25 @@ public class SchemaScanner {
                 }
             }
             List<EntrySchema> entries = new ArrayList<>();
+            List<Method> postHandlers = new ArrayList<>();
             Description description = clazz.getAnnotation(Description.class);
             Examples examples = clazz.getAnnotation(Examples.class);
 
             scanEntries(clazz, entries);
+            scanHandlers(clazz, postHandlers);
 
             Class<?> parent = clazz;
             while (true) {
                 parent = parent.getSuperclass();
                 if (parent != null && !parent.equals(Object.class) && parent.isAnnotationPresent(Configurable.class)) {
                     scanEntries(parent, entries);
+                    scanHandlers(parent, postHandlers);
                     continue;
                 }
                 break;
             }
 
-            ConfigSchema configSchema = new ConfigSchema(clazz, Collections.unmodifiableList(entries), description, examples);
+            ConfigSchema configSchema = new ConfigSchema(clazz, Collections.unmodifiableList(entries), description, examples, postHandlers);
             if (cache) {
                 CACHE.put(clazz.getName(), configSchema);
             }
@@ -64,6 +68,15 @@ public class SchemaScanner {
             Consistent consistent = field.getAnnotation(Consistent.class);
             Virtual virtual = field.getAnnotation(Virtual.class);
             entries.add(new EntrySchema(field, path, description, validation, examples, consistent != null, virtual != null));
+        }
+    }
+
+    private static void scanHandlers(Class<?> clazz, List<Method> methods) {
+        for (Method method : clazz.getDeclaredMethods()) {
+            method.setAccessible(true);
+            if (method.isAnnotationPresent(PostHandler.class)) {
+                methods.add(method);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ import dev.anhcraft.config.annotations.Examples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class ConfigSchema {
@@ -12,15 +13,17 @@ public class ConfigSchema {
     private final List<EntrySchema> entrySchemas;
     private final Description description;
     private final Examples examples;
+    private final List<Method> postHandlers;
 
     public ConfigSchema(@NotNull Class<?> owner,
                         @NotNull List<EntrySchema> entrySchemas,
                         @Nullable Description description,
-                        @Nullable Examples examples) {
+                        @Nullable Examples examples, List<Method> postHandlers) {
         this.owner = owner;
         this.entrySchemas = entrySchemas;
         this.description = description;
         this.examples = examples;
+        this.postHandlers = postHandlers;
     }
 
     @NotNull
@@ -41,5 +44,10 @@ public class ConfigSchema {
     @Nullable
     public Examples getExamples() {
         return examples;
+    }
+
+    @NotNull
+    public List<Method> getPostHandlers() {
+        return postHandlers;
     }
 }
