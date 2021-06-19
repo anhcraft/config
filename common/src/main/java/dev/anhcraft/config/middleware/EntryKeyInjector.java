@@ -1,6 +1,7 @@
 package dev.anhcraft.config.middleware;
 
 import dev.anhcraft.config.ConfigDeserializer;
+import dev.anhcraft.config.schema.ConfigSchema;
 import dev.anhcraft.config.schema.EntrySchema;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
@@ -29,7 +30,7 @@ public class EntryKeyInjector implements ConfigDeserializer.Middleware {
     }
 
     @Override
-    public @Nullable SimpleForm transform(@NotNull ConfigDeserializer deserializer, @NotNull EntrySchema entrySchema, @Nullable SimpleForm value) {
+    public @Nullable SimpleForm transform(@NotNull ConfigDeserializer deserializer, @NotNull ConfigSchema configSchema, @NotNull EntrySchema entrySchema, @Nullable SimpleForm value) {
         String dest = filter.apply(entrySchema);
         if (value != null && value.isSection() && dest != null) {
             ConfigSection s = Objects.requireNonNull(value.asSection());

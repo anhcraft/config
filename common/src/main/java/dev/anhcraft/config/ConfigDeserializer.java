@@ -26,6 +26,7 @@ import java.util.Objects;
 
 public class ConfigDeserializer extends ConfigHandler {
     private Middleware middleware;
+    private Callback callback;
     private boolean wrapSingleElement = true;
     private boolean transformCollectionType = true;
 
@@ -42,6 +43,15 @@ public class ConfigDeserializer extends ConfigHandler {
 
     public void setMiddleware(@Nullable Middleware middleware) {
         this.middleware = middleware;
+    }
+
+    @Nullable
+    public Callback getCallback() {
+        return callback;
+    }
+
+    public void setCallback(@Nullable Callback callback) {
+        this.callback = callback;
     }
 
     /**
@@ -127,7 +137,7 @@ public class ConfigDeserializer extends ConfigHandler {
             String key = entrySchema.getKey();
             SimpleForm simpleForm = configSection.get(key);
             if (middleware != null) {
-                simpleForm = middleware.transform(this, entrySchema, simpleForm);
+                simpleForm = middleware.transform(this, configSchema, entrySchema, simpleForm);
             }
             if (validation != null) {
                 if (simpleForm == null && validation.notNull()) {
@@ -154,6 +164,9 @@ public class ConfigDeserializer extends ConfigHandler {
                 if (!ClassUtil.isAssignable(field.getType(), complex.getClass())) continue;
             }
             field.set(object, complex);
+        }
+        if (callback != null) {
+            callback.accept(this, configSchema, object);
         }
         return object;
     }
@@ -225,6 +238,10 @@ public class ConfigDeserializer extends ConfigHandler {
 
     public interface Middleware {
         @Nullable
-        SimpleForm transform(@NotNull ConfigDeserializer deserializer, @NotNull EntrySchema entrySchema, @Nullable SimpleForm value);
+        SimpleForm transform(@NotNull ConfigDeserializer deserializer, @NotNull ConfigSchema configSchema, @NotNull EntrySchema entrySchema, @Nullable SimpleForm value);
+    }
+
+    public interface Callback {
+        void accept(@NotNull ConfigDeserializer deserializer, @NotNull ConfigSchema configSchema, @Nullable Object value);
     }
 }
