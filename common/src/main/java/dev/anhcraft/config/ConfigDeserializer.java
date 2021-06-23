@@ -160,6 +160,9 @@ public class ConfigDeserializer extends ConfigHandler {
                 // check data type
                 if (!ClassUtil.isAssignable(field.getType(), complex.getClass())) continue;
             }
+            if (complex == null && validation != null && validation.notNull() && validation.silent()) {
+                continue;
+            }
             field.set(object, complex);
         }
         for (Method m : configSchema.getPostHandlers()){
