@@ -1,12 +1,8 @@
 import configs.*;
-import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
-import dev.anhcraft.config.schema.ConfigSchema;
 import dev.anhcraft.config.struct.ConfigSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -123,4 +119,18 @@ public class CommonConfigTest extends TestPlatform {
         Assertions.assertEquals("OMEGA", map.table2.get((byte) 2));
         Assertions.assertNull(map.reserved);
     }
+
+    /*@Test
+    public void configdoc() {
+        new ConfigDocGenerator()
+                .withSchemaOf(Market.class)
+                .withSchemaOf(CodeMap.class)
+                .withSchemaOf(Ingredient.class)
+                .withSchemaOf(Menu.class)
+                .withSchemaOf(PlayerInfo.class)
+                .withSchemaOf(RoleTable.class)
+                .withSchemaOf(UserGroup.class)
+                .withSchemaOf(WorldMap.class)
+                .generate(new File("./doc"));
+    }*/
 }

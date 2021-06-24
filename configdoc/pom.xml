@@ -9,14 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>config.neep</artifactId>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
+    <artifactId>config.configdoc</artifactId>
 
     <dependencies>
         <dependency>
@@ -26,20 +19,15 @@
         </dependency>
         <dependency>
             <groupId>com.github.anhcraft</groupId>
-            <artifactId>Neep</artifactId>
-            <version>1.0.2-beta</version>
+            <artifactId>JvmKit</artifactId>
+            <version>1.1.5</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>dev.anhcraft</groupId>
-            <artifactId>config.bukkit</artifactId>
-            <version>${parent.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.16.3-R0.1-SNAPSHOT</version>
-            <scope>test</scope>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>21.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
