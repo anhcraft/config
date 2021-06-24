@@ -18,8 +18,8 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.anhcraft</groupId>
-            <artifactId>jvmkit</artifactId>
+            <groupId>com.github.anhcraft</groupId>
+            <artifactId>JvmKit</artifactId>
             <version>1.1.5</version>
             <scope>compile</scope>
         </dependency>
