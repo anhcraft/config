@@ -27,8 +27,18 @@ public class SchemaScanner {
             }
             List<EntrySchema> entries = new ArrayList<>();
             List<Method> postHandlers = new ArrayList<>();
-            Description description = clazz.getAnnotation(Description.class);
+            List<String[]> ex = new ArrayList<>();
             Examples examples = clazz.getAnnotation(Examples.class);
+            if(examples != null) {
+                for (Example example : examples.value()) {
+                    ex.add(example.value());
+                }
+            }
+            Example example = clazz.getAnnotation(Example.class);
+            if(example != null) {
+                ex.add(example.value());
+            }
+            Description description = clazz.getAnnotation(Description.class);
 
             scanEntries(clazz, entries);
             scanHandlers(clazz, postHandlers);
@@ -44,7 +54,7 @@ public class SchemaScanner {
                 break;
             }
 
-            ConfigSchema configSchema = new ConfigSchema(clazz, Collections.unmodifiableList(entries), description, examples, postHandlers);
+            ConfigSchema configSchema = new ConfigSchema(clazz, Collections.unmodifiableList(entries), description, ex, postHandlers);
             if (cache) {
                 CACHE.put(clazz.getName(), configSchema);
             }
@@ -64,10 +74,20 @@ public class SchemaScanner {
             Path path = field.getAnnotation(Path.class);
             Description description = field.getAnnotation(Description.class);
             Validation validation = field.getAnnotation(Validation.class);
+            List<String[]> ex = new ArrayList<>();
             Examples examples = field.getAnnotation(Examples.class);
+            if(examples != null) {
+                for (Example example : examples.value()) {
+                    ex.add(example.value());
+                }
+            }
+            Example example = field.getAnnotation(Example.class);
+            if(example != null) {
+                ex.add(example.value());
+            }
             Consistent consistent = field.getAnnotation(Consistent.class);
             Virtual virtual = field.getAnnotation(Virtual.class);
-            entries.add(new EntrySchema(field, path, description, validation, examples, consistent != null, virtual != null));
+            entries.add(new EntrySchema(field, path, description, validation, ex, consistent != null, virtual != null));
         }
     }
 
