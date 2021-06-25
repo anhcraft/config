@@ -2,7 +2,6 @@ package dev.anhcraft.configdoc;
 
 import com.google.common.base.Preconditions;
 import dev.anhcraft.config.annotations.Configurable;
-import dev.anhcraft.config.annotations.Example;
 import dev.anhcraft.config.annotations.Validation;
 import dev.anhcraft.config.schema.ConfigSchema;
 import dev.anhcraft.config.schema.EntrySchema;
@@ -68,8 +67,8 @@ public class ConfigDocGenerator {
         return this;
     }
 
-    private TextReplacer handleText(Example e){
-        return new TextReplacer(s -> String.join("\n", e.value()));
+    private TextReplacer handleText(String[] e){
+        return new TextReplacer(s -> String.join("\n", e));
     }
 
     private TextReplacer handleText(EntrySchema entry){
@@ -82,7 +81,7 @@ public class ConfigDocGenerator {
                 String file = s.substring("examples?".length()).trim();
                 String content = resourceLoader.get(file);
                 StringBuilder sb = new StringBuilder();
-                for(Example e : entry.getExamples().value()){
+                for(String[] e : entry.getExamples()){
                     sb.append(handleText(e).replace(content));
                 }
                 return sb.toString();
@@ -141,7 +140,7 @@ public class ConfigDocGenerator {
                 String file = s.substring("examples?".length()).trim();
                 String content = resourceLoader.get(file);
                 StringBuilder sb = new StringBuilder();
-                for(Example e : schema.getExamples().value()){
+                for(String[] e : schema.getExamples()){
                     sb.append(handleText(e).replace(content));
                 }
                 return sb.toString();

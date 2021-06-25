@@ -12,13 +12,13 @@ public class ConfigSchema {
     private final Class<?> owner;
     private final List<EntrySchema> entrySchemas;
     private final Description description;
-    private final Examples examples;
+    private final List<String[]> examples;
     private final List<Method> postHandlers;
 
     public ConfigSchema(@NotNull Class<?> owner,
                         @NotNull List<EntrySchema> entrySchemas,
                         @Nullable Description description,
-                        @Nullable Examples examples, List<Method> postHandlers) {
+                        @Nullable List<String[]> examples, List<Method> postHandlers) {
         this.owner = owner;
         this.entrySchemas = entrySchemas;
         this.description = description;
@@ -42,7 +42,7 @@ public class ConfigSchema {
     }
 
     @Nullable
-    public Examples getExamples() {
+    public List<String[]> getExamples() {
         return examples;
     }
 

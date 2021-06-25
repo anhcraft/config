@@ -2,10 +2,12 @@ import configs.*;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
 import dev.anhcraft.config.struct.ConfigSection;
+import dev.anhcraft.configdoc.ConfigDocGenerator;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.*;
 
 public class CommonConfigTest extends TestPlatform {

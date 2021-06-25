@@ -8,13 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 public class EntrySchema {
     private final Field field;
     private final Path path;
     private final Description description;
     private final Validation validation;
-    private final Examples examples;
+    private final List<String[]> examples;
     private final boolean consistent;
     private final boolean virtual;
 
@@ -22,7 +23,7 @@ public class EntrySchema {
                        @Nullable Path path,
                        @Nullable Description description,
                        @Nullable Validation validation,
-                       @Nullable Examples examples,
+                       @Nullable List<String[]> examples,
                        boolean consistent,
                        boolean virtual) {
         this.field = field;
@@ -55,7 +56,7 @@ public class EntrySchema {
     }
 
     @Nullable
-    public Examples getExamples() {
+    public List<String[]> getExamples() {
         return examples;
     }
 
