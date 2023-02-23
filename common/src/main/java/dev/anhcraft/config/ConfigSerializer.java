@@ -15,10 +15,12 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ConfigSerializer extends ConfigHandler {
-    private Middleware middleware;
+    private final List<Middleware> middlewares = new ArrayList<>();
 
     // protected constructor to prevent creating instances directly
     // to create a new instance, look at the implemented config provider
@@ -26,13 +28,8 @@ public class ConfigSerializer extends ConfigHandler {
         super(configProvider);
     }
 
-    @Nullable
-    public Middleware getMiddleware() {
-        return middleware;
-    }
-
-    public void setMiddleware(@Nullable Middleware middleware) {
-        this.middleware = middleware;
+    public void addMiddleware(@NotNull Middleware middleware) {
+        this.middlewares.add(middleware);
     }
 
     @Nullable
@@ -87,8 +84,8 @@ public class ConfigSerializer extends ConfigHandler {
             Field field = entrySchema.getField();
             String key = entrySchema.getKey();
             Object val = field.get(object);
-            if (middleware != null) {
-                val = middleware.transform(this, entrySchema, val);
+            for (Middleware m : middlewares) {
+                val = m.transform(this, entrySchema, val);
             }
             configSection.set(key, transform(field.getGenericType(), val));
         }
