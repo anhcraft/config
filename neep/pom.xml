@@ -22,7 +22,7 @@
         <dependency>
             <groupId>dev.anhcraft</groupId>
             <artifactId>config.common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.anhcraft</groupId>
@@ -32,13 +32,19 @@
         <dependency>
             <groupId>dev.anhcraft</groupId>
             <artifactId>config.bukkit</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.anhcraft</groupId>
+            <artifactId>config.configdoc</artifactId>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.3-R0.1-SNAPSHOT</version>
+            <version>1.19.3-R0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

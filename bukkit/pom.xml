@@ -22,12 +22,12 @@
         <dependency>
             <groupId>dev.anhcraft</groupId>
             <artifactId>config.common</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>dev.anhcraft</groupId>
             <artifactId>config.configdoc</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
