@@ -18,9 +18,9 @@ public class ByteAdapter implements TypeAdapter<Byte> {
 
     @Override
     public @Nullable Byte complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asByte();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Byte.parseByte(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

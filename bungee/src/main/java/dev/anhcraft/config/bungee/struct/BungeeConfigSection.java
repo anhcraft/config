@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.StringWriter;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BungeeConfigSection implements ConfigSection {
     private final ConfigurationProvider provider;
@@ -88,8 +90,8 @@ public class BungeeConfigSection implements ConfigSection {
             //if(v instanceof Configuration) {
             //    conf.set(k, deepClone((Configuration) v));
             //} else {
-                // TODO deep copy here :D
-                conf.set(k, ObjectUtil.shallowCopy(v));
+            // TODO deep copy here :D
+            conf.set(k, ObjectUtil.shallowCopy(v));
             //}
         }
         return conf;

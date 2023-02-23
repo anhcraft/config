@@ -18,9 +18,9 @@ public class LongAdapter implements TypeAdapter<Long> {
 
     @Override
     public @Nullable Long complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asLong();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Long.parseLong(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

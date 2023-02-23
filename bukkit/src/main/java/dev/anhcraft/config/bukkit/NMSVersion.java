@@ -28,19 +28,19 @@ public enum NMSVersion {
 
     static {
         //noinspection ConstantConditions
-        if(Bukkit.getServer() != null) {
-            current = NMSVersion.valueOf(Bukkit.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3]);
+        if (Bukkit.getServer() != null) {
+            current = NMSVersion.valueOf(Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3]);
         } else {
             current = NMSVersion.values()[0];
         }
     }
 
-    public int compare(@NotNull NMSVersion another){
-        return ordinal() - another.ordinal();
+    @NotNull
+    public static NMSVersion current() {
+        return current;
     }
 
-    @NotNull
-    public static NMSVersion current(){
-        return current;
+    public int compare(@NotNull NMSVersion another) {
+        return ordinal() - another.ordinal();
     }
 }

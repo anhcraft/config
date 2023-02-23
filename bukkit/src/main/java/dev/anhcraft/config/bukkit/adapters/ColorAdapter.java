@@ -25,7 +25,7 @@ public class ColorAdapter implements TypeAdapter<Color> {
 
     @Override
     public @Nullable Color complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isSection()) {
+        if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return Color.fromRGB(
                     Optional.ofNullable(cs.get("red")).map(SimpleForm::asInt).orElse(0),

@@ -18,9 +18,9 @@ public class IntegerAdapter implements TypeAdapter<Integer> {
 
     @Override
     public @Nullable Integer complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asInt();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Integer.parseInt(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

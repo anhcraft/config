@@ -28,28 +28,28 @@ public class AttributeModifierAdapter implements TypeAdapter<AttributeModifier> 
 
     @Override
     public @Nullable AttributeModifier complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isSection()) {
+        if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new AttributeModifier(
                     Objects.requireNonNull(
                             Optional.ofNullable(cs.get("id"))
-                            .map(SimpleForm::asString)
-                            .map(UUID::fromString)
-                            .orElse(null)
+                                    .map(SimpleForm::asString)
+                                    .map(UUID::fromString)
+                                    .orElse(null)
                     ),
                     Objects.requireNonNull(
                             Optional.ofNullable(cs.get("name"))
-                            .map(SimpleForm::asString)
-                            .orElse(null)
+                                    .map(SimpleForm::asString)
+                                    .orElse(null)
                     ),
                     Optional.ofNullable(cs.get("amount"))
                             .map(SimpleForm::asDouble)
                             .orElse(0d),
                     Objects.requireNonNull(
                             Optional.ofNullable(cs.get("operation"))
-                            .map(SimpleForm::asString)
-                            .map(s -> (AttributeModifier.Operation) ClassUtil.findEnum(AttributeModifier.Operation.class, s.toUpperCase()))
-                            .orElse(null)
+                                    .map(SimpleForm::asString)
+                                    .map(s -> (AttributeModifier.Operation) ClassUtil.findEnum(AttributeModifier.Operation.class, s.toUpperCase()))
+                                    .orElse(null)
                     )
             );
         }

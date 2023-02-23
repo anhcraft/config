@@ -128,7 +128,7 @@ public class ConfigDeserializer extends ConfigHandler {
     @NotNull
     public <T> T transformConfig(@NotNull ConfigSchema configSchema, @NotNull ConfigSection configSection, @NotNull T object) throws Exception {
         for (EntrySchema entrySchema : configSchema.getEntrySchemas()) {
-            if(entrySchema.isConsistent()) continue;
+            if (entrySchema.isConsistent()) continue;
             Field field = entrySchema.getField();
             Validation validation = entrySchema.getValidation();
             String key = entrySchema.getKey();
@@ -165,7 +165,7 @@ public class ConfigDeserializer extends ConfigHandler {
             }
             field.set(object, complex);
         }
-        for (Method m : configSchema.getPostHandlers()){
+        for (Method m : configSchema.getPostHandlers()) {
             try {
                 if (m.getParameterCount() == 0) {
                     m.invoke(object);

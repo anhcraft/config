@@ -18,9 +18,9 @@ public class DoubleAdapter implements TypeAdapter<Double> {
 
     @Override
     public @Nullable Double complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asDouble();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Double.parseDouble(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

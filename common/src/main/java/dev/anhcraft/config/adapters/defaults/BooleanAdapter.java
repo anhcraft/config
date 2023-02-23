@@ -18,9 +18,9 @@ public class BooleanAdapter implements TypeAdapter<Boolean> {
 
     @Override
     public @Nullable Boolean complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isBoolean()) {
+        if (value.isBoolean()) {
             return value.asBoolean();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Boolean.parseBoolean(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

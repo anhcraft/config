@@ -29,78 +29,78 @@ public class NeepConfigSection implements ConfigSection {
         this.backend = backend;
     }
 
-    @Override
-    public boolean isEmpty() {
-        return backend.size() == 0;
-    }
-
-    public Object wrap(NeepComponent component){
-        if(component instanceof NeepInt){
-            return ((NeepInt) component).getValueAsInt();
-        } else if(component instanceof NeepLong){
-            return ((NeepLong) component).getValueAsLong();
-        } else if(component instanceof NeepDouble){
-            return ((NeepDouble) component).getValueAsDouble();
-        } else if(component instanceof NeepBoolean){
-            return ((NeepBoolean) component).getValue();
-        } else if(component.isDynamic()) {
-            return component.asDynamic().stringifyValue();
-        } else if(component.isSection()) {
-            return new NeepConfigSection(component.asSection());
-        } else if(component.isList()) {
-            return component.asList().stream()
-                    .filter(Objects::nonNull)
-                    .map(o -> (NeepComponent) o)
-                    .map(this::wrap)
-                    .collect(Collectors.toList());
-        } else if(component.isComment()) {
-            return component.asComment().getContent();
-        } else {
-            throw new IllegalStateException("Cannot get value as object");
-        }
-    }
-
     public static NeepComponent unwrap(@NotNull NeepContainer<?> container, @NotNull String key, @NotNull Object object) {
         if (object instanceof NeepConfigSection) {
             NeepSection old = ((NeepConfigSection) object).backend;
             return new NeepSection(container, key, null, old.stream().collect(Collectors.toList()));
-        } else if(object instanceof NeepComponent) {
+        } else if (object instanceof NeepComponent) {
             return (NeepComponent) object;
-        } else if(object instanceof String) {
+        } else if (object instanceof String) {
             return new NeepString(container, key, object.toString(), null);
-        } else if(object instanceof Boolean) {
+        } else if (object instanceof Boolean) {
             return new NeepBoolean(container, key, object.toString(), null);
-        } else if(object instanceof Double || object instanceof Float) {
+        } else if (object instanceof Double || object instanceof Float) {
             double val = ((Number) object).doubleValue();
             return new NeepDouble(container, key, String.valueOf(val), null);
-        } else if(object instanceof Long) {
+        } else if (object instanceof Long) {
             long val = (Long) object;
             return new NeepLong(container, key, String.valueOf(val), null);
-        } else if(object instanceof Number) {
+        } else if (object instanceof Number) {
             int val = ((Number) object).intValue();
             return new NeepInt(container, key, String.valueOf(val), null);
-        } else if(object instanceof Collection) {
+        } else if (object instanceof Collection) {
             NeepList<NeepComponent> list = new NeepList<>(container, key, null, new ArrayList<>());
             int i = 0;
-            for(Object o : (Collection<?>) object){
+            for (Object o : (Collection<?>) object) {
                 list.add(unwrap(list, String.valueOf(i++), o));
             }
             return list;
-        } else if(object instanceof Map) {
+        } else if (object instanceof Map) {
             NeepSection section = new NeepSection(container, key, null, new ArrayList<>());
-            for(Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()){
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
                 section.add(unwrap(section, entry.getKey().toString(), entry.getValue()));
             }
             return section;
-        } else if(object.getClass().isArray()) {
+        } else if (object.getClass().isArray()) {
             NeepList<NeepComponent> list = new NeepList<>(container, key, null, new ArrayList<>());
             int i = 0;
-            for(Object o : (Object[]) object){
+            for (Object o : (Object[]) object) {
                 list.add(unwrap(list, String.valueOf(i++), o));
             }
             return list;
         } else {
             throw new IllegalArgumentException("Cannot convert object to component");
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return backend.size() == 0;
+    }
+
+    public Object wrap(NeepComponent component) {
+        if (component instanceof NeepInt) {
+            return ((NeepInt) component).getValueAsInt();
+        } else if (component instanceof NeepLong) {
+            return ((NeepLong) component).getValueAsLong();
+        } else if (component instanceof NeepDouble) {
+            return ((NeepDouble) component).getValueAsDouble();
+        } else if (component instanceof NeepBoolean) {
+            return ((NeepBoolean) component).getValue();
+        } else if (component.isDynamic()) {
+            return component.asDynamic().stringifyValue();
+        } else if (component.isSection()) {
+            return new NeepConfigSection(component.asSection());
+        } else if (component.isList()) {
+            return component.asList().stream()
+                    .filter(Objects::nonNull)
+                    .map(o -> (NeepComponent) o)
+                    .map(this::wrap)
+                    .collect(Collectors.toList());
+        } else if (component.isComment()) {
+            return component.asComment().getContent();
+        } else {
+            throw new IllegalStateException("Cannot get value as object");
         }
     }
 
@@ -128,9 +128,9 @@ public class NeepConfigSection implements ConfigSection {
         NeepSection conf = new NeepSection(backend.getParent(), backend.getKey(), backend.getInlineComment(), new ArrayList<>());
         for (String e : backend.getKeys(false)) {
             Object v = backend.get(e);
-            if(v == null) continue;
+            if (v == null) continue;
             // TODO deep copy here :D
-            if(v instanceof NeepSection) {
+            if (v instanceof NeepSection) {
                 conf.add((NeepComponent) v);
             } else {
                 v = ((NeepComponent) v).getValueAsObject();

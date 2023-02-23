@@ -24,7 +24,7 @@ public class BlockVectorAdapter implements TypeAdapter<BlockVector> {
 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull BlockVector value) throws Exception {
-        if(inlineSerialization) {
+        if (inlineSerialization) {
             return SimpleForm.of(value.getX() + " " + value.getY() + " " + value.getZ());
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
@@ -39,7 +39,7 @@ public class BlockVectorAdapter implements TypeAdapter<BlockVector> {
     public @Nullable BlockVector complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
         if (value.isString()) {
             String[] str = Objects.requireNonNull(value.asString()).split(" ");
-            if(str.length < 3) {
+            if (str.length < 3) {
                 throw new InvalidValueException("Missing required arguments (x, y, z): " + Arrays.toString(str));
             } else {
                 return new BlockVector(
@@ -48,7 +48,7 @@ public class BlockVectorAdapter implements TypeAdapter<BlockVector> {
                         Double.parseDouble(str[2])
                 );
             }
-        } else if(value.isSection()) {
+        } else if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new BlockVector(
                     Optional.ofNullable(cs.get("x")).map(SimpleForm::asDouble).orElse(0d),

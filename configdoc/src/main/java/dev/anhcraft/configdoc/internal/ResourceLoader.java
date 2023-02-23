@@ -13,12 +13,12 @@ public class ResourceLoader {
     private final Map<String, String> resources = new HashMap<>();
 
     @NotNull
-    public String get(String file){
+    public String get(String file) {
         return resources.computeIfAbsent(file, new Function<String, String>() {
             @Override
             public String apply(String s) {
                 try {
-                    return new String(IOUtil.readResource(getClass(), "/"+s), StandardCharsets.UTF_8);
+                    return new String(IOUtil.readResource(getClass(), "/" + s), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

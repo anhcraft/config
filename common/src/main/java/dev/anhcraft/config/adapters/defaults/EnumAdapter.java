@@ -32,7 +32,7 @@ public class EnumAdapter implements TypeAdapter<Enum<?>> {
     public @Nullable Enum<?> complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) {
         if (value.isString()) {
             String str = Objects.requireNonNull(value.asString());
-            if(preferUppercase) str = str.toUpperCase();
+            if (preferUppercase) str = str.toUpperCase();
             // noinspection unchecked
             return (Enum<?>) ClassUtil.findEnum((Class<? extends Enum>) targetType, str);
         } else {

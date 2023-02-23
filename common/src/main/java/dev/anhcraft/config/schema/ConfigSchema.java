@@ -1,7 +1,6 @@
 package dev.anhcraft.config.schema;
 
 import dev.anhcraft.config.annotations.Description;
-import dev.anhcraft.config.annotations.Examples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

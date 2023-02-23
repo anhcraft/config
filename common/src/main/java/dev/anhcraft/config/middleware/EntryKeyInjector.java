@@ -22,8 +22,9 @@ public class EntryKeyInjector implements ConfigDeserializer.Middleware {
 
     /**
      * Constructs a new instance of this injector
+     *
      * @param filter a filter that will choose the correct entry that contains the parent {@link ConfigSection}
-     *              and returns the destination, otherwise it should return {@code null}.
+     *               and returns the destination, otherwise it should return {@code null}.
      */
     public EntryKeyInjector(Function<EntrySchema, String> filter) {
         this.filter = filter;
@@ -37,7 +38,7 @@ public class EntryKeyInjector implements ConfigDeserializer.Middleware {
             try {
                 for (String k : s.getKeys(false)) {
                     SimpleForm c = s.get(k);
-                    if(c != null && c.isSection()) {
+                    if (c != null && c.isSection()) {
                         Objects.requireNonNull(c.asSection()).set(dest, SimpleForm.of(k));
                         s.set(k, c);
                     }

@@ -13,13 +13,13 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 public class BukkitAdapters {
-    public static void registerFor(@NotNull ConfigHandler handler){
+    public static void registerFor(@NotNull ConfigHandler handler) {
         handler.registerTypeAdapter(Location.class, new LocationAdapter());
         handler.registerTypeAdapter(Vector.class, new VectorAdapter());
         handler.registerTypeAdapter(AttributeModifierAdapter.class, new AttributeModifierAdapter());
         handler.registerTypeAdapter(BlockVector.class, new BlockVectorAdapter());
         handler.registerTypeAdapter(Pattern.class, new PatternAdapter());
-        if(NMSVersion.current().compare(NMSVersion.v1_13_R1) >= 0) {
+        if (NMSVersion.current().compare(NMSVersion.v1_13_R1) >= 0) {
             handler.registerTypeAdapter(BoundingBox.class, new BoundingBoxAdapter());
         }
         handler.registerTypeAdapter(Color.class, new ColorAdapter());

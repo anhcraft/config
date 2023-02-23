@@ -16,18 +16,18 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
 
     // this method can be inherited to add more map types
     @NotNull
-    protected Map<?, ?> createMapOf(@NotNull Type type){
-        if(type instanceof Hashtable) {
+    protected Map<?, ?> createMapOf(@NotNull Type type) {
+        if (type instanceof Hashtable) {
             return new Hashtable<>();
-        } else if(type instanceof TreeMap) {
+        } else if (type instanceof TreeMap) {
             return new TreeMap<>();
-        } else if(type instanceof LinkedHashMap) {
+        } else if (type instanceof LinkedHashMap) {
             return new LinkedHashMap<>();
-        } else if(type instanceof WeakHashMap) {
+        } else if (type instanceof WeakHashMap) {
             return new WeakHashMap<>();
-        } else if(type instanceof IdentityHashMap) {
+        } else if (type instanceof IdentityHashMap) {
             return new IdentityHashMap<>();
-        } else if(type instanceof EnumMap) {
+        } else if (type instanceof EnumMap) {
             throw new UnsupportedOperationException();
         } else {
             return new HashMap<>();
@@ -37,7 +37,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Map<?, ?> value) throws Exception {
         Type keyType, valueType;
-        if(sourceType instanceof ParameterizedType) {
+        if (sourceType instanceof ParameterizedType) {
             keyType = ((ParameterizedType) sourceType).getActualTypeArguments()[0];
             valueType = ((ParameterizedType) sourceType).getActualTypeArguments()[1];
         } else {
@@ -51,7 +51,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
                 section.set((String) key, serializer.transform(valueType, entry.getValue()));
             } else {
                 SimpleForm sp = serializer.transform(keyType, key);
-                if(sp != null) {
+                if (sp != null) {
                     section.set(Objects.requireNonNull(sp.getObject().toString()), serializer.transform(valueType, entry.getValue()));
                 }
             }
@@ -63,7 +63,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
     public @Nullable Map<?, ?> complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
         if (value.isSection()) {
             Type keyType, valueType;
-            if(targetType instanceof ParameterizedType) {
+            if (targetType instanceof ParameterizedType) {
                 keyType = ((ParameterizedType) targetType).getActualTypeArguments()[0];
                 valueType = ((ParameterizedType) targetType).getActualTypeArguments()[1];
             } else {

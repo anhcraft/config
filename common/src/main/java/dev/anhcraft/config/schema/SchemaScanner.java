@@ -29,13 +29,13 @@ public class SchemaScanner {
             List<Method> postHandlers = new ArrayList<>();
             List<String[]> ex = new ArrayList<>();
             Examples examples = clazz.getAnnotation(Examples.class);
-            if(examples != null) {
+            if (examples != null) {
                 for (Example example : examples.value()) {
                     ex.add(example.value());
                 }
             }
             Example example = clazz.getAnnotation(Example.class);
-            if(example != null) {
+            if (example != null) {
                 ex.add(example.value());
             }
             Description description = clazz.getAnnotation(Description.class);
@@ -76,13 +76,13 @@ public class SchemaScanner {
             Validation validation = field.getAnnotation(Validation.class);
             List<String[]> ex = new ArrayList<>();
             Examples examples = field.getAnnotation(Examples.class);
-            if(examples != null) {
+            if (examples != null) {
                 for (Example example : examples.value()) {
                     ex.add(example.value());
                 }
             }
             Example example = field.getAnnotation(Example.class);
-            if(example != null) {
+            if (example != null) {
                 ex.add(example.value());
             }
             Consistent consistent = field.getAnnotation(Consistent.class);

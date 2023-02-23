@@ -19,8 +19,8 @@ public class TestPlatform {
     }
 
     protected <T> SimpleForm serialize(Class<? extends T> clazz,
-                                     T object,
-                                     Consumer<ConfigSerializer> consumer) throws Exception {
+                                       T object,
+                                       Consumer<ConfigSerializer> consumer) throws Exception {
         ConfigSerializer serializer = BukkitConfigProvider.YAML.createSerializer();
         registerAdapters(serializer);
         consumer.accept(serializer);
@@ -33,8 +33,8 @@ public class TestPlatform {
     }
 
     protected <T> T deserialize(Class<? extends T> clazz,
-                              ConfigurationSection config,
-                              Consumer<ConfigDeserializer> consumer) throws Exception {
+                                ConfigurationSection config,
+                                Consumer<ConfigDeserializer> consumer) throws Exception {
         ConfigDeserializer deserializer = BukkitConfigProvider.YAML.createDeserializer();
         registerAdapters(deserializer);
         consumer.accept(deserializer);

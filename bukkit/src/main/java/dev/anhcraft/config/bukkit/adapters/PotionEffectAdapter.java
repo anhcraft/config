@@ -29,7 +29,7 @@ public class PotionEffectAdapter implements TypeAdapter<PotionEffect> {
 
     @Override
     public @Nullable PotionEffect complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isSection()) {
+        if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new PotionEffect(
                     Objects.requireNonNull(Optional.ofNullable(cs.get("type"))

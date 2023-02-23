@@ -18,9 +18,9 @@ public class ShortAdapter implements TypeAdapter<Short> {
 
     @Override
     public @Nullable Short complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asShort();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Short.parseShort(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

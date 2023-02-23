@@ -18,9 +18,9 @@ public class FloatAdapter implements TypeAdapter<Float> {
 
     @Override
     public @Nullable Float complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isNumber()) {
+        if (value.isNumber()) {
             return value.asFloat();
-        } else if(value.isString()) {
+        } else if (value.isString()) {
             return Float.parseFloat(Objects.requireNonNull(value.asString()));
         } else {
             throw new UnsupportedOperationException();

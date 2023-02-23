@@ -93,10 +93,10 @@ public class CommonConfigTest extends TestPlatform {
     @Test
     public void codeMap() throws Exception {
         CodeMap map = new CodeMap();
-        map.table1.put('a',  "ALPHA");
-        map.table1.put('b',  "BETA");
-        map.table2.put((byte) 1,  "DELTA");
-        map.table2.put((byte) 2,  "OMEGA");
+        map.table1.put('a', "ALPHA");
+        map.table1.put('b', "BETA");
+        map.table2.put((byte) 1, "DELTA");
+        map.table2.put((byte) 2, "OMEGA");
         ConfigSection configSection = Objects.requireNonNull(serialize(CodeMap.class, map).asSection());
         map = deserialize(CodeMap.class, ((NeepConfigSection) configSection).getBackend());
         Assertions.assertEquals("ALPHA", map.table1.get('a'));

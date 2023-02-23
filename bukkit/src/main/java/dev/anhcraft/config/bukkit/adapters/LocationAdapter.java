@@ -27,7 +27,7 @@ public class LocationAdapter implements TypeAdapter<Location> {
 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Location value) throws Exception {
-        if(inlineSerialization) {
+        if (inlineSerialization) {
             return SimpleForm.of(
                     (value.getWorld() != null ? value.getWorld().getName() + " " : "") +
                             value.getX() + " " + value.getY() + " " + value.getZ() + " " + value.getYaw() + " " + value.getPitch()
@@ -50,39 +50,39 @@ public class LocationAdapter implements TypeAdapter<Location> {
     public @Nullable Location complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
         if (value.isString()) {
             String[] str = Objects.requireNonNull(value.asString()).split(" ");
-            if(str.length < 3) {
+            if (str.length < 3) {
                 throw new InvalidValueException("Missing required arguments (x, y, z): " + Arrays.toString(str));
             } else {
                 World world = null;
                 double x, y, z;
                 float yaw = 0, pitch = 0;
-                if(NumberUtils.isNumber(str[0])) {
+                if (NumberUtils.isNumber(str[0])) {
                     x = Double.parseDouble(str[0]);
                     y = Double.parseDouble(str[1]);
                     z = Double.parseDouble(str[2]);
-                    if(str.length >= 4) {
+                    if (str.length >= 4) {
                         yaw = Float.parseFloat(str[3]);
                     }
-                    if(str.length >= 5) {
+                    if (str.length >= 5) {
                         pitch = Float.parseFloat(str[4]);
                     }
-                } else if(str.length == 3){
+                } else if (str.length == 3) {
                     throw new InvalidValueException("Missing required arguments (world, x, y, z): " + Arrays.toString(str));
                 } else {
                     world = Bukkit.getWorld(str[0]);
                     x = Double.parseDouble(str[1]);
                     y = Double.parseDouble(str[2]);
                     z = Double.parseDouble(str[3]);
-                    if(str.length >= 5) {
+                    if (str.length >= 5) {
                         yaw = Float.parseFloat(str[4]);
                     }
-                    if(str.length >= 6) {
+                    if (str.length >= 6) {
                         pitch = Float.parseFloat(str[5]);
                     }
                 }
                 return new Location(world, x, y, z, yaw, pitch);
             }
-        } else if(value.isSection()) {
+        } else if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new Location(
                     Optional.ofNullable(cs.get("world")).map(SimpleForm::asString).map(Bukkit::getWorld).orElse(null),

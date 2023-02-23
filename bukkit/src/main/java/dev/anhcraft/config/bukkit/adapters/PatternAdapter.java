@@ -27,7 +27,7 @@ public class PatternAdapter implements TypeAdapter<Pattern> {
 
     @Override
     public @Nullable Pattern complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isSection()) {
+        if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new Pattern(
                     Objects.requireNonNull(Optional.ofNullable(cs.get("color"))

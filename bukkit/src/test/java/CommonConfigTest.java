@@ -2,12 +2,10 @@ import configs.*;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
 import dev.anhcraft.config.struct.ConfigSection;
-import dev.anhcraft.configdoc.ConfigDocGenerator;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.*;
 
 public class CommonConfigTest extends TestPlatform {
@@ -34,7 +32,7 @@ public class CommonConfigTest extends TestPlatform {
                 return entrySchema.getKey().equals("groups") ? "id" : null;
             }));
             d.setCallback((deserializer, configSchema, value) -> {
-                if(value instanceof UserGroup) {
+                if (value instanceof UserGroup) {
                     Assertions.assertEquals(((UserGroup) value).getPerm(), "test.a,test.b,test.c");
                 }
             });
@@ -107,10 +105,10 @@ public class CommonConfigTest extends TestPlatform {
     @Test
     public void codeMap() throws Exception {
         CodeMap map = new CodeMap();
-        map.table1.put('a',  "ALPHA");
-        map.table1.put('b',  "BETA");
-        map.table2.put((byte) 1,  "DELTA");
-        map.table2.put((byte) 2,  "OMEGA");
+        map.table1.put('a', "ALPHA");
+        map.table1.put('b', "BETA");
+        map.table2.put((byte) 1, "DELTA");
+        map.table2.put((byte) 2, "OMEGA");
         map.reserved = new String[]{"THETA"};
         ConfigSection configSection = Objects.requireNonNull(serialize(CodeMap.class, map).asSection());
         Assertions.assertNotNull(configSection.get("reserved"));

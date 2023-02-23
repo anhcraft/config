@@ -24,7 +24,7 @@ public class VectorAdapter implements TypeAdapter<Vector> {
 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Vector value) throws Exception {
-        if(inlineSerialization) {
+        if (inlineSerialization) {
             return SimpleForm.of(value.getX() + " " + value.getY() + " " + value.getZ());
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
@@ -39,7 +39,7 @@ public class VectorAdapter implements TypeAdapter<Vector> {
     public @Nullable Vector complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
         if (value.isString()) {
             String[] str = Objects.requireNonNull(value.asString()).split(" ");
-            if(str.length < 3) {
+            if (str.length < 3) {
                 throw new InvalidValueException("Missing required arguments (x, y, z): " + Arrays.toString(str));
             } else {
                 return new Vector(
@@ -48,7 +48,7 @@ public class VectorAdapter implements TypeAdapter<Vector> {
                         Double.parseDouble(str[2])
                 );
             }
-        } else if(value.isSection()) {
+        } else if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new Vector(
                     Optional.ofNullable(cs.get("x")).map(SimpleForm::asDouble).orElse(0d),

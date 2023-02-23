@@ -15,12 +15,12 @@ public class TextReplacer {
     }
 
     @NotNull
-    public String replace(@NotNull String str){
+    public String replace(@NotNull String str) {
         Matcher m = INFO_PLACEHOLDER_PATTERN.matcher(str);
         StringBuffer sb = new StringBuffer(str.length());
-        while(m.find()){
+        while (m.find()) {
             String p = m.group();
-            String s = p.substring(1, p.length()-1).trim();
+            String s = p.substring(1, p.length() - 1).trim();
             m.appendReplacement(sb, handler.apply(s));
         }
         m.appendTail(sb);

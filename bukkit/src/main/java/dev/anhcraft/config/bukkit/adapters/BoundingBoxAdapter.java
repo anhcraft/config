@@ -24,10 +24,10 @@ public class BoundingBoxAdapter implements TypeAdapter<BoundingBox> {
 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull BoundingBox value) throws Exception {
-        if(inlineSerialization) {
+        if (inlineSerialization) {
             return SimpleForm.of(
                     value.getMinX() + " " + value.getMinY() + " " + value.getMinZ() + " " +
-                    value.getMaxX() + " " + value.getMaxY() + " " + value.getMaxZ() + " "
+                            value.getMaxX() + " " + value.getMaxY() + " " + value.getMaxZ() + " "
             );
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
@@ -45,7 +45,7 @@ public class BoundingBoxAdapter implements TypeAdapter<BoundingBox> {
     public @Nullable BoundingBox complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
         if (value.isString()) {
             String[] str = Objects.requireNonNull(value.asString()).split(" ");
-            if(str.length == 6) {
+            if (str.length == 6) {
                 return new BoundingBox(
                         Double.parseDouble(str[0]),
                         Double.parseDouble(str[1]),
@@ -57,7 +57,7 @@ public class BoundingBoxAdapter implements TypeAdapter<BoundingBox> {
             } else {
                 throw new InvalidValueException("Missing required arguments (x, y, z): " + Arrays.toString(str));
             }
-        } else if(value.isSection()) {
+        } else if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return new BoundingBox(
                     Optional.ofNullable(cs.get("minX")).map(SimpleForm::asDouble).orElse(0d),

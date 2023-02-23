@@ -29,7 +29,7 @@ public class FireworkEffectAdapter implements TypeAdapter<FireworkEffect> {
 
     @Override
     public @Nullable FireworkEffect complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) throws Exception {
-        if(value.isSection()) {
+        if (value.isSection()) {
             ConfigSection cs = Objects.requireNonNull(value.asSection());
             return FireworkEffect.builder().with(Objects.requireNonNull(Optional.ofNullable(cs.get("type"))
                             .map(SimpleForm::asString)

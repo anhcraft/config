@@ -18,8 +18,8 @@ public class TestPlatform {
     }
 
     protected <T> SimpleForm serialize(Class<? extends T> clazz,
-                                     T object,
-                                     Consumer<ConfigSerializer> consumer) throws Exception {
+                                       T object,
+                                       Consumer<ConfigSerializer> consumer) throws Exception {
         ConfigSerializer serializer = BukkitNeepConfigProvider.INSTANCE.createSerializer();
         registerAdapters(serializer);
         consumer.accept(serializer);
@@ -32,8 +32,8 @@ public class TestPlatform {
     }
 
     protected <T> T deserialize(Class<? extends T> clazz,
-                              NeepSection config,
-                              Consumer<ConfigDeserializer> consumer) throws Exception {
+                                NeepSection config,
+                                Consumer<ConfigDeserializer> consumer) throws Exception {
         ConfigDeserializer deserializer = BukkitNeepConfigProvider.INSTANCE.createDeserializer();
         registerAdapters(deserializer);
         consumer.accept(deserializer);

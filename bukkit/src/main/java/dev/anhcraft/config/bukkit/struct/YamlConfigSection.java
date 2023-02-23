@@ -29,11 +29,11 @@ public class YamlConfigSection implements ConfigSection {
         return backend.getKeys(false).isEmpty();
     }
 
-    private YamlConfiguration copy(ConfigurationSection section, YamlConfiguration conf){
-        for(Map.Entry<String, Object> k : section.getValues(false).entrySet()){
-            if(k.getValue() instanceof YamlConfiguration) {
+    private YamlConfiguration copy(ConfigurationSection section, YamlConfiguration conf) {
+        for (Map.Entry<String, Object> k : section.getValues(false).entrySet()) {
+            if (k.getValue() instanceof YamlConfiguration) {
                 conf.set(k.getKey(), k.getValue());
-            } else if(k.getValue() instanceof ConfigurationSection) {
+            } else if (k.getValue() instanceof ConfigurationSection) {
                 conf.set(k.getKey(), copy((ConfigurationSection) k.getValue(), new YamlConfiguration()));
             } else {
                 conf.set(k.getKey(), k.getValue());
@@ -103,7 +103,7 @@ public class YamlConfigSection implements ConfigSection {
 
     @Override
     public @NotNull String stringify() {
-        if(backend instanceof YamlConfiguration) {
+        if (backend instanceof YamlConfiguration) {
             return ((YamlConfiguration) backend).saveToString();
         } else {
             return copy(backend, new YamlConfiguration()).saveToString();
