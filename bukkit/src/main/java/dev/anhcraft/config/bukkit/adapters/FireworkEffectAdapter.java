@@ -19,9 +19,9 @@ public class FireworkEffectAdapter implements TypeAdapter<FireworkEffect> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull FireworkEffect value) throws Exception {
         ConfigSection cs = serializer.getConfigProvider().createSection();
-        cs.set("type", SimpleForm.of(value.getType().name()));
-        cs.set("flicker", SimpleForm.of(value.hasFlicker()));
-        cs.set("trail", SimpleForm.of(value.hasTrail()));
+        cs.set("type", value.getType().name());
+        cs.set("flicker", value.hasFlicker());
+        cs.set("trail", value.hasTrail());
         cs.set("colors", serializer.transform(Color[].class, value.getColors()));
         cs.set("fadeColors", serializer.transform(Color[].class, value.getFadeColors()));
         return SimpleForm.of(cs);

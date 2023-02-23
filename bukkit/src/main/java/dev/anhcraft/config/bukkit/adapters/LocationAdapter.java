@@ -34,13 +34,13 @@ public class LocationAdapter implements TypeAdapter<Location> {
             );
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
-            cs.set("x", SimpleForm.of(value.getX()));
-            cs.set("y", SimpleForm.of(value.getY()));
-            cs.set("z", SimpleForm.of(value.getZ()));
-            cs.set("yaw", SimpleForm.of(value.getYaw()));
-            cs.set("pitch", SimpleForm.of(value.getPitch()));
+            cs.set("x",value.getX());
+            cs.set("y", value.getY());
+            cs.set("z", value.getZ());
+            cs.set("yaw", value.getYaw());
+            cs.set("pitch", value.getPitch());
             if (value.getWorld() != null) {
-                cs.set("world", SimpleForm.of(value.getWorld().getName()));
+                cs.set("world", value.getWorld().getName());
             }
             return SimpleForm.of(cs);
         }

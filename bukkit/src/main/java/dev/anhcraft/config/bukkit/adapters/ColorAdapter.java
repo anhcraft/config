@@ -17,9 +17,9 @@ public class ColorAdapter implements TypeAdapter<Color> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Color value) throws Exception {
         ConfigSection cs = serializer.getConfigProvider().createSection();
-        cs.set("red", SimpleForm.of(value.getRed()));
-        cs.set("green", SimpleForm.of(value.getGreen()));
-        cs.set("blue", SimpleForm.of(value.getBlue()));
+        cs.set("red", value.getRed());
+        cs.set("green", value.getGreen());
+        cs.set("blue", value.getBlue());
         return SimpleForm.of(cs);
     }
 

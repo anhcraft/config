@@ -19,10 +19,10 @@ public class AttributeModifierAdapter implements TypeAdapter<AttributeModifier> 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull AttributeModifier value) throws Exception {
         ConfigSection cs = serializer.getConfigProvider().createSection();
-        cs.set("id", SimpleForm.of(value.getUniqueId().toString()));
-        cs.set("name", SimpleForm.of(value.getName()));
-        cs.set("amount", SimpleForm.of(value.getAmount()));
-        cs.set("operation", SimpleForm.of(value.getOperation().name()));
+        cs.set("id", value.getUniqueId().toString());
+        cs.set("name", value.getName());
+        cs.set("amount", value.getAmount());
+        cs.set("operation", value.getOperation().name());
         return SimpleForm.of(cs);
     }
 

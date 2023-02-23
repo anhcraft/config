@@ -18,12 +18,12 @@ public class PotionEffectAdapter implements TypeAdapter<PotionEffect> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull PotionEffect value) throws Exception {
         ConfigSection cs = serializer.getConfigProvider().createSection();
-        cs.set("type", SimpleForm.of(value.getType().getName()));
-        cs.set("duration", SimpleForm.of(value.getDuration()));
-        cs.set("amplifier", SimpleForm.of(value.getAmplifier()));
-        cs.set("ambient", SimpleForm.of(value.isAmbient()));
-        cs.set("particles", SimpleForm.of(value.hasParticles()));
-        cs.set("icon", SimpleForm.of(value.hasIcon()));
+        cs.set("type", value.getType().getName());
+        cs.set("duration", value.getDuration());
+        cs.set("amplifier", value.getAmplifier());
+        cs.set("ambient", value.isAmbient());
+        cs.set("particles", value.hasParticles());
+        cs.set("icon", value.hasIcon());
         return SimpleForm.of(cs);
     }
 

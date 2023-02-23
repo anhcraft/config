@@ -31,12 +31,12 @@ public class BoundingBoxAdapter implements TypeAdapter<BoundingBox> {
             );
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
-            cs.set("minX", SimpleForm.of(value.getMinX()));
-            cs.set("minY", SimpleForm.of(value.getMinY()));
-            cs.set("minZ", SimpleForm.of(value.getMinZ()));
-            cs.set("maxX", SimpleForm.of(value.getMaxX()));
-            cs.set("maxY", SimpleForm.of(value.getMaxY()));
-            cs.set("maxZ", SimpleForm.of(value.getMaxZ()));
+            cs.set("minX", value.getMinX());
+            cs.set("minY", value.getMinY());
+            cs.set("minZ", value.getMinZ());
+            cs.set("maxX", value.getMaxX());
+            cs.set("maxY", value.getMaxY());
+            cs.set("maxZ", value.getMaxZ());
             return SimpleForm.of(cs);
         }
     }

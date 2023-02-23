@@ -20,8 +20,8 @@ public class PatternAdapter implements TypeAdapter<Pattern> {
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Pattern value) throws Exception {
         ConfigSection cs = serializer.getConfigProvider().createSection();
-        cs.set("color", SimpleForm.of(value.getColor().name()));
-        cs.set("pattern", SimpleForm.of(value.getPattern().name()));
+        cs.set("color", value.getColor().name());
+        cs.set("pattern", value.getPattern().name());
         return SimpleForm.of(cs);
     }
 

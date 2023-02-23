@@ -28,9 +28,9 @@ public class VectorAdapter implements TypeAdapter<Vector> {
             return SimpleForm.of(value.getX() + " " + value.getY() + " " + value.getZ());
         } else {
             ConfigSection cs = serializer.getConfigProvider().createSection();
-            cs.set("x", SimpleForm.of(value.getX()));
-            cs.set("y", SimpleForm.of(value.getY()));
-            cs.set("z", SimpleForm.of(value.getZ()));
+            cs.set("x", value.getX());
+            cs.set("y", value.getY());
+            cs.set("z", value.getZ());
             return SimpleForm.of(cs);
         }
     }
