@@ -24,7 +24,6 @@ public class ConfigDeserializer extends ConfigHandler {
     private Middleware middleware;
     private Callback callback;
     private boolean wrapSingleElement = true;
-    private boolean transformCollectionType = true;
 
     // protected constructor to prevent creating instances directly
     // to create a new instance, look at the implemented config provider
@@ -188,30 +187,6 @@ public class ConfigDeserializer extends ConfigHandler {
                 Array.set(arr, 0, simpleForm.getObject());
                 //noinspection unchecked
                 return (T) arr;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    public <T> T transformList(@NotNull Type componentType, @NotNull SimpleForm simpleForm) throws Exception {
-        if (simpleForm.isArray()) {
-            if (transformCollectionType) {
-                List<?> list = new ArrayList<>();
-                Object array = simpleForm.getObject();
-                int length = Array.getLength(array);
-                for (int i = 0; i < length; i++) {
-                    list.add(transform(componentType, SimpleForm.of(Array.get(array, i))));
-                }
-                //noinspection unchecked
-                return (T) list;
-            }
-        } else {
-            if (wrapSingleElement) {
-                List<Object> list = new ArrayList<>();
-                list.add(simpleForm.getObject());
-                //noinspection unchecked
-                return (T) list;
             }
         }
         return null;
