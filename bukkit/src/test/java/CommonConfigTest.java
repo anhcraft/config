@@ -28,7 +28,7 @@ public class CommonConfigTest extends TestPlatform {
         conf.set("groups.a.permissions", Arrays.asList("test.a", "test.b", "test.c"));
         conf.set("inheritable", true);
         RoleTable obj = deserialize(RoleTable.class, conf.getRoot(), d -> {
-            d.setMiddleware(new EntryKeyInjector(entrySchema -> {
+            d.addMiddleware(new EntryKeyInjector(entrySchema -> {
                 return entrySchema.getKey().equals("groups") ? "id" : null;
             }));
             d.setCallback((deserializer, configSchema, value) -> {

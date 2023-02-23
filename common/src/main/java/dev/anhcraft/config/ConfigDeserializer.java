@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ConfigDeserializer extends ConfigHandler {
-    private Middleware middleware;
+    private final List<Middleware> middlewares = new ArrayList<>();
     private Callback callback;
     private boolean wrapSingleElement = true;
 
@@ -31,18 +31,8 @@ public class ConfigDeserializer extends ConfigHandler {
         super(configProvider);
     }
 
-    @Nullable
-    public Middleware getMiddleware() {
-        return middleware;
-    }
-
-    public void setMiddleware(@Nullable Middleware middleware) {
-        this.middleware = middleware;
-    }
-
-    @Nullable
-    public Callback getCallback() {
-        return callback;
+    public void addMiddleware(@NotNull Middleware middleware) {
+        this.middlewares.add(middleware);
     }
 
     public void setCallback(@Nullable Callback callback) {
@@ -116,8 +106,8 @@ public class ConfigDeserializer extends ConfigHandler {
             Validation validation = entrySchema.getValidation();
             String key = entrySchema.getKey();
             SimpleForm simpleForm = configSection.get(key);
-            if (middleware != null) {
-                simpleForm = middleware.transform(this, configSchema, entrySchema, simpleForm);
+            for (Middleware m : middlewares) {
+                simpleForm = m.transform(this, configSchema, entrySchema, simpleForm);
             }
             if (validation != null) {
                 if (simpleForm == null && validation.notNull()) {
