@@ -6,7 +6,7 @@ import dev.anhcraft.config.adapters.TypeAdapter;
 import dev.anhcraft.config.exceptions.InvalidValueException;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
-import org.apache.commons.lang.math.NumberUtils;
+import dev.anhcraft.config.utils.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -56,7 +56,7 @@ public class LocationAdapter implements TypeAdapter<Location> {
                 World world = null;
                 double x, y, z;
                 float yaw = 0, pitch = 0;
-                if (NumberUtils.isNumber(str[0])) {
+                if (StringUtil.isNumber(str[0])) {
                     x = Double.parseDouble(str[0]);
                     y = Double.parseDouble(str[1]);
                     z = Double.parseDouble(str[2]);
