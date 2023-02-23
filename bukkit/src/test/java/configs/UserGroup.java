@@ -22,7 +22,7 @@ public class UserGroup {
 
     @PostHandler
     private void handle(ConfigDeserializer deserializer) {
-        perm = String.join(",", permissions);
+        if (permissions != null) perm = String.join(",", permissions);
     }
 
     public String getPerm() {

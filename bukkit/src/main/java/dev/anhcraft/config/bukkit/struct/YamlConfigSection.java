@@ -49,8 +49,7 @@ public class YamlConfigSection implements ConfigSection {
         } else if (o instanceof MemorySection) {
             return (B) new YamlConfigSection(copy((MemorySection) o, new YamlConfiguration()));
         } else if (o instanceof List<?>) {
-            ((List<?>) o).replaceAll(this::wrap);
-            return (B) o;
+            return (B) ObjectUtil.replaceAll(((List<?>) o).toArray(), this::wrap);
         } else if (o != null && o.getClass().isArray()) {
             return (B) ObjectUtil.replaceAll(o, this::wrap);
         } else {
@@ -62,9 +61,6 @@ public class YamlConfigSection implements ConfigSection {
     private <A, B> B unwrap(A o) {
         if (o instanceof YamlConfigSection) {
             return (B) ((YamlConfigSection) o).backend;
-        } else if (o instanceof List<?>) {
-            ((List<?>) o).replaceAll(this::unwrap);
-            return (B) o;
         } else if (o != null && o.getClass().isArray()) {
             return (B) ObjectUtil.replaceAll(o, this::unwrap);
         } else {

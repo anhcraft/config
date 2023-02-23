@@ -6,6 +6,7 @@ import dev.anhcraft.config.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -13,7 +14,6 @@ import java.util.UUID;
 public abstract class ConfigHandler {
     private final Map<String, TypeAdapter<?>> typeAdapters = new HashMap<>();
     private final ConfigProvider configProvider;
-    private boolean preferCustomListAdapter;
     private boolean preferCustomArrayAdapter;
     private boolean callSuperAdapter = true;
 
@@ -21,6 +21,7 @@ public abstract class ConfigHandler {
         this.configProvider = configProvider;
         registerTypeAdapter(Enum.class, new EnumAdapter());
         registerTypeAdapter(Map.class, new MapAdapter());
+        registerTypeAdapter(Collection.class, new CollectionAdapter());
         registerTypeAdapter(Character.class, new CharacterAdapter());
         registerTypeAdapter(Boolean.class, new BooleanAdapter());
         registerTypeAdapter(Byte.class, new ByteAdapter());
@@ -38,18 +39,6 @@ public abstract class ConfigHandler {
         registerTypeAdapter(float.class, new FloatAdapter());
         registerTypeAdapter(double.class, new DoubleAdapter());
         registerTypeAdapter(UUID.class, new UUIDAdapter());
-    }
-
-    /**
-     * By default, {@link TypeAdapter} only takes effect on elements.<br>
-     * Enable this to expand the effect up to the whole list, allows
-     * you to modify the list, or transform it to another kind of object.<br>
-     * If the {@link TypeAdapter} not found, the default action will be done.
-     *
-     * @param value {@code true} or {@code false}
-     */
-    public void preferCustomListAdapter(boolean value) {
-        this.preferCustomListAdapter = value;
     }
 
     /**
@@ -96,10 +85,6 @@ public abstract class ConfigHandler {
     @Nullable
     protected TypeAdapter<?> getTypeAdapter(@NotNull Class<?> clazz) {
         return typeAdapters.get(ClassUtil.hashClass(clazz));
-    }
-
-    protected boolean isCustomListAdapterPreferred() {
-        return preferCustomListAdapter;
     }
 
     protected boolean isCustomArrayAdapterPreferred() {

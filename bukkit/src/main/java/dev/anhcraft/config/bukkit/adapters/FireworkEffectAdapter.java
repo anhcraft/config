@@ -6,12 +6,12 @@ import dev.anhcraft.config.adapters.TypeAdapter;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import dev.anhcraft.config.utils.ClassUtil;
+import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,8 +22,8 @@ public class FireworkEffectAdapter implements TypeAdapter<FireworkEffect> {
         cs.set("type", SimpleForm.of(value.getType().name()));
         cs.set("flicker", SimpleForm.of(value.hasFlicker()));
         cs.set("trail", SimpleForm.of(value.hasTrail()));
-        cs.set("colors", SimpleForm.of(value.getColors()));
-        cs.set("fadeColors", SimpleForm.of(value.getFadeColors()));
+        cs.set("colors", serializer.transform(Color[].class, value.getColors()));
+        cs.set("fadeColors", serializer.transform(Color[].class, value.getFadeColors()));
         return SimpleForm.of(cs);
     }
 
@@ -37,10 +37,14 @@ public class FireworkEffectAdapter implements TypeAdapter<FireworkEffect> {
                             .orElse(null)))
                     .flicker(Optional.ofNullable(cs.get("flicker")).map(SimpleForm::asBoolean).orElse(false))
                     .trail(Optional.ofNullable(cs.get("trail")).map(SimpleForm::asBoolean).orElse(false))
-                    .withColor(Optional.ofNullable(cs.get("colors")).map(SimpleForm::asList).orElse(new ArrayList<>()))
-                    .withFade(Optional.ofNullable(cs.get("fadeColors")).map(SimpleForm::asList).orElse(new ArrayList<>()))
-                    .build();
+                    .withColor(getColors("colors", deserializer, cs))
+                    .withFade(getColors("fadeColors", deserializer, cs)).build();
         }
         return null;
+    }
+
+    private static Color[] getColors(String k, ConfigDeserializer deserializer, ConfigSection cs) throws Exception {
+        SimpleForm o = cs.get(k);
+        return (o == null || !o.isArray()) ? new Color[0] : deserializer.transform(Color[].class, o);
     }
 }

@@ -48,19 +48,6 @@ public class NeepConfigSection implements ConfigSection {
         } else if (object instanceof Number) {
             int val = ((Number) object).intValue();
             return new NeepInt(container, key, String.valueOf(val), null);
-        } else if (object instanceof Collection) {
-            NeepList<NeepComponent> list = new NeepList<>(container, key, null, new ArrayList<>());
-            int i = 0;
-            for (Object o : (Collection<?>) object) {
-                list.add(unwrap(list, String.valueOf(i++), o));
-            }
-            return list;
-        } else if (object instanceof Map) {
-            NeepSection section = new NeepSection(container, key, null, new ArrayList<>());
-            for (Map.Entry<?, ?> entry : ((Map<?, ?>) object).entrySet()) {
-                section.add(unwrap(section, entry.getKey().toString(), entry.getValue()));
-            }
-            return section;
         } else if (object.getClass().isArray()) {
             NeepList<NeepComponent> list = new NeepList<>(container, key, null, new ArrayList<>());
             int i = 0;
@@ -96,7 +83,7 @@ public class NeepConfigSection implements ConfigSection {
                     .filter(Objects::nonNull)
                     .map(o -> (NeepComponent) o)
                     .map(this::wrap)
-                    .collect(Collectors.toList());
+                    .toArray();
         } else if (component.isComment()) {
             return component.asComment().getContent();
         } else {

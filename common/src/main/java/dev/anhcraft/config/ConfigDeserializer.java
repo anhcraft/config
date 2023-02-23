@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
 public class ConfigDeserializer extends ConfigHandler {
@@ -53,28 +52,13 @@ public class ConfigDeserializer extends ConfigHandler {
 
     /**
      * If the given {@link SimpleForm} contains a single object whose
-     * type matches the element type, a new instance of the collection
-     * will be created and the object becomes the only member.<br>
-     * The "collection" here can be either {@link List} or array.
+     * type matches the element type, a new instance of the array
+     * will be created and the object becomes the only member.
      *
      * @param value {@code true} or {@code false}
      */
     public void wrapSingleElement(boolean value) {
         this.wrapSingleElement = value;
-    }
-
-    /**
-     * If the collection type is different from the target, the handler will
-     * try to transform it to the appropriate type. All elements will be kept,
-     * but the order may be changed due to the implementation of the target type.<br>
-     * This option has no effect if {@link #preferCustomArrayAdapter(boolean)} or
-     * {@link #preferCustomListAdapter(boolean)} is set to {@code true}.<br>
-     * The "collection" here can be either {@link List} or array.
-     *
-     * @param value {@code true} or {@code false}
-     */
-    public void transformCollectionType(boolean value) {
-        this.transformCollectionType = value;
     }
 
     @Nullable
@@ -93,12 +77,6 @@ public class ConfigDeserializer extends ConfigHandler {
                 if (!isCustomArrayAdapterPreferred()) {
                     return transformArray(Objects.requireNonNull(TypeUtil.getElementType(targetType)), simpleForm);
                 }
-            } else if (rawType.equals(List.class)) {
-                if (!isCustomListAdapterPreferred()) {
-                    Type t = TypeUtil.getElementType(targetType);
-                    // t may be null if the list is using raw type (no generic param specified)
-                    return transformList(t == null ? Object.class : t, simpleForm);
-                }
             }
             Class<?> type = rawType;
             while (true) {
@@ -106,11 +84,17 @@ public class ConfigDeserializer extends ConfigHandler {
                 if (typeAdapter != null) {
                     //noinspection unchecked
                     return (T) typeAdapter.complexify(this, targetType, simpleForm);
-                } else {
-                    type = type.getSuperclass();
-                    if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
-                        break;
+                }
+                for (Class<?> clazz : type.getInterfaces()) {
+                    typeAdapter = getTypeAdapter(clazz);
+                    if (typeAdapter != null) {
+                        //noinspection unchecked
+                        return (T) typeAdapter.complexify(this, targetType, simpleForm);
                     }
+                }
+                type = type.getSuperclass();
+                if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
+                    break;
                 }
             }
             //noinspection unchecked
@@ -198,16 +182,6 @@ public class ConfigDeserializer extends ConfigHandler {
             }
             //noinspection unchecked
             return (T) arr;
-        } else if (simpleForm.isList()) {
-            if (transformCollectionType) {
-                List<?> list = Objects.requireNonNull(simpleForm.asList());
-                Object arr = Array.newInstance(TypeUtil.getRawType(componentType), list.size());
-                for (int i = 0; i < list.size(); i++) {
-                    Array.set(arr, i, transform(componentType, SimpleForm.of(list.get(i))));
-                }
-                //noinspection unchecked
-                return (T) arr;
-            }
         } else {
             if (wrapSingleElement) {
                 Object arr = Array.newInstance(TypeUtil.getRawType(componentType), 1);
@@ -221,15 +195,7 @@ public class ConfigDeserializer extends ConfigHandler {
 
     @Nullable
     public <T> T transformList(@NotNull Type componentType, @NotNull SimpleForm simpleForm) throws Exception {
-        if (simpleForm.isList()) {
-            List<?> list = Objects.requireNonNull(simpleForm.asList());
-            ListIterator<?> li = list.listIterator();
-            while (li.hasNext()) {
-                li.set(transform(componentType, SimpleForm.of(li.next())));
-            }
-            //noinspection unchecked
-            return (T) list;
-        } else if (simpleForm.isArray()) {
+        if (simpleForm.isArray()) {
             if (transformCollectionType) {
                 List<?> list = new ArrayList<>();
                 Object array = simpleForm.getObject();

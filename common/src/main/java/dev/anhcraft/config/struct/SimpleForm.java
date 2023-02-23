@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.util.List;
 import java.util.Objects;
 
 /**
- * SimpleForm is a safe wrapper for storing "simple" objects.<br>
- * Accepts number, character, boolean, array, {@link String}, {@link ConfigSection}, {@link List}.<br>
- * With collection types like array or {@link List}, their members also must have "simple" types.
+ * SimpleForm is a safe wrapper for storing non-null "simple" objects.<br>
+ * Simple objects are basic elements that a configuration system must support.<br>
+ * Accepts number, character, boolean, array, {@link String} and {@link ConfigSection}.<br>
+ * With arrays, their members also must have "simple" types.
  */
 public class SimpleForm {
     private final Object object;
@@ -30,9 +30,6 @@ public class SimpleForm {
                 || object instanceof String
                 || object instanceof ConfigSection) {
             return true;
-        } else if (object instanceof List<?>) {
-            List<?> list = (List<?>) object;
-            return list.isEmpty() || isAllowed(list.get(0));
         } else if (object.getClass().isArray()) {
             return Array.getLength(object) == 0 || isAllowed(Array.get(object, 0));
         }
@@ -66,10 +63,6 @@ public class SimpleForm {
 
     public boolean isSection() {
         return object instanceof ConfigSection;
-    }
-
-    public boolean isList() {
-        return object instanceof List<?>;
     }
 
     public boolean isArray() {
@@ -118,15 +111,9 @@ public class SimpleForm {
         return isSection() ? (ConfigSection) object : null;
     }
 
-    @Nullable
-    public List<?> asList() {
-        return isList() ? (List<?>) object : null;
-    }
-
     public boolean isEmpty() {
-        if (isList()) {
-            return Objects.requireNonNull(asList()).isEmpty();
-        } else if (isSection()) {
+        // note: zero number is not considered "empty"
+        if (isSection()) {
             return Objects.requireNonNull(asSection()).isEmpty();
         } else if (isString()) {
             return Objects.requireNonNull(asString()).isEmpty();

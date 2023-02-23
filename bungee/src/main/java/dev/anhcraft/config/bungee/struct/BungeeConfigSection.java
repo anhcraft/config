@@ -41,8 +41,7 @@ public class BungeeConfigSection implements ConfigSection {
                 return null;
             }
         } else if (o instanceof List<?>) {
-            ((List<?>) o).replaceAll(this::wrap);
-            return (B) o;
+            return (B) ObjectUtil.replaceAll(((List<?>) o).toArray(), this::wrap);
         } else if (o != null && o.getClass().isArray()) {
             return (B) ObjectUtil.replaceAll(o, this::wrap);
         } else {
@@ -54,9 +53,6 @@ public class BungeeConfigSection implements ConfigSection {
     private <A, B> B unwrap(A o) {
         if (o instanceof BungeeConfigSection) {
             return (B) ((BungeeConfigSection) o).backend;
-        } else if (o instanceof List<?>) {
-            ((List<?>) o).replaceAll(this::unwrap);
-            return (B) o;
         } else if (o != null && o.getClass().isArray()) {
             return (B) ObjectUtil.replaceAll(o, this::unwrap);
         } else {

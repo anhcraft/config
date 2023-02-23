@@ -7,7 +7,6 @@ import dev.anhcraft.config.schema.EntrySchema;
 import dev.anhcraft.config.schema.SchemaScanner;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
-import dev.anhcraft.config.utils.ObjectUtil;
 import dev.anhcraft.config.utils.TypeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,8 +15,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
 public class ConfigSerializer extends ConfigHandler {
@@ -54,12 +51,6 @@ public class ConfigSerializer extends ConfigHandler {
                 if (!isCustomArrayAdapterPreferred()) {
                     return transformArray(Objects.requireNonNull(TypeUtil.getElementType(sourceType)), object);
                 }
-            } else if (rawType.equals(List.class)) {
-                if (!isCustomListAdapterPreferred()) {
-                    Type t = TypeUtil.getElementType(sourceType);
-                    // t may be null if the list is using raw type (no generic param specified)
-                    return transformList(t == null ? Object.class : t, object);
-                }
             }
             Class<?> type = rawType;
             while (true) {
@@ -67,11 +58,16 @@ public class ConfigSerializer extends ConfigHandler {
                 TypeAdapter<T> typeAdapter = (TypeAdapter<T>) getTypeAdapter(type);
                 if (typeAdapter != null) {
                     return typeAdapter.simplify(this, sourceType, object);
-                } else {
-                    type = type.getSuperclass();
-                    if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
-                        break;
+                }
+                for (Class<?> clazz : type.getInterfaces()) {
+                    typeAdapter = (TypeAdapter<T>) getTypeAdapter(clazz);
+                    if (typeAdapter != null) {
+                        return typeAdapter.simplify(this, sourceType, object);
                     }
+                }
+                type = type.getSuperclass();
+                if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
+                    break;
                 }
             }
             return SimpleForm.of(object);
@@ -111,18 +107,6 @@ public class ConfigSerializer extends ConfigHandler {
             }
         }
         return SimpleForm.of(arr);
-    }
-
-    @Nullable
-    public <T> SimpleForm transformList(@NotNull Type componentType, @NotNull T object) throws Exception {
-        List<?> list = (List<?>) ObjectUtil.shallowCopy(object);
-        //noinspection unchecked
-        ListIterator<T> li = (ListIterator<T>) list.listIterator();
-        while (li.hasNext()) {
-            //noinspection unchecked
-            li.set((T) Objects.requireNonNull(transform(componentType, li.next())).getObject());
-        }
-        return SimpleForm.of(list);
     }
 
     public interface Middleware {
