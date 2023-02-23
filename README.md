@@ -243,3 +243,18 @@ Then registers it to the `ConfigHandler`:
 ```java
 handler.registerTypeAdapter(Color.class, new ColorAdapter());
 ```
+
+## ConfigDoc
+ConfigDoc is a built-in automatic-generated documentation which can be executed at runtime.
+
+Example usage:
+```java
+new ConfigDocGenerator()
+        .withSchemaOf(MyConfig1.class)
+        .withSchemaOf(MyConfig2.class)
+        .withSchemaOf(MyConfig3.class)
+        .withSchema(CachedSchema)
+        .combineWith(anotherConfigDocGenerator)
+        .addJavadoc("(com.example*)", "https://example.com/")
+        .generate(new File("docs"));
+```
