@@ -28,7 +28,7 @@ public class ConfigDocGenerator {
 
     public ConfigDocGenerator(){
         addJavadoc("(org.bukkit.*)|(org.spigotmc*)", "https://hub.spigotmc.org/javadocs/spigot/");
-        addJavadoc("(com.destroystokyo.paper*)", "https://papermc.io/javadocs/paper/1.17/");
+        addJavadoc("(com.destroystokyo.paper*)", "https://jd.papermc.io/paper/1.19/");
     }
 
     @Contract("_ -> this")
