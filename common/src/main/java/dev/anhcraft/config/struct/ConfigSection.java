@@ -55,10 +55,6 @@ public interface ConfigSection {
         set(path, SimpleForm.of(value));
     }
 
-    default void set(@NotNull String path, List<?> value) throws Exception {
-        set(path, SimpleForm.of(value));
-    }
-
     default void set(@NotNull String path, int[] value) throws Exception {
         set(path, SimpleForm.of(value));
     }
