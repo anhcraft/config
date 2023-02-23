@@ -49,7 +49,9 @@ public class ConfigDocGenerator {
     @Contract("_ -> this")
     public ConfigDocGenerator withSchemaOf(@NotNull Class<?> schemaClass) {
         Preconditions.checkNotNull(schemaClass);
-        schemas.add(SchemaScanner.scanConfig(schemaClass));
+        ConfigSchema schema = SchemaScanner.scanConfig(schemaClass);
+        if (schema == null) throw new IllegalArgumentException("given class not configurable: " + schemaClass.getName());
+        schemas.add(schema);
         return this;
     }
 
@@ -62,6 +64,7 @@ public class ConfigDocGenerator {
     @Contract("_, _ -> this")
     public ConfigDocGenerator addJavadoc(@NotNull Pattern classPattern, @NotNull String link) {
         Preconditions.checkNotNull(classPattern);
+        Preconditions.checkNotNull(link);
         if (!link.endsWith("/")) link = link + '/';
         javaDocs.put(classPattern, link);
         return this;
