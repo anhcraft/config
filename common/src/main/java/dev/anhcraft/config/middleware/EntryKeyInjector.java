@@ -13,9 +13,11 @@ import java.util.function.Function;
 
 /**
  * This built-in middleware for config deserializer will perform the following action:
- * <pre>given       ConfigSection{key:value}</pre>
- * <pre>then set    value.(destination) := key</pre>
- * <code>(with key is String; value is ConfigSection)</code>
+ * <pre>
+ *  given: ConfigSection<K, V extends ConfigSection>
+ *  and filter: if K matches whatever return S, otherwise null
+ *  for any K matched in which S is non-null: set V[S] = K
+ * </pre>
  */
 public class EntryKeyInjector implements ConfigDeserializer.Middleware {
     private final Function<EntrySchema, String> filter;
