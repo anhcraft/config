@@ -1,13 +1,28 @@
-const elem = document.getElementById("toggle-example");
-elem.onclick = function(){
-    Array.from(document.getElementsByClassName("examples")).forEach(function(e){
-        const isShowing = e.style.display === "block";
-        e.style.display = isShowing ? "none" : "block";
-        window.localStorage.setItem("configdoc", isShowing ? 0 : 1);
-    });
-};
+(function () {
+    const btn = document.getElementById("toggle-example");
+    let showExample = false;
 
-const confDoc = window.localStorage.getItem("configdoc");
-if(confDoc === "1"){
-    elem.click();
-}
+    if (window.localStorage.getItem("configdoc-example") === "1") {
+        showExample = true;
+    }
+
+    function render() {
+        Array.from(document.getElementsByClassName("examples")).forEach(function (e) {
+            e.style.display = showExample ? "block" : "none";
+        });
+
+        if (showExample) {
+            btn.classList.add("active")
+        } else {
+            btn.classList.remove("active")
+        }
+    }
+
+    btn.onclick = function () {
+        showExample = !showExample;
+        window.localStorage.setItem("configdoc-example", showExample ? "1" : "0");
+        render();
+    };
+
+    render();
+})()

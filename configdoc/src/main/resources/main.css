@@ -79,10 +79,14 @@ header {
     font-size: 12px;
     padding: 8px 12px;
     border: none;
-    background-color: #bd4f4f;
+    background-color: #797979;
     color: #fff;
     cursor: pointer;
     margin-bottom: 15px;
+}
+
+#toggle-example.active {
+    background-color: #bd4f4f !important;
 }
 
 .examples {
