@@ -55,15 +55,17 @@ public class MyConfig {
 }
 ```
 
-#### Setting
-`@Setting` indicates that its associated instance field should be configurable.
+By default, all declared fields (either private or public) are considered configurable, and will be the configuration settings.
+
+#### Exclude
+`@Exclude` is used to mark a specific field as non-configurable
 
 ```java
 @Configurable
 public class MyConfig {
-    @Setting
     private int times; // configurable
 
+    @Exclude
     private String msg; // not configurable
 }
 ```
@@ -72,7 +74,6 @@ public class MyConfig {
 `@Path` specifies the key path of the related field. If it is missing, the field's name will be used. Path is platform-independent - e.g: path with dots such as `a.b.c` may be invalid path in specific platforms.
 
 ```java
-@Setting
 @Path("TIMES")
 private int times;
 ```
@@ -81,7 +82,6 @@ private int times;
 This annotation is used to describe an option. It will also be shown in the ConfigDoc.
 
 ```java
-@Setting
 @Path("TIMES")
 @Description({"Line 1", "Line 2"})
 private int times;
@@ -91,7 +91,6 @@ private int times;
 This annotation is used to quickly validate value of an option.
 
 ```java
-@Setting
 @Validation(notNull = true)
 private String msg;
 ```
@@ -102,7 +101,6 @@ private String msg;
 `@Example` and `@Examples` is used for showing examples in how to configure the associated option. Examples will also be shown in the ConfigDoc.
 
 ```java
-@Setting
 @Example("times: 10")
 private int times;
 ```
@@ -169,17 +167,14 @@ We have:
 ```java
 @Configurable
 public class RoleTable {
-    @Setting
     public Map<String, UserGroup> groups;
 }
 
 @Configurable
 public class UserGroup {
-  @Setting
   @Virtual
   public String id;
 
-  @Setting
   public String name;
 }
 ```
