@@ -6,13 +6,10 @@ import dev.anhcraft.config.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class ConfigHandler {
-    private final Map<String, TypeAdapter<?>> typeAdapters = new HashMap<>();
+    private final Map<Class<?>, TypeAdapter<?>> typeAdapters = new WeakHashMap<>();
     private final ConfigProvider configProvider;
     private boolean preferCustomArrayAdapter;
     private boolean callSuperAdapter = true;
@@ -79,12 +76,12 @@ public abstract class ConfigHandler {
      * @param <T>         "complex" type
      */
     public <T> void registerTypeAdapter(@NotNull Class<T> clazz, @NotNull TypeAdapter<?> typeAdapter) {
-        typeAdapters.put(ClassUtil.hashClass(clazz), typeAdapter);
+        typeAdapters.put(clazz, typeAdapter);
     }
 
     @Nullable
     protected TypeAdapter<?> getTypeAdapter(@NotNull Class<?> clazz) {
-        return typeAdapters.get(ClassUtil.hashClass(clazz));
+        return typeAdapters.get(clazz);
     }
 
     protected boolean isCustomArrayAdapterPreferred() {
