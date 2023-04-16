@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used with {@link Setting} to provide the path to the setting.
+ * Used with a configurable field to provide the path to the setting.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)

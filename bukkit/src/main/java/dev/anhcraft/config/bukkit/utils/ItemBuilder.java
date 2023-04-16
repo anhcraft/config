@@ -18,46 +18,38 @@ import java.util.function.UnaryOperator;
 public class ItemBuilder implements Serializable {
     private static final long serialVersionUID = 7808305902298157946L;
 
-    @Setting
     @Path(value = "material")
     @Description(value = {"The material that make up this item"})
     @Validation(notNull = true, silent = true)
     private Material material = Material.AIR;
 
-    @Setting
     @Path(value = "amount")
     @Description(value = {"The amount of items in this stack"})
     private int amount = 1;
 
-    @Setting
     @Path(value = "name")
     @Description(value = {"The name of this item"})
     private String name;
 
-    @Setting
     @Path(value = "damage")
     @Description(value = {"The damaged value"})
     private int damage;
 
-    @Setting
     @Path(value = "lore")
     @Description(value = {"Item's lore"})
     @Validation(notNull = true, silent = true)
     private List<String> lore = new ArrayList<>();
 
-    @Setting
     @Path(value = "enchant")
     @Description(value = {"Item's enchantments"})
     @Validation(notNull = true, silent = true)
     private Map<Enchantment, Integer> enchants = new HashMap<>();
 
-    @Setting
     @Path(value = "flag")
     @Description(value = {"Items's flags that used to hide something"})
     @Validation(notNull = true, silent = true)
     private List<ItemFlag> flags = new ArrayList<>();
 
-    @Setting
     @Path(value = "unbreakable")
     @Description(value = {"Make the item unbreakable"})
     private boolean unbreakable;

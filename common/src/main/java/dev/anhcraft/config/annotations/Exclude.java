@@ -6,9 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation puts at instance fields to indicate they are configurable.
+ * Excludes a declared field from a {@link Configurable} class.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Setting {
+public @interface Exclude {
 }

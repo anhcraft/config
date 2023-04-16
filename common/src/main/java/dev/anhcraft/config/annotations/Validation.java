@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used with {@link Setting} to validate the value before modify the corresponding field.<br>
+ * Used with a configurable field to validate the value before modify the corresponding field.<br>
  * If not pass the validation, {@link InvalidValueException} will be thrown, unless silent mode is enabled.
  */
 @Target(ElementType.FIELD)

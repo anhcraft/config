@@ -67,9 +67,10 @@ public class SchemaScanner {
 
     private static void scanEntries(Class<?> clazz, List<EntrySchema> entries) {
         Configurable configurable = clazz.getAnnotation(Configurable.class);
+
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
-            if (!field.isAnnotationPresent(Setting.class)) {
+            if (field.isAnnotationPresent(Exclude.class)) {
                 continue;
             }
             Description description = field.getAnnotation(Description.class);
