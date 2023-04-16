@@ -25,6 +25,7 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(Color.class, new ColorAdapter());
         handler.registerTypeAdapter(PotionEffect.class, new PotionEffectAdapter());
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
+        handler.registerTypeAdapter(EnchantmentAdapter.class, new EnchantmentAdapter());
         //handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
     }
 }
