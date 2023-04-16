@@ -3,30 +3,20 @@ package dev.anhcraft.config.utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ClassUtil {
-    private static final Map<String, List<String>> ENUM_MAP = new HashMap<>();
-
-    @NotNull
-    public static String hashClass(@NotNull Class<?> clazz) {
-        // TODO hash class loader too (if possible)
-        return clazz.getName();
-    }
+    private static final Map<Class<?>, List<String>> ENUM_MAP = new WeakHashMap<>();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static <T extends Enum> Object findEnum(@NotNull Class<T> clazz, @NotNull String name) {
-        String hash = hashClass(clazz);
-        List<String> list = ENUM_MAP.get(hash);
+        List<String> list = ENUM_MAP.get(clazz);
         if (list == null) {
             if (clazz.isEnum()) {
                 list = Arrays.stream(clazz.getEnumConstants()).map(Enum::toString).collect(Collectors.toList());
-                ENUM_MAP.put(hash, list);
+                ENUM_MAP.put(clazz, list);
             } else {
                 return null;
             }
