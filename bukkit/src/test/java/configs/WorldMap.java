@@ -9,14 +9,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Configurable
+@Configurable(keyNamingStyle = Configurable.NamingStyle.TRAIN_CASE)
 public class WorldMap {
     @Setting
-    public Location central;
+    public Location centralLocation;
 
     @Setting
     public Map<String, Location> buildings = new HashMap<>();
 
     @Setting
-    public List<Location> homes = new ArrayList<>();
+    public List<Location> allHomes = new ArrayList<>();
+
+    @Setting
+    public Region centerRegions;
+
+    @Configurable(keyNamingStyle = Configurable.NamingStyle.SNAKE_CASE)
+    public static class Region {
+        @Setting
+        public List<Location> highlightedPos = new ArrayList<>();
+    }
 }

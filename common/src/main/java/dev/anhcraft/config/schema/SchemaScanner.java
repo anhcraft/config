@@ -66,12 +66,12 @@ public class SchemaScanner {
     }
 
     private static void scanEntries(Class<?> clazz, List<EntrySchema> entries) {
+        Configurable configurable = clazz.getAnnotation(Configurable.class);
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (!field.isAnnotationPresent(Setting.class)) {
                 continue;
             }
-            Path path = field.getAnnotation(Path.class);
             Description description = field.getAnnotation(Description.class);
             Validation validation = field.getAnnotation(Validation.class);
             List<String[]> ex = new ArrayList<>();
@@ -87,7 +87,24 @@ public class SchemaScanner {
             }
             Consistent consistent = field.getAnnotation(Consistent.class);
             Virtual virtual = field.getAnnotation(Virtual.class);
-            entries.add(new EntrySchema(field, path, description, validation, ex, consistent != null, virtual != null));
+            Path path = field.getAnnotation(Path.class);
+            String key;
+            if (path != null) {
+                key = path.value();
+            } else {
+                key = field.getName();
+                switch (configurable.keyNamingStyle()) {
+                    case SNAKE_CASE: {
+                        key = key.replaceAll("([a-z])([A-Z]+)", "$1_$2").toLowerCase();
+                        break;
+                    }
+                    case TRAIN_CASE: {
+                        key = key.replaceAll("([a-z])([A-Z]+)", "$1-$2").toLowerCase();
+                        break;
+                    }
+                }
+            }
+            entries.add(new EntrySchema(field, key, description, validation, ex, consistent != null, virtual != null));
         }
     }
 

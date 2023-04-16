@@ -11,7 +11,7 @@ import java.util.List;
 
 public class EntrySchema {
     private final Field field;
-    private final Path path;
+    private final String key;
     private final Description description;
     private final Validation validation;
     private final List<String[]> examples;
@@ -19,14 +19,14 @@ public class EntrySchema {
     private final boolean virtual;
 
     public EntrySchema(@NotNull Field field,
-                       @Nullable Path path,
+                       @Nullable String key,
                        @Nullable Description description,
                        @Nullable Validation validation,
                        @Nullable List<String[]> examples,
                        boolean consistent,
                        boolean virtual) {
         this.field = field;
-        this.path = path;
+        this.key = key;
         this.description = description;
         this.validation = validation;
         this.examples = examples;
@@ -37,11 +37,6 @@ public class EntrySchema {
     @NotNull
     public Field getField() {
         return field;
-    }
-
-    @Nullable
-    public Path getPath() {
-        return path;
     }
 
     @Nullable
@@ -61,7 +56,7 @@ public class EntrySchema {
 
     @NotNull
     public String getKey() {
-        return path == null ? field.getName() : path.value();
+        return key;
     }
 
     public boolean isConsistent() {
