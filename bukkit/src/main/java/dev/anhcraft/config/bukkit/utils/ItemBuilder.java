@@ -1,6 +1,7 @@
 package dev.anhcraft.config.bukkit.utils;
 
 import dev.anhcraft.config.annotations.*;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 @Configurable
 public class ItemBuilder implements Serializable {
@@ -49,6 +51,13 @@ public class ItemBuilder implements Serializable {
     @Description(value = {"Items's flags that used to hide something"})
     @Validation(notNull = true, silent = true)
     private List<ItemFlag> flags = new ArrayList<>();
+
+    @Path(value = "customModelData")
+    @Description(value = {
+            "Custom model data",
+            "Default: 0 to unset customModelData"
+    })
+    private int customModelData;
 
     @Path(value = "unbreakable")
     @Description(value = {"Make the item unbreakable"})
@@ -166,16 +175,24 @@ public class ItemBuilder implements Serializable {
         return this;
     }
 
+    public int customModelData() {
+        return this.customModelData;
+    }
+
+    public void customModelData(int customModelData) {
+        this.customModelData = customModelData;
+    }
+
     @NotNull
     public ItemStack build() {
         ItemStack item = new ItemStack(this.material, this.amount, (short) this.damage);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             if (this.name != null) {
-                meta.setDisplayName(this.name);
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', this.name));
             }
             if (!this.lore.isEmpty()) {
-                meta.setLore(this.lore);
+                meta.setLore(this.lore.stream().map(lore -> ChatColor.translateAlternateColorCodes('&', lore)).collect(Collectors.toList()));
             }
             if (!this.flags.isEmpty()) {
                 this.flags.stream().filter(Objects::nonNull).forEach(meta::addItemFlags);
@@ -186,6 +203,7 @@ public class ItemBuilder implements Serializable {
                 }
             }
             meta.setUnbreakable(this.unbreakable);
+            meta.setCustomModelData(customModelData == 0 ? null : customModelData);
             item.setItemMeta(meta);
         }
         return item;
