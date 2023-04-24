@@ -4,9 +4,6 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 public enum NMSVersion {
-    v1_12_R1,
-    v1_13_R1,
-    v1_13_R2,
     v1_14_R1,
     v1_15_R1,
     v1_16_R1,
