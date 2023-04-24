@@ -1,7 +1,7 @@
 package configs;
 
 import dev.anhcraft.config.annotations.Configurable;
-import dev.anhcraft.config.annotations.Consistent;
+import dev.anhcraft.config.annotations.Constant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +12,6 @@ public class CodeMap {
 
     public Map<Byte, String> table2 = new HashMap<>();
 
-    @Consistent
+    @Constant
     public String[] reserved;
 }

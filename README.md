@@ -105,8 +105,8 @@ private String msg;
 private int times;
 ```
 
-#### Consistent
-Adding `@Consistent` to an option prevents it being changed during the deserialization process.
+#### Constant
+Adding `@Constant` to an option prevents it being changed during the deserialization process.
 
 #### Virtual
 Adding `@Virtual` to an option prevents it being exposed to the configuration during the serialization process.

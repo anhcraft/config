@@ -86,7 +86,7 @@ public class SchemaScanner {
             if (example != null) {
                 ex.add(example.value());
             }
-            Consistent consistent = field.getAnnotation(Consistent.class);
+            Constant constant = field.getAnnotation(Constant.class);
             Virtual virtual = field.getAnnotation(Virtual.class);
             Path path = field.getAnnotation(Path.class);
             String key;
@@ -105,7 +105,7 @@ public class SchemaScanner {
                     }
                 }
             }
-            entries.add(new EntrySchema(field, key, description, validation, ex, consistent != null, virtual != null));
+            entries.add(new EntrySchema(field, key, description, validation, ex, constant != null, virtual != null));
         }
     }
 
