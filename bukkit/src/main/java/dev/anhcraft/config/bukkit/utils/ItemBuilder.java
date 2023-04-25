@@ -39,46 +39,35 @@ public class ItemBuilder implements Serializable {
     private final static String META_BOOK_GENERATION = "meta.bookGeneration";
     private final static String META_BOOK_PAGES = "meta.bookPages";
 
-    @Path(value = "material")
     @Description(value = {"The material that make up this item"})
     @Validation(notNull = true, silent = true)
     private Material material = Material.AIR;
 
-    @Path(value = "amount")
     @Description(value = {"The amount of items in this stack"})
     private int amount = 1;
 
-    @Path(value = "name")
     @Description(value = {"The name of this item"})
     private String name;
 
-    @Path(value = "damage")
     @Description(value = {"The damaged value"})
     private int damage;
 
-    @Path(value = "lore")
     @Description(value = {"Item's lore"})
     @Validation(notNull = true, silent = true)
     private List<String> lore = new ArrayList<>();
 
-    @Path(value = "enchant")
     @Description(value = {"Item's enchantments"})
-    @Validation(notNull = true, silent = true)
-    private Map<Enchantment, Integer> enchants = new HashMap<>();
+    private Map<Enchantment, Integer> enchantments;
 
-    @Path(value = "flag")
     @Description(value = {"Items's flags"})
-    @Validation(notNull = true, silent = true)
     private List<ItemFlag> flags;
 
-    @Path(value = "customModelData")
     @Description(value = {
             "Custom model data",
             "Default: 0 to unset customModelData"
     })
     private int customModelData;
 
-    @Path(value = "unbreakable")
     @Description(value = {"Make the item unbreakable"})
     private boolean unbreakable;
 
@@ -179,7 +168,7 @@ public class ItemBuilder implements Serializable {
                     pi.lore = meta.getLore();
                 }
                 pi.flags = new ArrayList<>(meta.getItemFlags());
-                pi.enchants = meta.getEnchants();
+                pi.enchantments = meta.getEnchants();
                 pi.unbreakable = meta.isUnbreakable();
                 pi.customModelData = meta.hasCustomModelData() ? meta.getCustomModelData() : 0;
                 Multimap<Attribute, AttributeModifier> attr = meta.getAttributeModifiers();
@@ -265,22 +254,24 @@ public class ItemBuilder implements Serializable {
         this.flags = flags;
     }
 
-    @NotNull
-    public Map<Enchantment, Integer> enchants() {
-        return this.enchants;
+    public ItemBuilder flag(@NotNull ItemFlag flag) {
+        if (flags == null) flags = new ArrayList<>();
+        flags.add(flag);
+        return this;
     }
 
-    public void enchants(@Nullable Map<Enchantment, Integer> enchants) {
-        if (enchants == null) {
-            this.enchants.clear();
-        } else {
-            this.enchants = enchants;
-        }
+    @Nullable
+    public Map<Enchantment, Integer> enchantments() {
+        return this.enchantments;
     }
 
-    public ItemBuilder replaceDisplay(UnaryOperator<String> operator) {
-        this.name = operator.apply(this.name);
-        this.lore.replaceAll(operator);
+    public void enchantments(@Nullable Map<Enchantment, Integer> enchantment) {
+        this.enchantments = enchantment;
+    }
+
+    public ItemBuilder enchant(@NotNull Enchantment enchantment, int level) {
+        if (enchantments == null) enchantments = new HashMap<>();
+        enchantments.put(enchantment, level);
         return this;
     }
 
@@ -299,6 +290,11 @@ public class ItemBuilder implements Serializable {
 
     public void itemModifiers(@Nullable List<ItemModifier> itemModifiers) {
         this.itemModifiers = itemModifiers;
+    }
+
+    public void addItemModifier(ItemModifier itemModifier) {
+        if (itemModifiers == null) itemModifiers = new ArrayList<>();
+        itemModifiers.add(itemModifier);
     }
 
     @Nullable
@@ -398,6 +394,12 @@ public class ItemBuilder implements Serializable {
         this.bookPages = bookPages;
     }
 
+    public ItemBuilder replaceDisplay(@NotNull UnaryOperator<String> operator) {
+        this.name = operator.apply(this.name);
+        this.lore.replaceAll(operator);
+        return this;
+    }
+
     @NotNull
     public ItemStack build() {
         ItemStack item = new ItemStack(material, amount, (short) damage);
@@ -412,8 +414,8 @@ public class ItemBuilder implements Serializable {
             if (flags != null && !flags.isEmpty()) {
                 flags.stream().filter(Objects::nonNull).forEach(meta::addItemFlags);
             }
-            if (!enchants.isEmpty()) {
-                for (Map.Entry<Enchantment, Integer> e : enchants.entrySet()) {
+            if (enchantments != null && !enchantments.isEmpty()) {
+                for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
                     meta.addEnchant(e.getKey(), e.getValue(), true);
                 }
             }
@@ -434,38 +436,28 @@ public class ItemBuilder implements Serializable {
 
     @NotNull
     public ItemBuilder duplicate() {
-        return this.copyTo(new ItemBuilder());
-    }
-
-    @Deprecated
-    @NotNull
-    public ItemBuilder merge(@NotNull ItemBuilder pi) {
-        return this.copyTo(pi);
-    }
-
-    @NotNull
-    public ItemBuilder copyTo(@NotNull ItemBuilder pi) {
-        pi.name = name;
-        pi.damage = damage;
-        pi.amount = amount;
-        pi.unbreakable = unbreakable;
-        pi.material = material;
-        pi.enchants.putAll(enchants);
-        pi.flags = flags == null ? null : new ArrayList<>(flags);
-        pi.lore.addAll(lore);
-        pi.customModelData = customModelData;
-        pi.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
-        pi.metaType = metaType;
-        pi.skullOwner = skullOwner;
-        pi.skullTexture = skullTexture;
-        pi.potionType = potionType;
-        pi.potionUpgraded = potionUpgraded;
-        pi.potionExtended = potionExtended;
-        pi.leatherColor = leatherColor;
-        pi.bookTitle = bookTitle;
-        pi.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
-        pi.bookAuthor = bookAuthor;
-        pi.bookGeneration = bookGeneration;
-        return pi;
+        ItemBuilder builder = new ItemBuilder();
+        builder.material = material;
+        builder.amount = amount;
+        builder.name = name;
+        builder.damage = damage;
+        builder.lore = new ArrayList<>(lore);
+        builder.enchantments = enchantments == null ? null : new HashMap<>(enchantments);
+        builder.flags = flags == null ? null : new ArrayList<>(flags);
+        builder.customModelData = customModelData;
+        builder.unbreakable = unbreakable;
+        builder.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
+        builder.metaType = metaType;
+        builder.skullOwner = skullOwner;
+        builder.skullTexture = skullTexture;
+        builder.potionType = potionType;
+        builder.potionUpgraded = potionUpgraded;
+        builder.potionExtended = potionExtended;
+        builder.leatherColor = leatherColor;
+        builder.bookTitle = bookTitle;
+        builder.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
+        builder.bookAuthor = bookAuthor;
+        builder.bookGeneration = bookGeneration;
+        return builder;
     }
 }

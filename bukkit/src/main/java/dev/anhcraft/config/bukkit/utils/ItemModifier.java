@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 public class ItemModifier {
     @Description("The attribute type")
     @Validation(notNull = true)
-    private Attribute attribute;
+    private final Attribute attribute;
 
     @Description("The modifier")
     @Validation(notNull = true)
-    private AttributeModifier modifier;
+    private final AttributeModifier modifier;
 
     public ItemModifier(@NotNull Attribute attribute, @NotNull AttributeModifier modifier) {
         this.attribute = attribute;
