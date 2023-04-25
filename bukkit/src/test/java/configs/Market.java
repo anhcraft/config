@@ -2,6 +2,7 @@ package configs;
 
 import dev.anhcraft.config.annotations.*;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ public class Market {
     public List<Transaction> transactions;
 
     public Map<String, Integer> counter;
+
+    public URL website;
 
     @Configurable
     public static class Item {

@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
 import java.util.*;
 
 public class CommonConfigTest extends TestPlatform {
@@ -61,6 +62,7 @@ public class CommonConfigTest extends TestPlatform {
                 new Market.Transaction(m.products[2], 1598959804261L),
                 new Market.Transaction(m.products[4], 1598960110693L)
         );
+        m.website = new URL("https://example.com");
         m.counter = new HashMap<>();
         m.counter.put("Apple", 1);
         m.counter.put("Peach", 1);
