@@ -55,7 +55,7 @@ public class MyConfig {
 }
 ```
 
-By default, all declared fields (either private or public) are considered configurable, and will be the configuration settings.
+By default, all declared non-static fields (either private, protected or public) are considered configurable, and will be the configuration settings.
 
 #### Exclude
 `@Exclude` is used to mark a specific field as non-configurable
@@ -107,6 +107,8 @@ private int times;
 
 #### Constant
 Adding `@Constant` to an option prevents it being changed during the deserialization process.
+
+Final fields automatically have this effect. To exclude them completely, uses `@Exclude`
 
 #### Virtual
 Adding `@Virtual` to an option prevents it being exposed to the configuration during the serialization process.

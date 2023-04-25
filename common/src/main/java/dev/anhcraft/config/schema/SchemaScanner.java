@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class SchemaScanner {
@@ -70,7 +71,7 @@ public class SchemaScanner {
 
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.isAnnotationPresent(Exclude.class)) {
+            if (field.isAnnotationPresent(Exclude.class) || Modifier.isStatic(field.getModifiers())) {
                 continue;
             }
             Description description = field.getAnnotation(Description.class);
@@ -105,7 +106,8 @@ public class SchemaScanner {
                     }
                 }
             }
-            entries.add(new EntrySchema(field, key, description, validation, ex, constant != null, virtual != null));
+            boolean consistent = constant != null || Modifier.isFinal(field.getModifiers());
+            entries.add(new EntrySchema(field, key, description, validation, ex, consistent, virtual != null));
         }
     }
 
