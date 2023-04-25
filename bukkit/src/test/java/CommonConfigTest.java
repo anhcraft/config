@@ -75,6 +75,34 @@ public class CommonConfigTest extends TestPlatform {
     }
 
     @Test
+    public void superMarket() throws Exception {
+        SuperMarket m = new SuperMarket();
+        m.website = new URL("https://example.com");
+        m.products = new Market.Item[]{
+                new Market.Item("Kiwi", 50),
+                new Market.Item("Banana", 40),
+                new Market.Item("Peach", 20),
+        };
+        m.counter = new HashMap<>();
+        m.counter.put("Banana", 3);
+        m.counter.put("Peach", 4);
+        m.counter.put("Kiwi", 1);
+        m.transactions = Arrays.asList(
+                new Market.Transaction(m.products[0], 1598959383829L),
+                new Market.Transaction(m.products[1], 1598959596515L),
+                new Market.Transaction(m.products[1], 1598959804261L),
+                new Market.Transaction(m.products[2], 1598960110693L)
+        );
+        m.shops.add(new SuperMarket.Shop("Shop1", "Shop1 desc"));
+        m.shops.add(new SuperMarket.Shop("Shop2", "Shop2 desc"));
+        m.shops.add(new SuperMarket.Shop("Shop3", "Shop3 desc"));
+        ConfigSection configSection = Objects.requireNonNull(serialize(SuperMarket.class, m).asSection());
+        m = deserialize(SuperMarket.class, ((YamlConfigSection) configSection).getBackend());
+        ConfigSection configSection2 = Objects.requireNonNull(serialize(SuperMarket.class, m).asSection());
+        Assertions.assertEquals(configSection.stringify(), configSection2.stringify());
+    }
+
+    @Test
     public void menu() throws Exception {
         Menu m = new Menu();
         m.recipes.put(Recipe.BEEF_STEW, Arrays.asList(

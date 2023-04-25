@@ -106,8 +106,7 @@ public class SchemaScanner {
                     }
                 }
             }
-            boolean consistent = constant != null || Modifier.isFinal(field.getModifiers());
-            entries.add(new EntrySchema(field, key, description, validation, ex, consistent, virtual != null));
+            entries.add(new EntrySchema(field, key, description, validation, ex, constant != null, virtual != null));
         }
     }
 

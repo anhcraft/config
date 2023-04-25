@@ -108,8 +108,6 @@ private int times;
 #### Constant
 Adding `@Constant` to an option prevents it being changed during the deserialization process.
 
-Final fields automatically have this effect. To exclude them completely, uses `@Exclude`
-
 #### Virtual
 Adding `@Virtual` to an option prevents it being exposed to the configuration during the serialization process.
 
