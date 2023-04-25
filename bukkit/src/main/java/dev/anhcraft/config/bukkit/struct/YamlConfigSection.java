@@ -31,6 +31,7 @@ public class YamlConfigSection implements ConfigSection {
 
     private YamlConfiguration copy(ConfigurationSection section, YamlConfiguration conf) {
         for (Map.Entry<String, Object> k : section.getValues(false).entrySet()) {
+            if (k.getKey().isEmpty()) continue;
             if (k.getValue() instanceof YamlConfiguration) {
                 conf.set(k.getKey(), k.getValue());
             } else if (k.getValue() instanceof ConfigurationSection) {
