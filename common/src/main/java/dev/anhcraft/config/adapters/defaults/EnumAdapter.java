@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 public class EnumAdapter implements TypeAdapter<Enum<?>> {
-    private boolean preferUppercase;
+    private boolean preferUppercase = true;
 
     /**
      * Automatic uppercase enum names.
