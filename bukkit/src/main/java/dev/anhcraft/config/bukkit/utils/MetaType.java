@@ -1,13 +1,17 @@
 package dev.anhcraft.config.bukkit.utils;
 
+import dev.anhcraft.config.bukkit.NMSVersion;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
+import org.bukkit.profile.PlayerProfile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -40,9 +44,19 @@ public enum MetaType {
     SKULL((i, im) -> {
         SkullMeta m = (SkullMeta) im;
         i.skullOwner(m.getOwner());
+        if (NMSVersion.current().atLeast(NMSVersion.v1_18_R1)) {
+            if (m.getOwnerProfile() != null) {
+                i.skullTexture(m.getOwnerProfile().getTextures().getSkin());
+            }
+        }
     }, (i, im) -> {
         SkullMeta m = (SkullMeta) im;
         m.setOwner(i.skullOwner());
+        if (NMSVersion.current().atLeast(NMSVersion.v1_18_R1)) {
+            PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+            profile.getTextures().setSkin(i.skullTexture());
+            m.setOwnerProfile(profile);
+        }
     }),
     BOOK((i, im) -> {
         BookMeta m = (BookMeta) im;

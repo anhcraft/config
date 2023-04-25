@@ -35,4 +35,8 @@ public enum NMSVersion {
     public int compare(@NotNull NMSVersion another) {
         return ordinal() - another.ordinal();
     }
+
+    public boolean atLeast(@NotNull NMSVersion another) {
+        return compare(another) >= 0;
+    }
 }

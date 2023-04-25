@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class ItemBuilder implements Serializable {
     private final static String META_POTION_UPGRADED = "meta.potionUpgraded";
     private final static String META_LEATHER_COLOR = "meta.leatherColor";
     private final static String META_SKULL_OWNER = "meta.skullOwner";
+    private final static String META_SKULL_TEXTURE = "meta.skullTexture";
     private final static String META_BOOK_AUTHOR = "meta.bookAuthor";
     private final static String META_BOOK_TITLE = "meta.bookTitle";
     private final static String META_BOOK_GENERATION = "meta.bookGeneration";
@@ -122,6 +124,14 @@ public class ItemBuilder implements Serializable {
             "Required item meta: skull"
     })
     private String skullOwner;
+
+    @Path(META_SKULL_TEXTURE)
+    @Description({
+            "Set the skull texture (must point to Mojang texture server)",
+            "This has higher precedence than the skull owner",
+            "Required item meta: skull & server >= 1.18"
+    })
+    private URL skullTexture;
 
     @Path(META_BOOK_TITLE)
     @Description({
@@ -344,6 +354,15 @@ public class ItemBuilder implements Serializable {
     }
 
     @Nullable
+    public URL skullTexture() {
+        return skullTexture;
+    }
+
+    public void skullTexture(@Nullable URL skullTexture) {
+        this.skullTexture = skullTexture;
+    }
+
+    @Nullable
     public String bookTitle() {
         return bookTitle;
     }
@@ -438,6 +457,7 @@ public class ItemBuilder implements Serializable {
         pi.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
         pi.metaType = metaType;
         pi.skullOwner = skullOwner;
+        pi.skullTexture = skullTexture;
         pi.potionType = potionType;
         pi.potionUpgraded = potionUpgraded;
         pi.potionExtended = potionExtended;
