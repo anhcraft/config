@@ -1,7 +1,10 @@
 package dev.anhcraft.config.bukkit.utils;
 
 import com.google.common.collect.Multimap;
-import dev.anhcraft.config.annotations.*;
+import dev.anhcraft.config.annotations.Configurable;
+import dev.anhcraft.config.annotations.Description;
+import dev.anhcraft.config.annotations.Path;
+import dev.anhcraft.config.annotations.Validation;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -62,9 +65,9 @@ public class ItemBuilder implements Serializable {
     private Map<Enchantment, Integer> enchants = new HashMap<>();
 
     @Path(value = "flag")
-    @Description(value = {"Items's flags that used to hide something"})
+    @Description(value = {"Items's flags"})
     @Validation(notNull = true, silent = true)
-    private List<ItemFlag> flags = new ArrayList<>();
+    private List<ItemFlag> flags;
 
     @Path(value = "customModelData")
     @Description(value = {
@@ -243,17 +246,13 @@ public class ItemBuilder implements Serializable {
         }
     }
 
-    @NotNull
+    @Nullable
     public List<ItemFlag> flags() {
         return this.flags;
     }
 
     public void flags(@Nullable List<ItemFlag> flags) {
-        if (flags == null) {
-            this.flags.clear();
-        } else {
-            this.flags = flags;
-        }
+        this.flags = flags;
     }
 
     @NotNull
@@ -382,24 +381,24 @@ public class ItemBuilder implements Serializable {
 
     @NotNull
     public ItemStack build() {
-        ItemStack item = new ItemStack(this.material, this.amount, (short) this.damage);
+        ItemStack item = new ItemStack(material, amount, (short) damage);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            if (this.name != null) {
-                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', this.name));
+            if (name != null) {
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
             }
-            if (!this.lore.isEmpty()) {
-                meta.setLore(this.lore.stream().map(lore -> ChatColor.translateAlternateColorCodes('&', lore)).collect(Collectors.toList()));
+            if (!lore.isEmpty()) {
+                meta.setLore(lore.stream().map(lore -> ChatColor.translateAlternateColorCodes('&', lore)).collect(Collectors.toList()));
             }
-            if (!this.flags.isEmpty()) {
-                this.flags.stream().filter(Objects::nonNull).forEach(meta::addItemFlags);
+            if (flags != null && !flags.isEmpty()) {
+                flags.stream().filter(Objects::nonNull).forEach(meta::addItemFlags);
             }
-            if (!this.enchants.isEmpty()) {
-                for (Map.Entry<Enchantment, Integer> e : this.enchants.entrySet()) {
+            if (!enchants.isEmpty()) {
+                for (Map.Entry<Enchantment, Integer> e : enchants.entrySet()) {
                     meta.addEnchant(e.getKey(), e.getValue(), true);
                 }
             }
-            meta.setUnbreakable(this.unbreakable);
+            meta.setUnbreakable(unbreakable);
             meta.setCustomModelData(customModelData == 0 ? null : customModelData);
             if (itemModifiers != null) {
                 for (ItemModifier itemModifier : itemModifiers) {
@@ -433,10 +432,10 @@ public class ItemBuilder implements Serializable {
         pi.unbreakable = unbreakable;
         pi.material = material;
         pi.enchants.putAll(enchants);
-        pi.flags.addAll(flags);
+        pi.flags = flags == null ? null : new ArrayList<>(flags);
         pi.lore.addAll(lore);
         pi.customModelData = customModelData;
-        pi.itemModifiers = new ArrayList<>(itemModifiers);
+        pi.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
         pi.metaType = metaType;
         pi.skullOwner = skullOwner;
         pi.potionType = potionType;
@@ -444,7 +443,7 @@ public class ItemBuilder implements Serializable {
         pi.potionExtended = potionExtended;
         pi.leatherColor = leatherColor;
         pi.bookTitle = bookTitle;
-        pi.bookPages = new ArrayList<>(bookPages);
+        pi.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
         pi.bookAuthor = bookAuthor;
         pi.bookGeneration = bookGeneration;
         return pi;
