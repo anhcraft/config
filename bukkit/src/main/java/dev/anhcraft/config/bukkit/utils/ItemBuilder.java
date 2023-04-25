@@ -1,13 +1,16 @@
 package dev.anhcraft.config.bukkit.utils;
 
+import com.google.common.collect.Multimap;
 import dev.anhcraft.config.annotations.*;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.*;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +22,19 @@ import java.util.stream.Collectors;
 @Configurable
 public class ItemBuilder implements Serializable {
     private static final long serialVersionUID = 7808305902298157946L;
+    private final static String META_TYPE = "meta.type";
+    private final static String META_POTION_TYPE = "meta.potion.type";
+    private final static String META_POTION_EXTENDED = "meta.potion.extended";
+    private final static String META_POTION_UPGRADED = "meta.potion.upgraded";
+    private final static String META_LEATHER_COLOR_R = "meta.leather.color_r";
+    private final static String META_LEATHER_COLOR_G = "meta.leather.color_g";
+    private final static String META_LEATHER_COLOR_B = "meta.leather.color_b";
+    private final static String META_SPAWN_EGG_ENTITY = "meta.spawn_egg.entity";
+    private final static String META_SKULL_OWNER = "meta.skull.owner";
+    private final static String META_BOOK_AUTHOR = "meta.book.author";
+    private final static String META_BOOK_TITLE = "meta.book.title";
+    private final static String META_BOOK_GENERATION = "meta.book.generation";
+    private final static String META_BOOK_PAGES = "meta.book.pages";
 
     @Path(value = "material")
     @Description(value = {"The material that make up this item"})
@@ -63,6 +79,91 @@ public class ItemBuilder implements Serializable {
     @Description(value = {"Make the item unbreakable"})
     private boolean unbreakable;
 
+    @Path(value = "modifiers")
+    @Description("List of attribute modifiers")
+    private List<ItemModifier> itemModifiers;
+
+    @Path(META_TYPE)
+    @Description("Item meta type")
+    private MetaType metaType;
+
+    @Path(META_POTION_TYPE)
+    @Description({
+            "Set the potion type",
+            "Required item meta: potion"
+    })
+    private PotionType potionType;
+
+    @Path(META_POTION_EXTENDED)
+    @Description({
+            "Set the 'extended' status",
+            "Required item meta: potion"
+    })
+    private boolean potionExtended;
+
+    @Path(META_POTION_UPGRADED)
+    @Description({
+            "Set the 'upgraded' status",
+            "Required item meta: potion"
+    })
+    private boolean potionUpgraded;
+
+    @Path(META_LEATHER_COLOR_R)
+    @Description({
+            "Set the leather color's red value",
+            "Required item meta: leather"
+    })
+    private int leatherColorRed;
+
+    @Path(META_LEATHER_COLOR_G)
+    @Description({
+            "Set the leather color's green value",
+            "Required item meta: leather"
+    })
+    private int leatherColorGreen;
+
+    @Path(META_LEATHER_COLOR_B)
+    @Description({
+            "Set the leather color's blue value",
+            "Required item meta: leather"
+    })
+    private int leatherColorBlue;
+
+    @Path(META_SKULL_OWNER)
+    @Description({
+            "Set the skull owner",
+            "Required item meta: skull"
+    })
+    private String skullOwner;
+
+    @Path(META_BOOK_TITLE)
+    @Description({
+            "Set the title of the book",
+            "Required item meta: book"
+    })
+    private String bookTitle;
+
+    @Path(META_BOOK_AUTHOR)
+    @Description({
+            "Set the author of the book",
+            "Required item meta: book"
+    })
+    private String bookAuthor;
+
+    @Path(META_BOOK_GENERATION)
+    @Description({
+            "Set the generation of the book",
+            "Required item meta: book"
+    })
+    private BookMeta.Generation bookGeneration;
+
+    @Path(META_BOOK_PAGES)
+    @Description({
+            "Set the pages of the book",
+            "Required item meta: book"
+    })
+    private List<String> bookPages;
+
     @NotNull
     public static ItemBuilder of(@Nullable ItemStack itemStack) {
         ItemBuilder pi = new ItemBuilder();
@@ -83,6 +184,21 @@ public class ItemBuilder implements Serializable {
                 pi.flags = new ArrayList<>(meta.getItemFlags());
                 pi.enchants = meta.getEnchants();
                 pi.unbreakable = meta.isUnbreakable();
+                pi.customModelData = meta.hasCustomModelData() ? meta.getCustomModelData() : 0;
+                Multimap<Attribute, AttributeModifier> attr = meta.getAttributeModifiers();
+                if (attr != null) {
+                    pi.itemModifiers = new ArrayList<>();
+                    for (Map.Entry<Attribute, AttributeModifier> entry : attr.entries()) {
+                        pi.itemModifiers.add(new ItemModifier(entry.getKey(), entry.getValue()));
+                    }
+                }
+                if (meta instanceof PotionMeta) pi.metaType = MetaType.POTION;
+                else if (meta instanceof LeatherArmorMeta) pi.metaType = MetaType.LEATHER;
+                else if (meta instanceof SkullMeta) pi.metaType = MetaType.SKULL;
+                else if (meta instanceof BookMeta) pi.metaType = MetaType.BOOK;
+                if (pi.metaType != null) {
+                    pi.metaType.getOnLoad().accept(pi, meta);
+                }
             }
         }
         return pi;
@@ -183,6 +299,118 @@ public class ItemBuilder implements Serializable {
         this.customModelData = customModelData;
     }
 
+    @Nullable
+    public List<ItemModifier> itemModifiers() {
+        return itemModifiers;
+    }
+
+    public void itemModifiers(@Nullable List<ItemModifier> itemModifiers) {
+        this.itemModifiers = itemModifiers;
+    }
+
+    @Nullable
+    public MetaType metaType() {
+        return metaType;
+    }
+
+    public void metaType(@Nullable MetaType metaType) {
+        this.metaType = metaType;
+    }
+
+    public boolean potionExtended() {
+        return potionExtended;
+    }
+
+    public void potionExtended(boolean potionExtended) {
+        this.potionExtended = potionExtended;
+    }
+
+    public boolean potionUpgraded() {
+        return potionUpgraded;
+    }
+
+    public void potionUpgraded(boolean potionUpgraded) {
+        this.potionUpgraded = potionUpgraded;
+    }
+
+    @Nullable
+    public PotionType potionType() {
+        return potionType;
+    }
+
+    public void potionType(@Nullable PotionType potionType) {
+        this.potionType = potionType;
+    }
+
+    public int leatherColorRed() {
+        return leatherColorRed;
+    }
+
+    public void leatherColorRed(int leatherColorRed) {
+        this.leatherColorRed = leatherColorRed;
+    }
+
+    public int leatherColorGreen() {
+        return leatherColorGreen;
+    }
+
+    public void leatherColorGreen(int leatherColorGreen) {
+        this.leatherColorGreen = leatherColorGreen;
+    }
+
+    public int leatherColorBlue() {
+        return leatherColorBlue;
+    }
+
+    public void leatherColorBlue(int leatherColorBlue) {
+        this.leatherColorBlue = leatherColorBlue;
+    }
+
+    @Nullable
+    public String skullOwner() {
+        return skullOwner;
+    }
+
+    public void skullOwner(@Nullable String skullOwner) {
+        this.skullOwner = skullOwner;
+    }
+
+    @Nullable
+    public String bookTitle() {
+        return bookTitle;
+    }
+
+    public void bookTitle(@Nullable String bookTitle) {
+        this.bookTitle = bookTitle;
+    }
+
+    @Nullable
+    public String bookAuthor() {
+        return bookAuthor;
+    }
+
+    public void bookAuthor(@Nullable String bookAuthor) {
+        this.bookAuthor = bookAuthor;
+    }
+
+    @Nullable
+    public BookMeta.Generation bookGeneration() {
+        return bookGeneration;
+    }
+
+    public void bookGeneration(@Nullable BookMeta.Generation bookGeneration) {
+        this.bookGeneration = bookGeneration;
+    }
+
+    @Nullable
+    public List<String> bookPages() {
+        return bookPages;
+    }
+
+    public void bookPages(@Nullable List<String> bookPages) {
+        this.bookPages = bookPages;
+    }
+
     @NotNull
     public ItemStack build() {
         ItemStack item = new ItemStack(this.material, this.amount, (short) this.damage);
@@ -204,6 +432,14 @@ public class ItemBuilder implements Serializable {
             }
             meta.setUnbreakable(this.unbreakable);
             meta.setCustomModelData(customModelData == 0 ? null : customModelData);
+            if (itemModifiers != null) {
+                for (ItemModifier itemModifier : itemModifiers) {
+                    meta.addAttributeModifier(itemModifier.getAttribute(), itemModifier.getModifier());
+                }
+            }
+            if (metaType != null) {
+                metaType.getOnSave().accept(this, meta);
+            }
             item.setItemMeta(meta);
         }
         return item;
