@@ -3,6 +3,7 @@ package dev.anhcraft.config.bukkit.utils;
 import com.google.common.collect.Multimap;
 import dev.anhcraft.config.annotations.*;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -23,18 +24,15 @@ import java.util.stream.Collectors;
 public class ItemBuilder implements Serializable {
     private static final long serialVersionUID = 7808305902298157946L;
     private final static String META_TYPE = "meta.type";
-    private final static String META_POTION_TYPE = "meta.potion.type";
-    private final static String META_POTION_EXTENDED = "meta.potion.extended";
-    private final static String META_POTION_UPGRADED = "meta.potion.upgraded";
-    private final static String META_LEATHER_COLOR_R = "meta.leather.color_r";
-    private final static String META_LEATHER_COLOR_G = "meta.leather.color_g";
-    private final static String META_LEATHER_COLOR_B = "meta.leather.color_b";
-    private final static String META_SPAWN_EGG_ENTITY = "meta.spawn_egg.entity";
-    private final static String META_SKULL_OWNER = "meta.skull.owner";
-    private final static String META_BOOK_AUTHOR = "meta.book.author";
-    private final static String META_BOOK_TITLE = "meta.book.title";
-    private final static String META_BOOK_GENERATION = "meta.book.generation";
-    private final static String META_BOOK_PAGES = "meta.book.pages";
+    private final static String META_POTION_TYPE = "meta.potionType";
+    private final static String META_POTION_EXTENDED = "meta.potionExtended";
+    private final static String META_POTION_UPGRADED = "meta.potionUpgraded";
+    private final static String META_LEATHER_COLOR = "meta.leatherColor";
+    private final static String META_SKULL_OWNER = "meta.skullOwner";
+    private final static String META_BOOK_AUTHOR = "meta.bookAuthor";
+    private final static String META_BOOK_TITLE = "meta.bookTitle";
+    private final static String META_BOOK_GENERATION = "meta.bookGeneration";
+    private final static String META_BOOK_PAGES = "meta.bookPages";
 
     @Path(value = "material")
     @Description(value = {"The material that make up this item"})
@@ -108,26 +106,12 @@ public class ItemBuilder implements Serializable {
     })
     private boolean potionUpgraded;
 
-    @Path(META_LEATHER_COLOR_R)
+    @Path(META_LEATHER_COLOR)
     @Description({
-            "Set the leather color's red value",
+            "Set the leather color",
             "Required item meta: leather"
     })
-    private int leatherColorRed;
-
-    @Path(META_LEATHER_COLOR_G)
-    @Description({
-            "Set the leather color's green value",
-            "Required item meta: leather"
-    })
-    private int leatherColorGreen;
-
-    @Path(META_LEATHER_COLOR_B)
-    @Description({
-            "Set the leather color's blue value",
-            "Required item meta: leather"
-    })
-    private int leatherColorBlue;
+    private Color leatherColor;
 
     @Path(META_SKULL_OWNER)
     @Description({
@@ -342,28 +326,13 @@ public class ItemBuilder implements Serializable {
         this.potionType = potionType;
     }
 
-    public int leatherColorRed() {
-        return leatherColorRed;
+    @Nullable
+    public Color leatherColor() {
+        return leatherColor;
     }
 
-    public void leatherColorRed(int leatherColorRed) {
-        this.leatherColorRed = leatherColorRed;
-    }
-
-    public int leatherColorGreen() {
-        return leatherColorGreen;
-    }
-
-    public void leatherColorGreen(int leatherColorGreen) {
-        this.leatherColorGreen = leatherColorGreen;
-    }
-
-    public int leatherColorBlue() {
-        return leatherColorBlue;
-    }
-
-    public void leatherColorBlue(int leatherColorBlue) {
-        this.leatherColorBlue = leatherColorBlue;
+    public void leatherColor(@Nullable Color leatherColor) {
+        this.leatherColor = leatherColor;
     }
 
     @Nullable
@@ -458,29 +427,26 @@ public class ItemBuilder implements Serializable {
 
     @NotNull
     public ItemBuilder copyTo(@NotNull ItemBuilder pi) {
-        pi.name = this.name;
-        pi.damage = this.damage;
-        pi.amount = this.amount;
-        pi.unbreakable = this.unbreakable;
-        pi.material = this.material;
-        pi.enchants.putAll(this.enchants);
-        pi.flags.addAll(this.flags);
-        pi.lore.addAll(this.lore);
+        pi.name = name;
+        pi.damage = damage;
+        pi.amount = amount;
+        pi.unbreakable = unbreakable;
+        pi.material = material;
+        pi.enchants.putAll(enchants);
+        pi.flags.addAll(flags);
+        pi.lore.addAll(lore);
+        pi.customModelData = customModelData;
+        pi.itemModifiers = new ArrayList<>(itemModifiers);
+        pi.metaType = metaType;
+        pi.skullOwner = skullOwner;
+        pi.potionType = potionType;
+        pi.potionUpgraded = potionUpgraded;
+        pi.potionExtended = potionExtended;
+        pi.leatherColor = leatherColor;
+        pi.bookTitle = bookTitle;
+        pi.bookPages = new ArrayList<>(bookPages);
+        pi.bookAuthor = bookAuthor;
+        pi.bookGeneration = bookGeneration;
         return pi;
-    }
-
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        ItemBuilder that = (ItemBuilder) o;
-        return this.amount == that.amount && this.damage == that.damage && this.unbreakable == that.unbreakable && this.material == that.material && Objects.equals(this.name, that.name) && this.lore.equals(that.lore) && this.enchants.equals(that.enchants) && this.flags.equals(that.flags);
-    }
-
-    public int hashCode() {
-        return Objects.hash(this.material, this.amount, this.name, this.damage, this.lore, this.enchants, this.flags, this.unbreakable);
     }
 }

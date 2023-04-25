@@ -32,17 +32,10 @@ public enum MetaType {
     }),
     LEATHER((i, im) -> {
         LeatherArmorMeta m = (LeatherArmorMeta) im;
-        Color c = m.getColor();
-        i.leatherColorRed(c.getRed());
-        i.leatherColorGreen(c.getGreen());
-        i.leatherColorBlue(c.getBlue());
+        i.leatherColor(m.getColor());
     }, (i, im) -> {
         LeatherArmorMeta m = (LeatherArmorMeta) im;
-        m.setColor(Color.fromRGB(
-                i.leatherColorRed(),
-                i.leatherColorGreen(),
-                i.leatherColorBlue()
-        ));
+        m.setColor(i.leatherColor());
     }),
     SKULL((i, im) -> {
         SkullMeta m = (SkullMeta) im;
