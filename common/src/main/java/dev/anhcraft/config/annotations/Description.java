@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used with {@link Setting} or {@link Configurable} to describe a setting or a configuration.<br>
+ * This annotation is used with any configurable field or {@link Configurable} to describe a setting or a configuration.<br>
  * The description should be clear to give users good understanding of the setting(s).<br>
  * However, it must not contain any examples. For more details, take a look at {@link Example}.<br>
  */
