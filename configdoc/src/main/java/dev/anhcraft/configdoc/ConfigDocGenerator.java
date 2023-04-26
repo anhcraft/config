@@ -27,8 +27,9 @@ public class ConfigDocGenerator {
     private final Map<Pattern, String> javaDocs = new HashMap<>();
 
     public ConfigDocGenerator() {
-        addJavadoc("(org.bukkit.*)|(org.spigotmc*)", "https://hub.spigotmc.org/javadocs/spigot/");
+        addJavadoc("(org.bukkit*)|(org.spigotmc*)", "https://jd.papermc.io/paper/1.19/");
         addJavadoc("(com.destroystokyo.paper*)", "https://jd.papermc.io/paper/1.19/");
+        addJavadoc("(io.papermc.paper*)", "https://jd.papermc.io/paper/1.19/");
     }
 
     @Contract("_ -> this")
