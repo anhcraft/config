@@ -24,6 +24,7 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(PotionEffect.class, new PotionEffectAdapter());
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
         handler.registerTypeAdapter(EnchantmentAdapter.class, new EnchantmentAdapter());
+        handler.registerTypeAdapter(NamespacedKeyAdapter.class, new NamespacedKeyAdapter());
         //handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
     }
 }
