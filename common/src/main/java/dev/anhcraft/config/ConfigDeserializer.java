@@ -2,7 +2,6 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapters.TypeAdapter;
 import dev.anhcraft.config.annotations.Configurable;
-import dev.anhcraft.config.annotations.Optional;
 import dev.anhcraft.config.annotations.Validation;
 import dev.anhcraft.config.exceptions.InvalidValueException;
 import dev.anhcraft.config.schema.ConfigSchema;
@@ -102,7 +101,7 @@ public class ConfigDeserializer extends ConfigHandler {
     @NotNull
     public <T> T transformConfig(@NotNull ConfigSchema configSchema, @NotNull ConfigSection configSection, @NotNull T object) throws Exception {
         for (EntrySchema entrySchema : configSchema.getEntrySchemas()) {
-            if (entrySchema.isConsistent()) continue;
+            if (entrySchema.isConstant()) continue;
             Field field = entrySchema.getField();
             boolean optional = entrySchema.isOptional();
             Validation validation = entrySchema.getValidation();

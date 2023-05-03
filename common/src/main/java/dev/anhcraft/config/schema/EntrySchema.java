@@ -1,7 +1,6 @@
 package dev.anhcraft.config.schema;
 
 import dev.anhcraft.config.annotations.Description;
-import dev.anhcraft.config.annotations.Path;
 import dev.anhcraft.config.annotations.Validation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +14,7 @@ public class EntrySchema {
     private final Description description;
     private final Validation validation;
     private final List<String[]> examples;
-    private final boolean consistent;
+    private final boolean constant;
     private final boolean virtual;
     private final boolean optional;
 
@@ -24,7 +23,7 @@ public class EntrySchema {
                        @Nullable Description description,
                        @Nullable Validation validation,
                        @Nullable List<String[]> examples,
-                       boolean consistent,
+                       boolean constant,
                        boolean virtual,
                        boolean optional) {
         this.field = field;
@@ -32,7 +31,7 @@ public class EntrySchema {
         this.description = description;
         this.validation = validation;
         this.examples = examples;
-        this.consistent = consistent;
+        this.constant = constant;
         this.virtual = virtual;
         this.optional = optional;
     }
@@ -62,8 +61,8 @@ public class EntrySchema {
         return key;
     }
 
-    public boolean isConsistent() {
-        return consistent;
+    public boolean isConstant() {
+        return constant;
     }
 
     public boolean isVirtual() {

@@ -147,6 +147,7 @@ public class ConfigDocGenerator {
                 String content = resourceLoader.get(file);
                 StringBuilder sb = new StringBuilder();
                 for (EntrySchema entry : schema.getEntrySchemas()) {
+                    if (entry.isVirtual() || entry.isConstant()) continue;
                     sb.append(handleText(entry).replace(content));
                 }
                 return sb.toString();
