@@ -25,6 +25,7 @@ public class ConfigDocGenerator {
     private static final ResourceLoader resourceLoader = new ResourceLoader();
     private final List<ConfigSchema> schemas = new ArrayList<>();
     private final Map<Pattern, String> javaDocs = new HashMap<>();
+    private boolean showFooter = true;
 
     public ConfigDocGenerator() {
         addJavadoc("(org.bukkit*)|(org.spigotmc*)", "https://jd.papermc.io/paper/1.19/");
@@ -68,6 +69,12 @@ public class ConfigDocGenerator {
         Preconditions.checkNotNull(link);
         if (!link.endsWith("/")) link = link + '/';
         javaDocs.put(classPattern, link);
+        return this;
+    }
+
+    @Contract("_ -> this")
+    public ConfigDocGenerator showFooter(boolean showFooter) {
+        this.showFooter = showFooter;
         return this;
     }
 
@@ -163,6 +170,8 @@ public class ConfigDocGenerator {
                     sb.append(new TextReplacer(handleText(schema)).replace(content));
                 }
                 return sb.toString();
+            } else if (s.equals("footer") && showFooter) {
+                return resourceLoader.get("footer.html");
             }
             return "";
         };

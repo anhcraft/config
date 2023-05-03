@@ -166,6 +166,7 @@ public class CommonConfigTest extends TestPlatform {
                 .withSchemaOf(UserGroup.class)
                 .withSchemaOf(WorldMap.class)
                 .withSchemaOf(WorldMap.Region.class)
+                .showFooter(false)
                 .generate(new File("./doc"));
     }
 }
