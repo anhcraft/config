@@ -3,8 +3,7 @@ package configs;
 import dev.anhcraft.config.annotations.*;
 
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Configurable
 public class Market {
@@ -35,7 +34,7 @@ public class Market {
     public Item[] products;
 
     @Validation(notEmpty = true, silent = true)
-    public List<Transaction> transactions;
+    public LinkedHashSet<Transaction> transactions;
 
     public Map<String, Integer> counter;
 
@@ -63,6 +62,19 @@ public class Market {
         public Transaction(Item item, long date) {
             this.item = item;
             this.date = date;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Transaction that = (Transaction) o;
+            return date == that.date && Objects.equals(item, that.item);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(item, date);
         }
     }
 }

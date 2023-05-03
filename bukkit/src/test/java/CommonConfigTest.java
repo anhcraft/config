@@ -1,3 +1,4 @@
+import com.google.common.collect.Sets;
 import configs.*;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
@@ -56,19 +57,17 @@ public class CommonConfigTest extends TestPlatform {
                 new Market.Item("Tomato", 30),
                 new Market.Item("Kiwi", 50)
         };
-        m.transactions = Arrays.asList(
-                new Market.Transaction(m.products[0], 1598959383829L),
-                new Market.Transaction(m.products[4], 1598959596515L),
-                new Market.Transaction(m.products[2], 1598959804261L),
-                new Market.Transaction(m.products[4], 1598960110693L)
-        );
+        m.transactions = new LinkedHashSet<>();
+        m.transactions.add(new Market.Transaction(m.products[0], 1598959383829L));
+        m.transactions.add(new Market.Transaction(m.products[4], 1598959596515L));
+        m.transactions.add(new Market.Transaction(m.products[2], 1598959804261L));
+        m.transactions.add(new Market.Transaction(m.products[4], 1598960110693L));
         m.website = new URL("https://example.com");
         m.counter = new HashMap<>();
         m.counter.put("Apple", 1);
         m.counter.put("Peach", 1);
         m.counter.put("Kiwi", 2);
         ConfigSection configSection = Objects.requireNonNull(serialize(Market.class, m).asSection());
-        //debug(((YamlConfigSection) configSection).getBackend());
         m = deserialize(Market.class, ((YamlConfigSection) configSection).getBackend());
         ConfigSection configSection2 = Objects.requireNonNull(serialize(Market.class, m).asSection());
         Assertions.assertEquals(configSection.stringify(), configSection2.stringify());
@@ -87,12 +86,11 @@ public class CommonConfigTest extends TestPlatform {
         m.counter.put("Banana", 3);
         m.counter.put("Peach", 4);
         m.counter.put("Kiwi", 1);
-        m.transactions = Arrays.asList(
-                new Market.Transaction(m.products[0], 1598959383829L),
-                new Market.Transaction(m.products[1], 1598959596515L),
-                new Market.Transaction(m.products[1], 1598959804261L),
-                new Market.Transaction(m.products[2], 1598960110693L)
-        );
+        m.transactions = new LinkedHashSet<>();
+        m.transactions.add(new Market.Transaction(m.products[0], 1598959383829L));
+        m.transactions.add(new Market.Transaction(m.products[1], 1598959596515L));
+        m.transactions.add(new Market.Transaction(m.products[1], 1598959804261L));
+        m.transactions.add(new Market.Transaction(m.products[2], 1598960110693L));
         m.shops.add(new SuperMarket.Shop("Shop1", "Shop1 desc"));
         m.shops.add(new SuperMarket.Shop("Shop2", "Shop2 desc"));
         m.shops.add(new SuperMarket.Shop("Shop3", "Shop3 desc"));

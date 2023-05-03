@@ -11,9 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 public class CollectionAdapter implements TypeAdapter<Collection<?>> {
 
@@ -31,6 +29,12 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
             }
         } catch (InstantiationException ignored) {
         }
+        if (((Class<?>) type).isAssignableFrom(LinkedHashSet.class)) return new HashSet<>();
+        if (((Class<?>) type).isAssignableFrom(TreeSet.class)) return new TreeSet<>();
+        if (((Class<?>) type).isAssignableFrom(Set.class)) return new HashSet<>();
+        if (((Class<?>) type).isAssignableFrom(Vector.class)) return new Vector<>();
+        if (((Class<?>) type).isAssignableFrom(Stack.class)) return new Stack<>();
+        if (((Class<?>) type).isAssignableFrom(LinkedList.class)) return new LinkedList<>();
         return new ArrayList<>();
     }
 
