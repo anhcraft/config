@@ -1,6 +1,7 @@
 package dev.anhcraft.config.schema;
 
 import dev.anhcraft.config.annotations.*;
+import dev.anhcraft.config.annotations.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,6 +90,7 @@ public class SchemaScanner {
             }
             Constant constant = field.getAnnotation(Constant.class);
             Virtual virtual = field.getAnnotation(Virtual.class);
+            Optional optional = field.getAnnotation(Optional.class);
             Path path = field.getAnnotation(Path.class);
             String key;
             if (path != null) {
@@ -106,7 +108,7 @@ public class SchemaScanner {
                     }
                 }
             }
-            entries.add(new EntrySchema(field, key, description, validation, ex, constant != null, virtual != null));
+            entries.add(new EntrySchema(field, key, description, validation, ex, constant != null, virtual != null, optional != null));
         }
     }
 

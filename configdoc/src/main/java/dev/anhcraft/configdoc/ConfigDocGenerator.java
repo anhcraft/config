@@ -125,6 +125,9 @@ public class ConfigDocGenerator {
                         }
                     }
                 }
+                if (entry.isOptional()) {
+                    vb.append(" <b>optional</b>");
+                }
                 return vb.toString();
             }
             return "";

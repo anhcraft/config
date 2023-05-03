@@ -17,14 +17,16 @@ public class EntrySchema {
     private final List<String[]> examples;
     private final boolean consistent;
     private final boolean virtual;
+    private final boolean optional;
 
     public EntrySchema(@NotNull Field field,
-                       @Nullable String key,
+                       @NotNull String key,
                        @Nullable Description description,
                        @Nullable Validation validation,
                        @Nullable List<String[]> examples,
                        boolean consistent,
-                       boolean virtual) {
+                       boolean virtual,
+                       boolean optional) {
         this.field = field;
         this.key = key;
         this.description = description;
@@ -32,6 +34,7 @@ public class EntrySchema {
         this.examples = examples;
         this.consistent = consistent;
         this.virtual = virtual;
+        this.optional = optional;
     }
 
     @NotNull
@@ -65,5 +68,9 @@ public class EntrySchema {
 
     public boolean isVirtual() {
         return virtual;
+    }
+
+    public boolean isOptional() {
+        return optional;
     }
 }

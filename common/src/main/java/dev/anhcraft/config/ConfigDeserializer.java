@@ -2,6 +2,7 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapters.TypeAdapter;
 import dev.anhcraft.config.annotations.Configurable;
+import dev.anhcraft.config.annotations.Optional;
 import dev.anhcraft.config.annotations.Validation;
 import dev.anhcraft.config.exceptions.InvalidValueException;
 import dev.anhcraft.config.schema.ConfigSchema;
@@ -103,12 +104,14 @@ public class ConfigDeserializer extends ConfigHandler {
         for (EntrySchema entrySchema : configSchema.getEntrySchemas()) {
             if (entrySchema.isConsistent()) continue;
             Field field = entrySchema.getField();
+            boolean optional = entrySchema.isOptional();
             Validation validation = entrySchema.getValidation();
             String key = entrySchema.getKey();
             SimpleForm simpleForm = configSection.get(key);
             for (Middleware m : middlewares) {
                 simpleForm = m.transform(this, configSchema, entrySchema, simpleForm);
             }
+            if (optional && simpleForm == null) continue;
             if (validation != null) {
                 if (simpleForm == null && validation.notNull()) {
                     if (validation.silent()) {
@@ -133,6 +136,7 @@ public class ConfigDeserializer extends ConfigHandler {
                 // check data type
                 if (!ClassUtil.isAssignable(field.getType(), complex.getClass())) continue;
             }
+            if (optional && complex == null) continue;
             if (complex == null && validation != null && validation.notNull() ) {
                 if (validation.silent()) {
                     continue;

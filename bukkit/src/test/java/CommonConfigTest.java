@@ -147,6 +147,7 @@ public class CommonConfigTest extends TestPlatform {
         Assertions.assertEquals("BETA", map.table1.get('b'));
         Assertions.assertEquals("DELTA", map.table2.get((byte) 1));
         Assertions.assertEquals("OMEGA", map.table2.get((byte) 2));
+        Assertions.assertEquals("1001", map.hash);
         Assertions.assertNull(map.reserved);
     }
 
