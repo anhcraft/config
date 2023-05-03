@@ -133,8 +133,12 @@ public class ConfigDeserializer extends ConfigHandler {
                 // check data type
                 if (!ClassUtil.isAssignable(field.getType(), complex.getClass())) continue;
             }
-            if (complex == null && validation != null && validation.notNull() && validation.silent()) {
-                continue;
+            if (complex == null && validation != null && validation.notNull() ) {
+                if (validation.silent()) {
+                    continue;
+                } else {
+                    throw new InvalidValueException(key, InvalidValueException.Reason.NULL);
+                }
             }
             field.set(object, complex);
         }
