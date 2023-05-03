@@ -106,10 +106,13 @@ private int times;
 ```
 
 #### Constant
-Adding `@Constant` to an option prevents it being changed during the deserialization process.
+Adds `@Constant` to an option prevents it being changed during the deserialization process.
 
 #### Virtual
-Adding `@Virtual` to an option prevents it being exposed to the configuration during the serialization process.
+Adds `@Virtual` to an option prevents it being exposed to the configuration during the serialization process.
+
+#### Optional
+Adds `@Optional` to mark a field as optional. If the corresponding entry does not exist in configuration, the field value is not overridden and no exception will be thrown.
 
 For example, `id` is a runtime-generated option. We do not want it to be exported.
 
