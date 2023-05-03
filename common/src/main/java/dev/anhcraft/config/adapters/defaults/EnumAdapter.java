@@ -12,27 +12,27 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 
 public class EnumAdapter implements TypeAdapter<Enum<?>> {
-    private boolean preferUppercase = true;
+    private boolean lowerCaseOnSerialize = true;
+    private boolean upperCaseOnDeserialize = true;
 
-    /**
-     * Automatic uppercase enum names.
-     *
-     * @param value {@code true} or {@code false}
-     */
-    public void preferUppercase(boolean value) {
-        this.preferUppercase = value;
+    public void lowerCaseOnSerialize(boolean lowerCaseOnSerialize) {
+        this.lowerCaseOnSerialize = lowerCaseOnSerialize;
+    }
+
+    public void uppercaseOnDeserialize(boolean upperCaseOnDeserialize) {
+        this.upperCaseOnDeserialize = upperCaseOnDeserialize;
     }
 
     @Override
     public @Nullable SimpleForm simplify(@NotNull ConfigSerializer serializer, @NotNull Type sourceType, @NotNull Enum<?> value) throws Exception {
-        return SimpleForm.of(value.name());
+        return SimpleForm.of(lowerCaseOnSerialize ? value.name().toLowerCase() : value.name());
     }
 
     @Override
     public @Nullable Enum<?> complexify(@NotNull ConfigDeserializer deserializer, @NotNull Type targetType, @NotNull SimpleForm value) {
         if (value.isString()) {
             String str = Objects.requireNonNull(value.asString());
-            if (preferUppercase) str = str.toUpperCase();
+            if (upperCaseOnDeserialize) str = str.toUpperCase();
             // noinspection unchecked
             return (Enum<?>) ClassUtil.findEnum((Class<? extends Enum>) targetType, str);
         } else {
