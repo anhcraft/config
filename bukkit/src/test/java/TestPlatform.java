@@ -1,7 +1,9 @@
 import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.ConfigHandler;
 import dev.anhcraft.config.ConfigSerializer;
+import dev.anhcraft.config.bukkit.BukkitConfigDeserializer;
 import dev.anhcraft.config.bukkit.BukkitConfigProvider;
+import dev.anhcraft.config.bukkit.BukkitConfigSerializer;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import org.bukkit.configuration.ConfigurationSection;
@@ -21,7 +23,7 @@ public class TestPlatform {
     protected <T> SimpleForm serialize(Class<? extends T> clazz,
                                        T object,
                                        Consumer<ConfigSerializer> consumer) throws Exception {
-        ConfigSerializer serializer = BukkitConfigProvider.YAML.createSerializer();
+        ConfigSerializer serializer = new BukkitConfigSerializer(BukkitConfigProvider.YAML);
         registerAdapters(serializer);
         consumer.accept(serializer);
         return serializer.transform(clazz, object);
@@ -35,7 +37,7 @@ public class TestPlatform {
     protected <T> T deserialize(Class<? extends T> clazz,
                                 ConfigurationSection config,
                                 Consumer<ConfigDeserializer> consumer) throws Exception {
-        ConfigDeserializer deserializer = BukkitConfigProvider.YAML.createDeserializer();
+        ConfigDeserializer deserializer = new BukkitConfigDeserializer(BukkitConfigProvider.YAML);
         registerAdapters(deserializer);
         consumer.accept(deserializer);
         return deserializer.transform(clazz, SimpleForm.of(new YamlConfigSection(config)));

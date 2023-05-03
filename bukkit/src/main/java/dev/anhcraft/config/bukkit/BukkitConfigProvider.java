@@ -14,14 +14,4 @@ public abstract class BukkitConfigProvider implements ConfigProvider {
             return new YamlConfigSection();
         }
     };
-
-    @Override
-    public @NotNull ConfigSerializer createSerializer() {
-        return new BukkitConfigSerializer(this);
-    }
-
-    @Override
-    public @NotNull ConfigDeserializer createDeserializer() {
-        return new BukkitConfigDeserializer(this);
-    }
 }

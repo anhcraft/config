@@ -24,14 +24,4 @@ public abstract class BungeeConfigProvider implements ConfigProvider {
             return new BungeeConfigSection(ConfigurationProvider.getProvider(JsonConfiguration.class));
         }
     };
-
-    @Override
-    public @NotNull ConfigSerializer createSerializer() {
-        return new BungeeConfigSerializer(this);
-    }
-
-    @Override
-    public @NotNull ConfigDeserializer createDeserializer() {
-        return new BungeeConfigDeserializer(this);
-    }
 }
