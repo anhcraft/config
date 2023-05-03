@@ -3,10 +3,12 @@ import configs.*;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
 import dev.anhcraft.config.struct.ConfigSection;
+import dev.anhcraft.configdoc.ConfigDocGenerator;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.net.URL;
 import java.util.*;
 
@@ -148,17 +150,22 @@ public class CommonConfigTest extends TestPlatform {
         Assertions.assertNull(map.reserved);
     }
 
-    /*@Test
+    @Test
     public void configdoc() {
         new ConfigDocGenerator()
                 .withSchemaOf(Market.class)
+                .withSchemaOf(Market.Item.class)
+                .withSchemaOf(Market.Transaction.class)
                 .withSchemaOf(CodeMap.class)
                 .withSchemaOf(Ingredient.class)
                 .withSchemaOf(Menu.class)
                 .withSchemaOf(PlayerInfo.class)
                 .withSchemaOf(RoleTable.class)
+                .withSchemaOf(SuperMarket.class)
+                .withSchemaOf(SuperMarket.Shop.class)
                 .withSchemaOf(UserGroup.class)
                 .withSchemaOf(WorldMap.class)
+                .withSchemaOf(WorldMap.Region.class)
                 .generate(new File("./doc"));
-    }*/
+    }
 }
