@@ -139,6 +139,8 @@ public class CommonConfigTest extends TestPlatform {
         map.table1.put('b', "BETA");
         map.table2.put((byte) 1, "DELTA");
         map.table2.put((byte) 2, "OMEGA");
+        map.table3.put(5, "GAMMA");
+        map.table3.put(-5, "SIGMA");
         map.reserved = new String[]{"THETA"};
         ConfigSection configSection = Objects.requireNonNull(serialize(CodeMap.class, map).asSection());
         Assertions.assertNotNull(configSection.get("reserved"));
@@ -147,6 +149,8 @@ public class CommonConfigTest extends TestPlatform {
         Assertions.assertEquals("BETA", map.table1.get('b'));
         Assertions.assertEquals("DELTA", map.table2.get((byte) 1));
         Assertions.assertEquals("OMEGA", map.table2.get((byte) 2));
+        Assertions.assertEquals("GAMMA", map.table3.get(5));
+        Assertions.assertEquals("SIGMA", map.table3.get(-5));
         Assertions.assertEquals("1001", map.hash);
         Assertions.assertNull(map.reserved);
     }

@@ -5,33 +5,47 @@ import dev.anhcraft.config.ConfigSerializer;
 import dev.anhcraft.config.adapters.TypeAdapter;
 import dev.anhcraft.config.struct.ConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
+import dev.anhcraft.config.utils.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MapAdapter implements TypeAdapter<Map<?, ?>> {
 
     // this method can be inherited to add more map types
     @NotNull
     protected Map<?, ?> createMapOf(@NotNull Type type) {
-        if (type instanceof Hashtable) {
-            return new Hashtable<>();
-        } else if (type instanceof TreeMap) {
-            return new TreeMap<>();
-        } else if (type instanceof LinkedHashMap) {
-            return new LinkedHashMap<>();
-        } else if (type instanceof WeakHashMap) {
-            return new WeakHashMap<>();
-        } else if (type instanceof IdentityHashMap) {
-            return new IdentityHashMap<>();
-        } else if (type instanceof EnumMap) {
-            throw new UnsupportedOperationException();
-        } else {
+        Class<?> mapType = null;
+        if (type instanceof ParameterizedType) {
+            mapType = (Class<?>) ((ParameterizedType) type).getRawType();
+        }
+        if (mapType == null) {
             return new HashMap<>();
         }
+        if (mapType.isAssignableFrom(Hashtable.class)) return new Hashtable<>();
+        if (mapType.isAssignableFrom(TreeMap.class)) return new TreeMap<>();
+        if (mapType.isAssignableFrom(LinkedHashMap.class)) return new LinkedHashMap<>();
+        if (mapType.isAssignableFrom(WeakHashMap.class)) return new WeakHashMap<>();
+        if (mapType.isAssignableFrom(IdentityHashMap.class)) return new IdentityHashMap<>();
+        if (mapType.isAssignableFrom(ConcurrentHashMap.class)) return new ConcurrentHashMap<>();
+        if (mapType.isAssignableFrom(EnumMap.class)) {
+            if (type instanceof ParameterizedType) {
+                Type keyType = ((ParameterizedType) type).getActualTypeArguments()[0];
+                return new EnumMap<>((Class) keyType);
+            }
+        }
+        try {
+            Object o = ObjectUtil.newInstance(mapType);
+            if (o instanceof Map) {
+                return (Map<?, ?>) o;
+            }
+        } catch (InstantiationException ignored) {
+        }
+        return new HashMap<>();
     }
 
     @Override
@@ -71,6 +85,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
                 valueType = Object.class;
             }
             ConfigSection section = Objects.requireNonNull(value.asSection());
+            System.out.println("q");
             Map<?, ?> map = createMapOf(targetType);
             for (String k : section.getKeys(false)) {
                 map.put(deserializer.transform(keyType, SimpleForm.of(k)), deserializer.transform(valueType, section.get(k)));
