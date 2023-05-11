@@ -85,7 +85,6 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
                 valueType = Object.class;
             }
             ConfigSection section = Objects.requireNonNull(value.asSection());
-            System.out.println("q");
             Map<?, ?> map = createMapOf(targetType);
             for (String k : section.getKeys(false)) {
                 map.put(deserializer.transform(keyType, SimpleForm.of(k)), deserializer.transform(valueType, section.get(k)));
