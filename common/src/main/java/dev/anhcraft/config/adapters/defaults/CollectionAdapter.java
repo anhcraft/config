@@ -12,6 +12,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CollectionAdapter implements TypeAdapter<Collection<?>> {
 
@@ -35,6 +36,7 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
         if (((Class<?>) type).isAssignableFrom(Vector.class)) return new Vector<>();
         if (((Class<?>) type).isAssignableFrom(Stack.class)) return new Stack<>();
         if (((Class<?>) type).isAssignableFrom(LinkedList.class)) return new LinkedList<>();
+        if (((Class<?>) type).isAssignableFrom(CopyOnWriteArrayList.class)) return new CopyOnWriteArrayList<>();
         return new ArrayList<>();
     }
 
