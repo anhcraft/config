@@ -241,7 +241,7 @@ public class ItemBuilder implements Serializable {
         if (lore == null) {
             this.lore.clear();
         } else {
-            this.lore = lore;
+            this.lore = new ArrayList<>(lore);
         }
     }
 
@@ -251,7 +251,7 @@ public class ItemBuilder implements Serializable {
     }
 
     public void flags(@Nullable List<ItemFlag> flags) {
-        this.flags = flags;
+        this.flags = flags == null ? null : new ArrayList<>(flags);
     }
 
     public ItemBuilder flag(@NotNull ItemFlag flag) {
@@ -265,8 +265,8 @@ public class ItemBuilder implements Serializable {
         return this.enchantments;
     }
 
-    public void enchantments(@Nullable Map<Enchantment, Integer> enchantment) {
-        this.enchantments = enchantment;
+    public void enchantments(@Nullable Map<Enchantment, Integer> enchantments) {
+        this.enchantments = enchantments == null ? null : new HashMap<>(enchantments);
     }
 
     public ItemBuilder enchant(@NotNull Enchantment enchantment, int level) {
@@ -289,7 +289,7 @@ public class ItemBuilder implements Serializable {
     }
 
     public void itemModifiers(@Nullable List<ItemModifier> itemModifiers) {
-        this.itemModifiers = itemModifiers;
+        this.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
     }
 
     public void addItemModifier(ItemModifier itemModifier) {
@@ -391,20 +391,24 @@ public class ItemBuilder implements Serializable {
     }
 
     public void bookPages(@Nullable List<String> bookPages) {
-        this.bookPages = bookPages;
+        this.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
     }
 
     public ItemBuilder replaceDisplay(@NotNull UnaryOperator<String> operator) {
         this.name = operator.apply(this.name);
         this.lore.replaceAll(operator);
+        if (this.bookPages != null) this.bookPages.replaceAll(operator);
         return this;
     }
 
     @NotNull
     public ItemStack build() {
-        ItemStack item = new ItemStack(material, amount, (short) damage);
+        ItemStack item = new ItemStack(material, amount);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
+            if (meta instanceof Damageable) {
+                ((Damageable) meta).setDamage(damage);
+            }
             if (name != null) {
                 meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
             }
