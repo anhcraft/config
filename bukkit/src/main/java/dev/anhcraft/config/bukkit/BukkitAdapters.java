@@ -6,6 +6,7 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.block.banner.Pattern;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.BoundingBox;
@@ -25,6 +26,6 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
         handler.registerTypeAdapter(EnchantmentAdapter.class, new EnchantmentAdapter());
         handler.registerTypeAdapter(NamespacedKeyAdapter.class, new NamespacedKeyAdapter());
-        //handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
+        handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
     }
 }
