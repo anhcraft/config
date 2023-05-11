@@ -5,7 +5,7 @@
     <parent>
         <artifactId>config</artifactId>
         <groupId>dev.anhcraft</groupId>
-        <version>1.1.6</version>
+        <version>1.1.7</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,12 +21,6 @@
             <groupId>com.github.anhcraft</groupId>
             <artifactId>JvmKit</artifactId>
             <version>1.1.5</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

@@ -1,6 +1,5 @@
 package dev.anhcraft.configdoc;
 
-import com.google.common.base.Preconditions;
 import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.Validation;
 import dev.anhcraft.config.schema.ConfigSchema;
@@ -35,7 +34,6 @@ public class ConfigDocGenerator {
 
     @Contract("_ -> this")
     public ConfigDocGenerator combineWith(@NotNull ConfigDocGenerator configDocGenerator) {
-        Preconditions.checkNotNull(configDocGenerator);
         schemas.addAll(configDocGenerator.schemas);
         javaDocs.putAll(configDocGenerator.javaDocs);
         return this;
@@ -43,14 +41,12 @@ public class ConfigDocGenerator {
 
     @Contract("_ -> this")
     public ConfigDocGenerator withSchema(@NotNull ConfigSchema schema) {
-        Preconditions.checkNotNull(schema);
         schemas.add(schema);
         return this;
     }
 
     @Contract("_ -> this")
     public ConfigDocGenerator withSchemaOf(@NotNull Class<?> schemaClass) {
-        Preconditions.checkNotNull(schemaClass);
         ConfigSchema schema = SchemaScanner.scanConfig(schemaClass);
         if (schema == null) throw new IllegalArgumentException("given class not configurable: " + schemaClass.getName());
         schemas.add(schema);
@@ -59,14 +55,11 @@ public class ConfigDocGenerator {
 
     @Contract("_, _ -> this")
     public ConfigDocGenerator addJavadoc(@NotNull String classPattern, @NotNull String link) {
-        Preconditions.checkNotNull(classPattern);
         return addJavadoc(Pattern.compile(classPattern), link);
     }
 
     @Contract("_, _ -> this")
     public ConfigDocGenerator addJavadoc(@NotNull Pattern classPattern, @NotNull String link) {
-        Preconditions.checkNotNull(classPattern);
-        Preconditions.checkNotNull(link);
         if (!link.endsWith("/")) link = link + '/';
         javaDocs.put(classPattern, link);
         return this;
@@ -183,7 +176,6 @@ public class ConfigDocGenerator {
 
     @Contract("_ -> this")
     public ConfigDocGenerator generate(@NotNull File output) {
-        Preconditions.checkNotNull(output);
         output.mkdirs();
 
         String schemHtml = resourceLoader.get("schema.html");
