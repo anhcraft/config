@@ -238,11 +238,7 @@ public class ItemBuilder implements Serializable {
     }
 
     public void lore(@Nullable List<String> lore) {
-        if (lore == null) {
-            this.lore.clear();
-        } else {
-            this.lore = new ArrayList<>(lore);
-        }
+        this.lore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
     }
 
     @Nullable
@@ -395,7 +391,7 @@ public class ItemBuilder implements Serializable {
     }
 
     public ItemBuilder replaceDisplay(@NotNull UnaryOperator<String> operator) {
-        this.name = operator.apply(this.name);
+        if (this.name != null) this.name = operator.apply(this.name);
         this.lore.replaceAll(operator);
         if (this.bookPages != null) this.bookPages.replaceAll(operator);
         return this;
@@ -445,12 +441,12 @@ public class ItemBuilder implements Serializable {
         builder.amount = amount;
         builder.name = name;
         builder.damage = damage;
-        builder.lore = new ArrayList<>(lore);
-        builder.enchantments = enchantments == null ? null : new HashMap<>(enchantments);
-        builder.flags = flags == null ? null : new ArrayList<>(flags);
+        builder.lore(lore);
+        builder.enchantments(enchantments);
+        builder.flags(flags);
         builder.customModelData = customModelData;
         builder.unbreakable = unbreakable;
-        builder.itemModifiers = itemModifiers == null ? null : new ArrayList<>(itemModifiers);
+        builder.itemModifiers(itemModifiers);
         builder.metaType = metaType;
         builder.skullOwner = skullOwner;
         builder.skullTexture = skullTexture;
@@ -459,7 +455,7 @@ public class ItemBuilder implements Serializable {
         builder.potionExtended = potionExtended;
         builder.leatherColor = leatherColor;
         builder.bookTitle = bookTitle;
-        builder.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
+        builder.bookPages(bookPages);
         builder.bookAuthor = bookAuthor;
         builder.bookGeneration = bookGeneration;
         return builder;
