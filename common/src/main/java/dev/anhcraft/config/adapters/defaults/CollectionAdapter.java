@@ -23,13 +23,6 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
             // given X<? extends Y> returns X
             type = ((ParameterizedType) type).getRawType();
         }
-        try {
-            Object o = ObjectUtil.newInstance((Class<?>) type);
-            if (o instanceof Collection) {
-                return (Collection<?>) o;
-            }
-        } catch (InstantiationException ignored) {
-        }
         if (((Class<?>) type).isAssignableFrom(LinkedHashSet.class)) return new HashSet<>();
         if (((Class<?>) type).isAssignableFrom(TreeSet.class)) return new TreeSet<>();
         if (((Class<?>) type).isAssignableFrom(Set.class)) return new HashSet<>();
@@ -37,6 +30,13 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
         if (((Class<?>) type).isAssignableFrom(Stack.class)) return new Stack<>();
         if (((Class<?>) type).isAssignableFrom(LinkedList.class)) return new LinkedList<>();
         if (((Class<?>) type).isAssignableFrom(CopyOnWriteArrayList.class)) return new CopyOnWriteArrayList<>();
+        try {
+            Object o = ObjectUtil.newInstance((Class<?>) type);
+            if (o instanceof Collection) {
+                return (Collection<?>) o;
+            }
+        } catch (InstantiationException ignored) {
+        }
         return new ArrayList<>();
     }
 
