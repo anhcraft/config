@@ -23,7 +23,7 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
             // given X<? extends Y> returns X
             type = ((ParameterizedType) type).getRawType();
         }
-        if (((Class<?>) type).isAssignableFrom(LinkedHashSet.class)) return new HashSet<>();
+        if (((Class<?>) type).isAssignableFrom(LinkedHashSet.class)) return new LinkedHashSet<>();
         if (((Class<?>) type).isAssignableFrom(TreeSet.class)) return new TreeSet<>();
         if (((Class<?>) type).isAssignableFrom(Set.class)) return new HashSet<>();
         if (((Class<?>) type).isAssignableFrom(Vector.class)) return new Vector<>();

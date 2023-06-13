@@ -1,4 +1,3 @@
-import com.google.common.collect.Sets;
 import configs.*;
 import dev.anhcraft.config.bukkit.struct.YamlConfigSection;
 import dev.anhcraft.config.middleware.EntryKeyInjector;
@@ -65,7 +64,7 @@ public class CommonConfigTest extends TestPlatform {
         m.transactions.add(new Market.Transaction(m.products[2], 1598959804261L));
         m.transactions.add(new Market.Transaction(m.products[4], 1598960110693L));
         m.website = new URL("https://example.com");
-        m.counter = new HashMap<>();
+        m.counter = new LinkedHashMap<>();
         m.counter.put("Apple", 1);
         m.counter.put("Peach", 1);
         m.counter.put("Kiwi", 2);
@@ -84,7 +83,7 @@ public class CommonConfigTest extends TestPlatform {
                 new Market.Item("Banana", 40),
                 new Market.Item("Peach", 20),
         };
-        m.counter = new HashMap<>();
+        m.counter = new LinkedHashMap<>();
         m.counter.put("Banana", 3);
         m.counter.put("Peach", 4);
         m.counter.put("Kiwi", 1);

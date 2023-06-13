@@ -1,7 +1,9 @@
 import dev.anhcraft.config.ConfigDeserializer;
 import dev.anhcraft.config.ConfigHandler;
 import dev.anhcraft.config.ConfigSerializer;
+import dev.anhcraft.config.bungee.BungeeConfigDeserializer;
 import dev.anhcraft.config.bungee.BungeeConfigProvider;
+import dev.anhcraft.config.bungee.BungeeConfigSerializer;
 import dev.anhcraft.config.bungee.struct.BungeeConfigSection;
 import dev.anhcraft.config.struct.SimpleForm;
 import net.md_5.bungee.config.Configuration;
@@ -23,7 +25,7 @@ public class TestPlatform {
     protected <T> SimpleForm serialize(Class<? extends T> clazz,
                                        T object,
                                        Consumer<ConfigSerializer> consumer) throws Exception {
-        ConfigSerializer serializer = BungeeConfigProvider.YAML.createSerializer();
+        ConfigSerializer serializer = new BungeeConfigSerializer(BungeeConfigProvider.YAML);
         registerAdapters(serializer);
         consumer.accept(serializer);
         return serializer.transform(clazz, object);
@@ -37,7 +39,7 @@ public class TestPlatform {
     protected <T> T deserialize(Class<? extends T> clazz,
                                 Configuration config,
                                 Consumer<ConfigDeserializer> consumer) throws Exception {
-        ConfigDeserializer deserializer = BungeeConfigProvider.YAML.createDeserializer();
+        ConfigDeserializer deserializer = new BungeeConfigDeserializer(BungeeConfigProvider.YAML);
         registerAdapters(deserializer);
         consumer.accept(deserializer);
         return deserializer.transform(clazz, SimpleForm.of(new BungeeConfigSection(ConfigurationProvider.getProvider(YamlConfiguration.class), config)));

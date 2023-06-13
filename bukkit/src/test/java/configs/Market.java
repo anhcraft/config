@@ -36,7 +36,7 @@ public class Market {
     @Validation(notEmpty = true, silent = true)
     public LinkedHashSet<Transaction> transactions;
 
-    public Map<String, Integer> counter;
+    public LinkedHashMap<String, Integer> counter;
 
     public URL website;
 
