@@ -22,6 +22,7 @@ public class EnchantmentAdapter implements TypeAdapter<Enchantment> {
             INDEXES.put(i, e);
             INDEXES.put(i.replace("_", ""), e);
             INDEXES.put(i.replace("_", " "), e);
+            INDEXES.put(i.replace("_", "-"), e);
         }
         INDEXES.put("protection", Enchantment.PROTECTION_ENVIRONMENTAL);
         INDEXES.put("fire protection", Enchantment.PROTECTION_FIRE);
@@ -55,6 +56,13 @@ public class EnchantmentAdapter implements TypeAdapter<Enchantment> {
     @Override
     @Nullable
     public Enchantment complexify(@NotNull ConfigDeserializer configDeserializer, @NotNull Type type, @NotNull SimpleForm simpleForm) throws Exception {
-        return simpleForm.isString() ? INDEXES.get(Objects.requireNonNull(simpleForm.asString()).toLowerCase()) : null;
+        if (simpleForm.isString()) {
+            String id = Objects.requireNonNull(simpleForm.asString()).trim();
+            Enchantment enc = INDEXES.get(id.toLowerCase());
+            if (enc == null)
+                enc = Enchantment.getByName(id.toUpperCase());
+            return enc;
+        }
+        return null;
     }
 }
