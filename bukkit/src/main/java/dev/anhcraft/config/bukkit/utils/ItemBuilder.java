@@ -406,10 +406,10 @@ public class ItemBuilder implements Serializable {
                 ((Damageable) meta).setDamage(damage);
             }
             if (name != null) {
-                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+                meta.setDisplayName((ColorUtil.colorize(name)));
             }
             if (!lore.isEmpty()) {
-                meta.setLore(lore.stream().map(lore -> ChatColor.translateAlternateColorCodes('&', lore)).collect(Collectors.toList()));
+                meta.setLore(lore.stream().map(ColorUtil::colorize).collect(Collectors.toList()));
             }
             if (flags != null && !flags.isEmpty()) {
                 flags.stream().filter(Objects::nonNull).forEach(meta::addItemFlags);

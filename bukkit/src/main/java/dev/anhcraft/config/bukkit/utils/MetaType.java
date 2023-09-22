@@ -67,12 +67,12 @@ public enum MetaType {
     }, (i, im) -> {
         BookMeta m = (BookMeta) im;
         String title = i.bookTitle();
-        m.setTitle(title == null ? null : ChatColor.translateAlternateColorCodes('&', title));
+        m.setTitle(ColorUtil.colorize(title));
         m.setAuthor(i.bookAuthor());
         m.setGeneration(i.bookGeneration());
         List<String> pages = i.bookPages();
         m.setPages(pages == null ? new ArrayList<>() : pages.stream()
-                .map(p -> ChatColor.translateAlternateColorCodes('&', p))
+                .map(ColorUtil::colorize)
                 .collect(Collectors.toList()));
     });
 
