@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ColorUtil {
-    private static final Pattern HEX_PATTERN = Pattern.compile("&#([0-9a-fA-F]{3,6})");
+    private static final Pattern HEX_PATTERN = Pattern.compile("&#(([0-9a-fA-F]{6})|([0-9a-fA-F]{3}))");
 
 
     public static String colorize(String str) {
