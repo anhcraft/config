@@ -24,19 +24,19 @@ import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-@Configurable
+@Configurable(keyNamingStyle = Configurable.NamingStyle.TRAIN_CASE)
 public class ItemBuilder implements Serializable {
     private static final long serialVersionUID = 7808305902298157946L;
     private final static String META_TYPE = "meta.type";
-    private final static String META_POTION_TYPE = "meta.potionType";
-    private final static String META_POTION_EXTENDED = "meta.potionExtended";
-    private final static String META_POTION_UPGRADED = "meta.potionUpgraded";
-    private final static String META_LEATHER_COLOR = "meta.leatherColor";
-    private final static String META_SKULL_TEXTURE = "meta.skullTexture";
-    private final static String META_BOOK_AUTHOR = "meta.bookAuthor";
-    private final static String META_BOOK_TITLE = "meta.bookTitle";
-    private final static String META_BOOK_GENERATION = "meta.bookGeneration";
-    private final static String META_BOOK_PAGES = "meta.bookPages";
+    private final static String META_POTION_TYPE = "meta.potion-type";
+    private final static String META_POTION_EXTENDED = "meta.potion-extended";
+    private final static String META_POTION_UPGRADED = "meta.potion-upgraded";
+    private final static String META_LEATHER_COLOR = "meta.leather-color";
+    private final static String META_SKULL_TEXTURE = "meta.skull-texture";
+    private final static String META_BOOK_AUTHOR = "meta.book-author";
+    private final static String META_BOOK_TITLE = "meta.book-title";
+    private final static String META_BOOK_GENERATION = "meta.book-generation";
+    private final static String META_BOOK_PAGES = "meta.book-pages";
 
     @Description(value = {"The material that make up this item"})
     @Validation(notNull = true, silent = true)
