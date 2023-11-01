@@ -1,5 +1,7 @@
 package dev.anhcraft.config.bukkit.utils;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import dev.anhcraft.config.bukkit.NMSVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,9 +11,10 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.profile.PlayerProfile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -43,20 +46,39 @@ public enum MetaType {
     }),
     SKULL((i, im) -> {
         SkullMeta m = (SkullMeta) im;
-        i.skullOwner(m.getOwner());
         if (NMSVersion.current().atLeast(NMSVersion.v1_18_R1)) {
-            if (m.getOwnerProfile() != null) {
-                i.skullTexture(m.getOwnerProfile().getTextures().getSkin());
-            }
+            org.bukkit.profile.PlayerProfile profile = m.getOwnerProfile();
+            if (profile != null && profile.getTextures().getSkin() != null)
+                i.skullTexture(profile.getTextures().getSkin().toString());
+            return;
         }
+        try {
+            Field f = m.getClass().getDeclaredField("profile");
+            f.setAccessible(true);
+            GameProfile profile = (GameProfile) f.get(m);
+            Collection<Property> properties = profile.getProperties().get("textures");
+            if (properties.isEmpty()) return;
+            i.skullTexture(properties.iterator().next().getValue());
+        } catch (Exception ignored) {}
     }, (i, im) -> {
-        SkullMeta m = (SkullMeta) im;
-        m.setOwner(i.skullOwner());
-        if (NMSVersion.current().atLeast(NMSVersion.v1_18_R1)) {
-            PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-            profile.getTextures().setSkin(i.skullTexture());
-            m.setOwnerProfile(profile);
-        }
+        try {
+            String texture = i.skullTexture();
+            if (texture == null) return;
+            if (!texture.contains("/"))
+                texture = "https://textures.minecraft.net/texture/" + texture;
+            SkullMeta m = (SkullMeta) im;
+            if (NMSVersion.current().atLeast(NMSVersion.v1_18_R1)) {
+                PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+                profile.getTextures().setSkin(new URL(texture));
+                m.setOwnerProfile(profile);
+                return;
+            }
+            GameProfile gameProfile = new GameProfile(UUID.randomUUID(), null);
+            gameProfile.getProperties().put("textures", new Property("textures", texture, null));
+            Field f = m.getClass().getDeclaredField("profile");
+            f.setAccessible(true);
+            f.set(m, gameProfile);
+        } catch (Exception ignored) {}
     }),
     BOOK((i, im) -> {
         BookMeta m = (BookMeta) im;

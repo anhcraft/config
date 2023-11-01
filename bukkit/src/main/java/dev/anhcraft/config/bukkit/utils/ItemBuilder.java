@@ -32,7 +32,6 @@ public class ItemBuilder implements Serializable {
     private final static String META_POTION_EXTENDED = "meta.potionExtended";
     private final static String META_POTION_UPGRADED = "meta.potionUpgraded";
     private final static String META_LEATHER_COLOR = "meta.leatherColor";
-    private final static String META_SKULL_OWNER = "meta.skullOwner";
     private final static String META_SKULL_TEXTURE = "meta.skullTexture";
     private final static String META_BOOK_AUTHOR = "meta.bookAuthor";
     private final static String META_BOOK_TITLE = "meta.bookTitle";
@@ -107,20 +106,14 @@ public class ItemBuilder implements Serializable {
     })
     private Color leatherColor;
 
-    @Path(META_SKULL_OWNER)
-    @Description({
-            "Set the skull owner",
-            "Required item meta: skull"
-    })
-    private String skullOwner;
-
     @Path(META_SKULL_TEXTURE)
     @Description({
-            "Set the skull texture (must point to Mojang texture server)",
-            "This has higher precedence than the skull owner",
-            "Required item meta: skull & server >= 1.18"
+            "Set the skull texture",
+            "Example: 27267165e42bf310afd1f12304f414d562624d64862873fb4aadee046a22a58a",
+            "Or https://textures.minecraft.net/texture/27267165e42bf310afd1f12304f414d562624d64862873fb4aadee046a22a58a",
+            "Required item meta: skull"
     })
-    private URL skullTexture;
+    private String skullTexture;
 
     @Path(META_BOOK_TITLE)
     @Description({
@@ -337,20 +330,11 @@ public class ItemBuilder implements Serializable {
     }
 
     @Nullable
-    public String skullOwner() {
-        return skullOwner;
-    }
-
-    public void skullOwner(@Nullable String skullOwner) {
-        this.skullOwner = skullOwner;
-    }
-
-    @Nullable
-    public URL skullTexture() {
+    public String skullTexture() {
         return skullTexture;
     }
 
-    public void skullTexture(@Nullable URL skullTexture) {
+    public void skullTexture(@Nullable String skullTexture) {
         this.skullTexture = skullTexture;
     }
 
@@ -448,7 +432,6 @@ public class ItemBuilder implements Serializable {
         builder.unbreakable = unbreakable;
         builder.itemModifiers(itemModifiers);
         builder.metaType = metaType;
-        builder.skullOwner = skullOwner;
         builder.skullTexture = skullTexture;
         builder.potionType = potionType;
         builder.potionUpgraded = potionUpgraded;
