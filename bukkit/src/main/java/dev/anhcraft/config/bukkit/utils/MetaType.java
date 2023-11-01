@@ -1,5 +1,7 @@
 package dev.anhcraft.config.bukkit.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import dev.anhcraft.config.bukkit.NMSVersion;
@@ -17,6 +19,7 @@ import org.bukkit.profile.PlayerProfile;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -63,7 +66,17 @@ public enum MetaType {
             GameProfile profile = (GameProfile) f.get(m);
             Collection<Property> properties = profile.getProperties().get("textures");
             if (properties.isEmpty()) return;
-            i.skullTexture(properties.iterator().next().getValue());
+            String json = properties.iterator().next().getValue();
+            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+            if (jsonObject.has("textures")) {
+                JsonObject textures = jsonObject.getAsJsonObject();
+                if (textures.has("SKIN")) {
+                    JsonObject skin = textures.get("SKIN").getAsJsonObject();
+                    if (skin.has("url")) {
+                        i.skullTexture(skin.getAsJsonPrimitive("url").getAsString());
+                    }
+                }
+            }
         } catch (Exception ignored) {}
     }, (i, im) -> {
         try {
@@ -79,7 +92,9 @@ public enum MetaType {
                 return;
             }
             GameProfile gameProfile = new GameProfile(UUID.randomUUID(), null);
-            gameProfile.getProperties().put("textures", new Property("textures", texture, null));
+            texture = "{\"textures\":{\"SKIN\":{\"url\":\"" + texture + "\"}}}";
+            String txt = Base64.getEncoder().encodeToString(texture.getBytes(StandardCharsets.UTF_8));
+            gameProfile.getProperties().put("textures", new Property("textures", txt, null));
             Field f = m.getClass().getDeclaredField("profile");
             f.setAccessible(true);
             f.set(m, gameProfile);
@@ -101,7 +116,8 @@ public enum MetaType {
         m.setPages(pages == null ? new ArrayList<>() : pages.stream()
                 .map(ColorUtil::colorize)
                 .collect(Collectors.toList()));
-    }), BANNER((i, im) -> {
+    }),
+    BANNER((i, im) -> {
         BannerMeta m = (BannerMeta) im;
         i.bannerPatterns(m.getPatterns());
     }, (i, im) -> {
@@ -109,7 +125,8 @@ public enum MetaType {
         List<Pattern> patterns = i.bannerPatterns();
         if (patterns != null)
             m.setPatterns(patterns);
-    }), ENCHANTED_BOOK((i, im) -> {
+    }),
+    ENCHANTED_BOOK((i, im) -> {
         EnchantmentStorageMeta m = (EnchantmentStorageMeta) im;
         i.storedEnchantments(m.getStoredEnchants());
     }, (i, im) -> {
@@ -123,7 +140,8 @@ public enum MetaType {
                 m.addStoredEnchant(entry.getKey(), entry.getValue(), true);
             }
         }
-    }), ARMOR((i, im) -> {
+    }),
+    ARMOR((i, im) -> {
         if (!NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) return;
         org.bukkit.inventory.meta.ArmorMeta armorMeta = (org.bukkit.inventory.meta.ArmorMeta) im;
         if (!armorMeta.hasTrim()) return;
