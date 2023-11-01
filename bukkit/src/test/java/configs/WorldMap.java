@@ -4,17 +4,14 @@ import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.Exclude;
 import org.bukkit.Location;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Configurable(keyNamingStyle = Configurable.NamingStyle.TRAIN_CASE)
 public class WorldMap {
     @Exclude
     public Location centralLocation;
 
-    public Map<String, Location> buildings = new HashMap<>();
+    public LinkedHashMap<String, Location> buildings = new LinkedHashMap<>();
 
     public List<Location> allHomes = new ArrayList<>();
 
