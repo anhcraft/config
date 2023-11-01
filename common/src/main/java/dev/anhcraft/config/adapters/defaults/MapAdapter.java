@@ -23,7 +23,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
         if (type instanceof ParameterizedType) {
             mapType = (Class<?>) ((ParameterizedType) type).getRawType();
         }
-        if (mapType == null) return new LinkedHashMap<>();
+        if (mapType == null || mapType.isAssignableFrom(Map.class)) return new LinkedHashMap<>();
         if (mapType.isAssignableFrom(Hashtable.class)) return new Hashtable<>();
         if (mapType.isAssignableFrom(TreeMap.class)) return new TreeMap<>();
         if (mapType.isAssignableFrom(LinkedHashMap.class)) return new LinkedHashMap<>();
@@ -44,7 +44,7 @@ public class MapAdapter implements TypeAdapter<Map<?, ?>> {
             }
         } catch (InstantiationException ignored) {
         }
-        return new HashMap<>();
+        return new LinkedHashMap<>();
     }
 
     @Override
