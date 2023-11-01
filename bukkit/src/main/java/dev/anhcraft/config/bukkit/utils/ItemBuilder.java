@@ -5,11 +5,12 @@ import dev.anhcraft.config.annotations.Configurable;
 import dev.anhcraft.config.annotations.Description;
 import dev.anhcraft.config.annotations.Path;
 import dev.anhcraft.config.annotations.Validation;
-import org.bukkit.ChatColor;
+import dev.anhcraft.config.bukkit.NMSVersion;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -37,6 +37,10 @@ public class ItemBuilder implements Serializable {
     private final static String META_BOOK_TITLE = "meta.book-title";
     private final static String META_BOOK_GENERATION = "meta.book-generation";
     private final static String META_BOOK_PAGES = "meta.book-pages";
+    private final static String META_STORED_ENCHANTMENTS = "meta.stored-enchantments";
+    private final static String META_BANNER_PATTERNS = "meta.banner-patterns";
+    private final static String META_TRIM_MATERIAL = "meta.trim-material";
+    private final static String META_TRIM_PATTERN = "meta.trim-pattern";
 
     @Description(value = {"The material that make up this item"})
     @Validation(notNull = true, silent = true)
@@ -143,6 +147,34 @@ public class ItemBuilder implements Serializable {
     })
     private List<String> bookPages;
 
+    @Path(META_STORED_ENCHANTMENTS)
+    @Description({
+            "Set which enchantments are stored in the enchanted book",
+            "Required item meta: enchanted_book"
+    })
+    private Map<Enchantment, Integer> storedEnchantments;
+
+    @Path(META_BANNER_PATTERNS)
+    @Description({
+            "Set the pattern of the banner",
+            "Required item meta: banner"
+    })
+    private List<Pattern> bannerPatterns;
+
+    @Path(META_TRIM_PATTERN)
+    @Description({
+            "Set the pattern of the banner",
+            "Required item meta: armor (1.20+)"
+    })
+    private String trimPattern;
+
+    @Path(META_TRIM_MATERIAL)
+    @Description({
+            "Set the pattern of the banner",
+            "Required item meta: armor (1.20+)"
+    })
+    private String trimMaterial;
+
     @NotNull
     public static ItemBuilder of(@Nullable ItemStack itemStack) {
         ItemBuilder pi = new ItemBuilder();
@@ -171,10 +203,22 @@ public class ItemBuilder implements Serializable {
                         pi.itemModifiers.add(new ItemModifier(entry.getKey(), entry.getValue()));
                     }
                 }
-                if (meta instanceof PotionMeta) pi.metaType = MetaType.POTION;
-                else if (meta instanceof LeatherArmorMeta) pi.metaType = MetaType.LEATHER;
-                else if (meta instanceof SkullMeta) pi.metaType = MetaType.SKULL;
-                else if (meta instanceof BookMeta) pi.metaType = MetaType.BOOK;
+
+                if (meta instanceof PotionMeta)
+                    pi.metaType = MetaType.POTION;
+                else if (meta instanceof LeatherArmorMeta)
+                    pi.metaType = MetaType.LEATHER;
+                else if (meta instanceof SkullMeta)
+                    pi.metaType = MetaType.SKULL;
+                else if (meta instanceof BookMeta)
+                    pi.metaType = MetaType.BOOK;
+                else if (meta instanceof BannerMeta)
+                    pi.metaType = MetaType.BANNER;
+                else if (meta instanceof EnchantmentStorageMeta)
+                    pi.metaType = MetaType.ENCHANTED_BOOK;
+                else if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1) && meta instanceof org.bukkit.inventory.meta.ArmorMeta)
+                    pi.metaType = MetaType.ARMOR;
+
                 if (pi.metaType != null) {
                     pi.metaType.getOnLoad().accept(pi, meta);
                 }
@@ -374,6 +418,42 @@ public class ItemBuilder implements Serializable {
         this.bookPages = bookPages == null ? null : new ArrayList<>(bookPages);
     }
 
+    @Nullable
+    public Map<Enchantment, Integer> storedEnchantments() {
+        return storedEnchantments;
+    }
+
+    public void storedEnchantments(@Nullable Map<Enchantment, Integer> storedEnchantments) {
+        this.storedEnchantments = storedEnchantments == null ? null : new HashMap<>(storedEnchantments);
+    }
+
+    @Nullable
+    public List<Pattern> bannerPatterns() {
+        return bannerPatterns;
+    }
+
+    public void bannerPatterns(@Nullable List<Pattern> bannerPatterns) {
+        this.bannerPatterns = bannerPatterns == null ? null : new ArrayList<>(bannerPatterns);
+    }
+
+    @Nullable
+    public String trimPattern() {
+        return trimPattern;
+    }
+
+    public void trimPattern(@Nullable String trimPattern) {
+        this.trimPattern = trimPattern;
+    }
+
+    @Nullable
+    public String trimMaterial() {
+        return trimMaterial;
+    }
+
+    public void trimMaterial(@Nullable String trimMaterial) {
+        this.trimMaterial = trimMaterial;
+    }
+
     public ItemBuilder replaceDisplay(@NotNull UnaryOperator<String> operator) {
         if (this.name != null) this.name = operator.apply(this.name);
         this.lore.replaceAll(operator);
@@ -441,6 +521,10 @@ public class ItemBuilder implements Serializable {
         builder.bookPages(bookPages);
         builder.bookAuthor = bookAuthor;
         builder.bookGeneration = bookGeneration;
+        builder.bannerPatterns(bannerPatterns);
+        builder.storedEnchantments(storedEnchantments);
+        builder.trimPattern = trimPattern;
+        builder.trimMaterial = trimMaterial;
         return builder;
     }
 }

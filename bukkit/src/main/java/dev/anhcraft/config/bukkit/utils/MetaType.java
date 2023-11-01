@@ -4,19 +4,24 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import dev.anhcraft.config.bukkit.NMSVersion;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.*;
+import org.bukkit.inventory.meta.trim.ArmorTrim;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
+import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.profile.PlayerProfile;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 public enum MetaType {
     POTION((i, im) -> {
@@ -96,6 +101,45 @@ public enum MetaType {
         m.setPages(pages == null ? new ArrayList<>() : pages.stream()
                 .map(ColorUtil::colorize)
                 .collect(Collectors.toList()));
+    }), BANNER((i, im) -> {
+        BannerMeta m = (BannerMeta) im;
+        i.bannerPatterns(m.getPatterns());
+    }, (i, im) -> {
+        BannerMeta m = (BannerMeta) im;
+        List<Pattern> patterns = i.bannerPatterns();
+        if (patterns != null)
+            m.setPatterns(patterns);
+    }), ENCHANTED_BOOK((i, im) -> {
+        EnchantmentStorageMeta m = (EnchantmentStorageMeta) im;
+        i.storedEnchantments(m.getStoredEnchants());
+    }, (i, im) -> {
+        EnchantmentStorageMeta m = (EnchantmentStorageMeta) im;
+        Map<Enchantment, Integer> enc = i.storedEnchantments();
+        if (enc != null) {
+            for (Enchantment enchantment : m.getStoredEnchants().keySet()) {
+                m.removeStoredEnchant(enchantment);
+            }
+            for (Map.Entry<Enchantment, Integer> entry : enc.entrySet()) {
+                m.addStoredEnchant(entry.getKey(), entry.getValue(), true);
+            }
+        }
+    }), ARMOR((i, im) -> {
+        if (!NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) return;
+        org.bukkit.inventory.meta.ArmorMeta armorMeta = (org.bukkit.inventory.meta.ArmorMeta) im;
+        if (!armorMeta.hasTrim()) return;
+        i.trimMaterial(armorMeta.getTrim().getMaterial().getKey().toString());
+        i.trimPattern(armorMeta.getTrim().getPattern().getKey().toString());
+    }, (i, im) -> {
+        if (!NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) return;
+        org.bukkit.inventory.meta.ArmorMeta armorMeta = (org.bukkit.inventory.meta.ArmorMeta) im;
+        String material = i.trimMaterial();
+        if (material == null) return;
+        String pattern = i.trimPattern();
+        if (pattern == null) return;
+        armorMeta.setTrim(new ArmorTrim(
+                requireNonNull(requireNonNull(Bukkit.getRegistry(TrimMaterial.class)).get(requireNonNull(NamespacedKey.fromString(material)))),
+                requireNonNull(requireNonNull(Bukkit.getRegistry(TrimPattern.class)).get(requireNonNull(NamespacedKey.fromString(pattern))))
+        ));
     });
 
     private final BiConsumer<ItemBuilder, ItemMeta> onLoad;
