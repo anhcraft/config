@@ -30,5 +30,9 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(Enchantment.class, new EnchantmentAdapter());
         handler.registerTypeAdapter(NamespacedKey.class, new NamespacedKeyAdapter());
         handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
+
+        if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
+            handler.registerTypeAdapter(org.bukkit.inventory.meta.trim.ArmorTrim.class, new ArmorTrimAdapter());
+        }
     }
 }
