@@ -6,6 +6,7 @@ import dev.anhcraft.config.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -38,6 +39,7 @@ public abstract class ConfigHandler {
         registerTypeAdapter(double.class, new DoubleAdapter());
         registerTypeAdapter(UUID.class, new UUIDAdapter());
         registerTypeAdapter(URL.class, new URLAdapter());
+        registerTypeAdapter(URI.class, new URIAdapter());
     }
 
     /**
