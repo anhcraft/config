@@ -2,10 +2,7 @@ package dev.anhcraft.config.bukkit;
 
 import dev.anhcraft.config.ConfigHandler;
 import dev.anhcraft.config.bukkit.adapters.*;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
@@ -27,12 +24,17 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(Color.class, new ColorAdapter());
         handler.registerTypeAdapter(PotionEffect.class, new PotionEffectAdapter());
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
-        handler.registerTypeAdapter(Enchantment.class, new EnchantmentAdapter());
         handler.registerTypeAdapter(NamespacedKey.class, new NamespacedKeyAdapter());
         handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
 
         if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
             handler.registerTypeAdapter(org.bukkit.inventory.meta.trim.ArmorTrim.class, new ArmorTrimAdapter());
         }
+
+        try {
+            // Prevent initialization exception when testing
+            if (Bukkit.class.getDeclaredField("server").get(null) != null)
+                handler.registerTypeAdapter(Enchantment.class, new EnchantmentAdapter());
+        } catch (Exception ignored) {}
     }
 }
