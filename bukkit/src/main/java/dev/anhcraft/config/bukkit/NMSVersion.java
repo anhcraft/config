@@ -4,6 +4,12 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 public enum NMSVersion {
+    v1_9_R2,
+    v1_10_R1,
+    v1_11_R1,
+    v1_12_R1,
+    v1_13_R1,
+    v1_13_R2,
     v1_14_R1,
     v1_15_R1,
     v1_16_R1,
@@ -19,15 +25,16 @@ public enum NMSVersion {
     v1_20_R2,
     v1_20_R3;
 
-    private static final NMSVersion current;
+    private static NMSVersion current;
 
     static {
+        current = NMSVersion.values()[NMSVersion.values().length - 1];
         //noinspection ConstantConditions
-        if (Bukkit.getServer() != null) {
-            current = NMSVersion.valueOf(Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3]);
-        } else {
-            current = NMSVersion.values()[0];
-        }
+        try {
+            if (Bukkit.getServer() != null) {
+                current = NMSVersion.valueOf(Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3]);
+            }
+        } catch (Exception ignored) {} // use default if not found
     }
 
     @NotNull
