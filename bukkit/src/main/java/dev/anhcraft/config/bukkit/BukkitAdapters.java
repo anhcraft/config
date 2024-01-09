@@ -32,14 +32,15 @@ public class BukkitAdapters {
             handler.registerTypeAdapter(org.bukkit.util.BoundingBox.class, new BoundingBoxAdapter());
         }
 
-        if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
-            handler.registerTypeAdapter(org.bukkit.inventory.meta.trim.ArmorTrim.class, new ArmorTrimAdapter());
-        }
-
         try {
             // Prevent initialization exception when testing
-            if (Bukkit.class.getDeclaredField("server").get(null) != null)
+            if (Bukkit.class.getDeclaredField("server").get(null) != null) {
                 handler.registerTypeAdapter(Enchantment.class, new EnchantmentAdapter());
+
+                if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
+                    handler.registerTypeAdapter(org.bukkit.inventory.meta.trim.ArmorTrim.class, new ArmorTrimAdapter());
+                }
+            }
         } catch (Exception ignored) {}
     }
 }
