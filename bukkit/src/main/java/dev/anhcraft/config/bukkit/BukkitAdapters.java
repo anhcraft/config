@@ -9,7 +9,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,12 +19,18 @@ public class BukkitAdapters {
         handler.registerTypeAdapter(AttributeModifier.class, new AttributeModifierAdapter());
         handler.registerTypeAdapter(BlockVector.class, new BlockVectorAdapter());
         handler.registerTypeAdapter(Pattern.class, new PatternAdapter());
-        handler.registerTypeAdapter(BoundingBox.class, new BoundingBoxAdapter());
         handler.registerTypeAdapter(Color.class, new ColorAdapter());
         handler.registerTypeAdapter(PotionEffect.class, new PotionEffectAdapter());
         handler.registerTypeAdapter(FireworkEffect.class, new FireworkEffectAdapter());
-        handler.registerTypeAdapter(NamespacedKey.class, new NamespacedKeyAdapter());
         handler.registerTypeAdapter(ItemStack.class, new ItemStackAdapter());
+
+        if (NMSVersion.current().atLeast(NMSVersion.v1_12_R1)) {
+            handler.registerTypeAdapter(org.bukkit.NamespacedKey.class, new NamespacedKeyAdapter());
+        }
+
+        if (NMSVersion.current().atLeast(NMSVersion.v1_13_R1)) {
+            handler.registerTypeAdapter(org.bukkit.util.BoundingBox.class, new BoundingBoxAdapter());
+        }
 
         if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
             handler.registerTypeAdapter(org.bukkit.inventory.meta.trim.ArmorTrim.class, new ArmorTrimAdapter());
