@@ -1,13 +1,39 @@
 # config
-Configuration mapper for Java objects
+
+A Java object-mapping library for configuration.
 
 [![Release](https://travis-ci.com/anhcraft/config.svg?branch=master)](https://travis-ci.com/anhcraft/config)
 [![](https://jitpack.io/v/anhcraft/config.svg)](https://jitpack.io/#anhcraft/config)<br>
 
-## Build
-```clean test package install```
+## Overview
 
-If `java: package sun.misc does not exist` occurs, disable the `--release` option in Java compiler settings (IntelliJ)
+```mermaid
+flowchart BT
+  Platform((Platform))
+  Platform -->|Deserialize| POJO
+  POJO -->|Serialize| Platform
+  Platform -->|Serialize| Wrapper
+  Wrapper -->|Deserialize| Platform
+  Platform -->|Generate| ConfigDoc
+  subgraph Wrapper
+    YAML
+    JSON
+    Other-format
+  end
+```
+
+```mermaid
+flowchart TD
+    subgraph Platform
+        direction LR
+        subgraph Core
+          BITA(Built-in Type Adapters)
+        end
+        CTA(Custom Type Adapters)
+        Pre-Processors
+        Post-Processors
+    end
+```
 
 ## Features
 - Support common Java types including collection, map, etc
