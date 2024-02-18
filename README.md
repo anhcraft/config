@@ -14,7 +14,6 @@ If `java: package sun.misc does not exist` occurs, disable the `--release` optio
 - Support platforms:
   1. Bukkit: `Yaml`
   2. Bungeecord: `Yaml`, `JSON`
-  3. [Neep](https://github.com/anhcraft/Neep): my own configuration format. Let's check it out!
 - Custom adapter (mapper)
 - Various settings for quickly serializing/deserializing
 - Nesting sections supported
@@ -153,11 +152,7 @@ Middleware allows to handle configuration entries at pre-serialization / pre-des
 For example, it can be used to transform types, relocate paths before validation or transformation take place.
 
 ### Built-in: EntryKeyInjector (deserialization)
-```
-given: ConfigSection<K, V extends ConfigSection>
-and filter: if K matches whatever return S, otherwise null 
-for any K matched in which S is non-null: set V[S] = K
-```
+For each entry in the map, inject the entry's key into a field in the object value
 
 Example usage:
 ```java
