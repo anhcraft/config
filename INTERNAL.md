@@ -213,18 +213,17 @@ public static void main(String[] args) {
 - The normalizer is constructed from a factory
 - The purpose of the normalizer is to map a complex type into a simple type, so it can be put into a wrapper
 
-| Java data type        | Wrapper-compatible | Note                   |
-|-----------------------|--------------------|------------------------|
-| Primitive             | Scalar             | No conversion          |
-| Wrapper of primitives | Scalar             | No conversion          |
-| String                | Scalar             | No conversion          |
-| Array of simple type  | Array              | No conversion          |
-| Wrapper container     | Container          | No conversion          |
-| Array of complex type | Array              | Built-in type-adapting |
-| Iterable              | Array              | Built-in type-adapting |
-| Map                   | Container          | Built-in type-adapting |
-| `@Configurable`       | Container          | Built-in type-adapting |
-| _other_               | Container          | Custom type-adapting   |
+| Java data type        | Wrapper-compatible | Note                              |
+|-----------------------|--------------------|-----------------------------------|
+| Primitive             | Scalar             | No conversion                     |
+| Wrapper of primitives | Scalar             | No conversion                     |
+| String                | Scalar             | No conversion                     |
+| Array of simple type  | Array              | No conversion                     |
+| Wrapper container     | Container          | No conversion                     |
+| Array of complex type | Array              | Built-in type-adapting            |
+| Iterable              | Array              | Built-in type-adapting            |
+| Map                   | Container          | Built-in type-adapting            |
+| _other_               | Container          | Automatic or custom type-adapting |
 
 ### Denormalizer
 - The denormalizer is also constructed from a factory
@@ -244,11 +243,8 @@ flowchart TB
 
 ## Type Adapters
 - It is possible to register custom adapters or override existing adapter(s) including the built-in
-- The adapter associates with a complex data type. It has several use cases:
-  - Ability to normalize a POJO which cannot be done using `@Configurable`
-  - Ability to normalize a `@Configurable` class (overriding)
-  - Ability to normalize a third-party class belonging to a library
-  - Override a built-in or preceded type adapter
+- By default, Config does automatic type-adapting by using the schema and normalize an instance into a container. Using type adapter, it is possible to control the process, e.g: do complex logic, scalarize the object, etc
+- For non-POJOs, it is recommended to have their own type adapters
 - The adapter has two main method:
   - Normalize a POJO into a wrapper
   - Denormalize a wrapper into the POJO
@@ -264,10 +260,6 @@ flowchart TB
   - Type adapter `T'` processes type `T'` and any ` extends T'`
   - Type adapter `T` only processes type `T` and any type ` super T'`
   - Note that: `T' extends T` which mean they are under the same hierarchy
-
-### Overridden adapters
-- It is possible to override existing adapters in the factory, including the built-in ones
-- Precedence: level of hierarchy, then registration order
 
 ## Normalization
 - To normalize a complex type into a simple type
