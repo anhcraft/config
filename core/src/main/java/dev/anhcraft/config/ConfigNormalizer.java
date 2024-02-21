@@ -4,8 +4,6 @@ import dev.anhcraft.config.adapter.AdapterContext;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
-import dev.anhcraft.config.wrapper.Container;
-import dev.anhcraft.config.wrapper.SimpleTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +13,7 @@ import java.lang.reflect.Array;
  * The normalizer simplifies a complex object with the following rules:
  * <ul>
  *     <li>{@code null} is returned as is</li>
- *     <li>Primitive, primitive wrappers, String and {@link Container} are returned as is</li>
+ *     <li>Primitive, primitive wrappers, String and {@link Wrapper} are returned as is</li>
  *     <li>Array is recursively checked with each element normalized independently</li>
  *     <li>Common reference types are normalized using the built-in type adapters</li>
  * </ul>
@@ -89,7 +87,7 @@ public class ConfigNormalizer {
     }
 
     private <S, T extends S> void validateType(Class<S> type, T complex) {
-        if (type.isAssignableFrom(complex.getClass()))
+        if (!type.isAssignableFrom(complex.getClass()))
             throw new IllegalArgumentException("the given type is not the correct type or a supertype of the given complex object");
     }
 
@@ -120,10 +118,12 @@ public class ConfigNormalizer {
         return result;
     }
 
-    private Container _dynamicNormalize(AdapterContext ctx, Class<?> type, Object complex) throws Exception {
-        Container container = new Container();
+    private Wrapper _dynamicNormalize(AdapterContext ctx, Class<?> type, Object complex) throws Exception {
+        Wrapper container = new Wrapper();
         Schema schema = ctx.getFactory().getSchema(type);
         for (Property property : schema.properties()) {
+            if (property.isTransient())
+                continue;
             Object value = property.field().get(complex);
             value = _normalize(ctx, value.getClass(), value);
             container.set(property.name(), value);

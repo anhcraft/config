@@ -23,27 +23,29 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
 
     @Override
     public @NotNull Schema scanSchema(@NotNull Class<?> type) {
-        Map<String, Property> properties = new LinkedHashMap<>();
+        Map<String, Property> lookup = new LinkedHashMap<>();
+        List<Property> properties = new ArrayList<>();
 
         for (Field field : type.getDeclaredFields()) {
             field.setAccessible(true);
             if (isExcluded(field))
                 continue;
 
-            PropertyNaming name = scanName(field, Set.copyOf(properties.keySet()));
+            PropertyNaming name = scanName(field, Set.copyOf(lookup.keySet()));
             List<String> description = scanDescription(field);
             byte modifier = scanModifier(field);
             Validator validator = scanValidation(field);
             Class<?> payloadType = scanPayloadType(field);
 
             Property property = new Property(name, description, modifier, validator, payloadType, field);
-            properties.put(name.primary(), property);
+            lookup.put(name.primary(), property);
             for (String alias : name.aliases()) {
-                properties.put(alias, property);
+                lookup.put(alias, property);
             }
+            properties.add(property);
         }
 
-        return new Schema(type, properties);
+        return new Schema(type, properties, lookup);
     }
 
     private boolean isExcluded(Field field) {
@@ -51,20 +53,25 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
     }
 
     private PropertyNaming scanName(Field field, Set<String> existing) {
-        Set<String> aliases = new LinkedHashSet<>();
+        Set<String> aliases = Collections.emptySet(); // use empty singleton to reduce allocations
         String primary = null;
 
         Name nameMeta = field.getAnnotation(Name.class);
         if (nameMeta != null) {
             for (String name : nameMeta.value()) {
                 if (name.isBlank() || existing.contains(name) || aliases.contains(name)) continue;
-                if (primary == null) primary = name;
-                else aliases.add(name);
+                if (primary == null) {
+                    primary = name;
+                    aliases = new LinkedHashSet<>();
+                } else {
+                    aliases.add(name);
+                }
             }
         }
 
         Alias aliasMeta = field.getAnnotation(Alias.class);
         if (aliasMeta != null) {
+            aliases = new LinkedHashSet<>();
             for (String alias : aliasMeta.value()) {
                 if (alias.isBlank() || existing.contains(alias) || aliases.contains(alias)) continue;
                 aliases.add(alias);

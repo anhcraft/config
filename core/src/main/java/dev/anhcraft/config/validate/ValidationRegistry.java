@@ -1,9 +1,6 @@
 package dev.anhcraft.config.validate;
 
-import dev.anhcraft.config.validate.check.NotBlankValidation;
-import dev.anhcraft.config.validate.check.NotEmptyValidation;
-import dev.anhcraft.config.validate.check.NotNullValidation;
-import dev.anhcraft.config.validate.check.Validation;
+import dev.anhcraft.config.validate.check.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +18,8 @@ public class ValidationRegistry {
             .add(Set.of("not-null", "notNull", "non-null", "nonNull"), (s) -> NOT_NULL)
             .add(Set.of("not-empty", "notEmpty", "non-empty", "nonEmpty"), (s) -> NOT_EMPTY)
             .add(Set.of("not-blank", "notBlank", "non-blank", "nonBlank"), (s) -> NOT_BLANK)
+            .add(Set.of("range"), RangeValidation::new)
+            .add(Set.of("size"), SizeValidation::new)
             .build();
 
     private final Map<String, Function<String, Validation>> validations;

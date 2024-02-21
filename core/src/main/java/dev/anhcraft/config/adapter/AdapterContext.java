@@ -33,12 +33,13 @@ public class AdapterContext implements TypeAdapter<Object> {
     }
 
     @Override
-    public @Nullable Object simplify(@NotNull AdapterContext ctx, @NotNull Type sourceType, @NotNull Object value) throws Exception {
-        return null;
+    public @Nullable Object simplify(@NotNull AdapterContext ctx, @NotNull Class<Object> sourceType, @NotNull Object value) throws Exception {
+        return factory.getNormalizer().normalize(ctx, sourceType, value);
     }
 
     @Override
     public @Nullable Object complexify(@NotNull AdapterContext ctx, @NotNull Type targetType, @NotNull Object value) throws Exception {
         return null;
+        //return factory.getDenormalizer().denormalize(targetType, value);
     }
 }

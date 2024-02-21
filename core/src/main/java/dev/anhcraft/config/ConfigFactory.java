@@ -16,7 +16,6 @@ import java.util.function.UnaryOperator;
 
 public class ConfigFactory {
     private final Map<Class<?>, TypeAdapter<?>> typeAdapters;
-    private final ValidationRegistry validationRegistry;
     private final ReflectBlueprintScanner blueprintScanner;
     private final ConfigNormalizer normalizer;
     private final ConfigDenormalizer denormalizer;
@@ -24,8 +23,7 @@ public class ConfigFactory {
 
     ConfigFactory(Builder builder) {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
-        this.validationRegistry = builder.validationRegistry;
-        this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, validationRegistry);
+        this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, builder.validationRegistry);
         this.normalizer = new ConfigNormalizer(this, builder.contextDepthLimit);
         this.denormalizer = new ConfigDenormalizer(this, builder.contextDepthLimit);
         this.schemas = new LinkedHashMap<>() {
@@ -47,7 +45,7 @@ public class ConfigFactory {
                 return (TypeAdapter<T>) adapter;
             }
             clazz = clazz.getSuperclass();
-        } while (clazz != Object.class);
+        } while (clazz != null);
         return null;
     }
 
@@ -71,10 +69,24 @@ public class ConfigFactory {
         private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
         private UnaryOperator<String> namingStrategy = NamingStrategy.DEFAULT;
         private int schemaCacheCapacity = 100;
-        private int contextDepthLimit = 5;
+        private int contextDepthLimit = 20;
 
         public Builder() {
+            typeAdapters.put(byte.class, new ByteAdapter());
+            typeAdapters.put(Byte.class, new ByteAdapter());
+            typeAdapters.put(short.class, new ShortAdapter());
+            typeAdapters.put(Short.class, new ShortAdapter());
+            typeAdapters.put(int.class, new IntegerAdapter());
+            typeAdapters.put(Integer.class, new IntegerAdapter());
+            typeAdapters.put(long.class, new LongAdapter());
+            typeAdapters.put(Long.class, new LongAdapter());
+            typeAdapters.put(float.class, new FloatAdapter());
+            typeAdapters.put(Float.class, new FloatAdapter());
+            typeAdapters.put(double.class, new DoubleAdapter());
+            typeAdapters.put(Double.class, new DoubleAdapter());
+            typeAdapters.put(String.class, new StringAdapter());
             typeAdapters.put(UUID.class, new UuidAdapter());
+            typeAdapters.put(Iterable.class, new IterableAdapter());
         }
 
         @NotNull
@@ -101,6 +113,14 @@ public class ConfigFactory {
             return this;
         }
 
+        /**
+         * Sets the limit of the context depth.<br>
+         * The context depth is the number of recursive calls to different type-adapting. The limit exists
+         * to prevent unnecessary recursions which can lead to stack overflows and performance issues.<br>
+         * The context depth is set to 20 by default.
+         * @param contextDepthLimit the limit
+         * @return this
+         */
         @NotNull
         public Builder setContextDepthLimit(int contextDepthLimit) {
             this.contextDepthLimit = contextDepthLimit;

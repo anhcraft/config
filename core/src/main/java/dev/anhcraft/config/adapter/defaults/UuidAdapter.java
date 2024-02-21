@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class UuidAdapter implements TypeAdapter<UUID> {
     @Override
-    public @Nullable Object simplify(@NotNull AdapterContext ctx, @NotNull Type sourceType, @NotNull UUID value) throws Exception {
+    public @Nullable Object simplify(@NotNull AdapterContext ctx, @NotNull Class<UUID> sourceType, @NotNull UUID value) throws Exception {
         return value.toString();
     }
 

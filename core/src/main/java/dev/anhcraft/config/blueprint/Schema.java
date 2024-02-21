@@ -3,18 +3,17 @@ package dev.anhcraft.config.blueprint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Schema {
     private final Class<?> type;
-    private final Map<String, Property> properties;
+    private final List<Property> properties;
+    private final Map<String, Property> lookup;
 
-    public Schema(@NotNull Class<?> type, @NotNull Map<String, Property> properties) {
+    public Schema(@NotNull Class<?> type, @NotNull List<Property> properties, @NotNull Map<String, Property> lookup) {
         this.type = type;
-        this.properties = Collections.unmodifiableMap(properties);
+        this.properties = Collections.unmodifiableList(properties);
+        this.lookup = Collections.unmodifiableMap(lookup);
     }
 
     @NotNull
@@ -30,7 +29,7 @@ public class Schema {
      */
     @NotNull
     public Set<String> propertyNames() {
-        return properties.keySet();
+        return lookup.keySet();
     }
 
     /**
@@ -39,7 +38,7 @@ public class Schema {
      */
     @NotNull
     public Collection<Property> properties() {
-        return properties.values();
+        return properties;
     }
 
     /**
@@ -49,6 +48,6 @@ public class Schema {
      */
     @Nullable
     public Property property(@Nullable String name) {
-        return properties.get(name);
+        return lookup.get(name);
     }
 }

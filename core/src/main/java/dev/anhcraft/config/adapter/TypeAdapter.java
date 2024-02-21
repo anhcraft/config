@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 public interface TypeAdapter<ComplexT> {
     @Nullable
-    Object simplify(@NotNull AdapterContext ctx, @NotNull Type sourceType, @NotNull ComplexT value) throws Exception;
+    Object simplify(@NotNull AdapterContext ctx, @NotNull Class<ComplexT> sourceType, @NotNull ComplexT value) throws Exception;
 
     @Nullable
     ComplexT complexify(@NotNull AdapterContext ctx, @NotNull Type targetType, @NotNull Object value) throws Exception;

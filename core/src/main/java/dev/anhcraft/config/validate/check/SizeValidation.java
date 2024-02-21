@@ -1,8 +1,10 @@
 package dev.anhcraft.config.validate.check;
 
+import dev.anhcraft.config.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class SizeValidation extends ParameterizedValidation {
@@ -11,16 +13,16 @@ public class SizeValidation extends ParameterizedValidation {
 
     public SizeValidation(@NotNull String arg) {
         super(arg);
-        String[] parts = arg.split("\\|");
-        if (parts.length == 1) {
-            int num = Integer.parseInt(parts[0]);
+        List<String> parts = StringUtil.fastSplit(arg, '|');
+        if (parts.size() == 1) {
+            int num = Integer.parseInt(parts.get(0));
             min = Math.max(0, num);
             max = Math.max(0, num);
-        } else if (parts.length == 2) {
-            if (!parts[0].isEmpty())
-                min = Math.max(0, Integer.parseInt(parts[0]));
-            if (!parts[1].isEmpty())
-                max = Math.max(0, Integer.parseInt(parts[1]));
+        } else if (parts.size() == 2) {
+            if (!parts.get(0).isEmpty())
+                min = Math.max(0, Integer.parseInt(parts.get(0)));
+            if (!parts.get(1).isEmpty())
+                max = Math.max(0, Integer.parseInt(parts.get(1)));
         }
     }
 
