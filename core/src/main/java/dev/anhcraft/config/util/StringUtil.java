@@ -3,7 +3,7 @@ package dev.anhcraft.config.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StringUtil {
+public final class StringUtil {
     // A fast split algorithm that does not use regex, and works for empty fragments
     public static List<String> fastSplit(String str, char separator) {
         if (str.isEmpty())

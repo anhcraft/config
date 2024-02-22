@@ -35,7 +35,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
             List<String> description = scanDescription(field);
             byte modifier = scanModifier(field);
             Validator validator = scanValidation(field);
-            Class<?> payloadType = scanPayloadType(field);
+            Class<?>[] payloadType = scanPayloadType(field);
 
             Property property = new Property(name, description, modifier, validator, payloadType, field);
             lookup.put(name.primary(), property);
@@ -112,7 +112,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
         return DisabledValidator.INSTANCE;
     }
 
-    private Class<?> scanPayloadType(Field field) {
+    private Class<?>[] scanPayloadType(Field field) {
         Payload payloadMeta = field.getAnnotation(Payload.class);
         if (payloadMeta != null) {
             return payloadMeta.value();

@@ -8,6 +8,8 @@ import dev.anhcraft.config.validate.ValidationRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class ConfigFactory {
     ConfigFactory(Builder builder) {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
         this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, builder.validationRegistry);
-        this.normalizer = new ConfigNormalizer(this, builder.contextDepthLimit);
+        this.normalizer = new ConfigNormalizer(this, builder.contextDepthLimit, builder.normalizerSettings);
         this.denormalizer = new ConfigDenormalizer(this, builder.contextDepthLimit);
         this.schemas = new LinkedHashMap<>() {
             @Override
@@ -70,6 +72,7 @@ public class ConfigFactory {
         private UnaryOperator<String> namingStrategy = NamingStrategy.DEFAULT;
         private int schemaCacheCapacity = 100;
         private int contextDepthLimit = 20;
+        private byte normalizerSettings = 1;
 
         public Builder() {
             typeAdapters.put(byte.class, new ByteAdapter());
@@ -85,8 +88,10 @@ public class ConfigFactory {
             typeAdapters.put(double.class, new DoubleAdapter());
             typeAdapters.put(Double.class, new DoubleAdapter());
             typeAdapters.put(String.class, new StringAdapter());
-            typeAdapters.put(UUID.class, new UuidAdapter());
             typeAdapters.put(Iterable.class, new IterableAdapter());
+            typeAdapters.put(UUID.class, new UuidAdapter());
+            typeAdapters.put(URL.class, new UrlAdapter());
+            typeAdapters.put(URI.class, new UriAdapter());
         }
 
         @NotNull
@@ -124,6 +129,33 @@ public class ConfigFactory {
         @NotNull
         public Builder setContextDepthLimit(int contextDepthLimit) {
             this.contextDepthLimit = contextDepthLimit;
+            return this;
+        }
+
+        /**
+         * Ignores the default values when normalizing into a {@link Dictionary}.<br>
+         * Includes: {@code 0} and {@code false}
+         * @param ignore if the default values should be ignored
+         * @return this
+         */
+        @NotNull
+        public Builder ignoreDefaultValues(boolean ignore) {
+            if (ignore) normalizerSettings |= 1;
+            else normalizerSettings &= ~1;
+            return this;
+        }
+
+        @NotNull
+        public Builder ignoreEmptyArray(boolean ignore) {
+            if (ignore) normalizerSettings |= 2;
+            else normalizerSettings &= ~2;
+            return this;
+        }
+
+        @NotNull
+        public Builder ignoreEmptyDictionary(boolean ignore) {
+            if (ignore) normalizerSettings |= 4;
+            else normalizerSettings &= ~4;
             return this;
         }
 

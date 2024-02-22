@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public class AdapterContext implements TypeAdapter<Object> {
+public final class AdapterContext implements TypeAdapter<Object> {
     private final ConfigFactory factory;
     private int depth;
 
@@ -39,7 +39,6 @@ public class AdapterContext implements TypeAdapter<Object> {
 
     @Override
     public @Nullable Object complexify(@NotNull AdapterContext ctx, @NotNull Type targetType, @NotNull Object value) throws Exception {
-        return null;
-        //return factory.getDenormalizer().denormalize(targetType, value);
+        return factory.getDenormalizer().denormalize(ctx, targetType, value);
     }
 }

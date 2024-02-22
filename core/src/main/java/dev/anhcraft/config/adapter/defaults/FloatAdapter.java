@@ -17,7 +17,7 @@ public class FloatAdapter implements ScalarAdapter<Float> {
         else if (value instanceof Boolean)
             return complexify(ctx, targetType, ((Boolean) value) ? 1 : 0);
         else if (value instanceof Character)
-            return complexify(ctx, targetType, Character.getNumericValue(((Character) value)));
+            return (float) value;
         return null;
     }
 }

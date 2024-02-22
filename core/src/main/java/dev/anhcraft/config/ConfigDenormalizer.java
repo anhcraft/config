@@ -7,6 +7,7 @@ import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.util.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
@@ -21,11 +22,11 @@ public class ConfigDenormalizer {
         this.contextDepthLimit = contextDepthLimit;
     }
 
-    public <T> Object denormalize(@NotNull Type targetType, @NotNull T simple) throws Exception {
+    public <T> Object denormalize(@NotNull Type targetType, @Nullable T simple) throws Exception {
         return denormalize(new AdapterContext(configFactory, 0), targetType, simple);
     }
 
-    public <T> Object denormalize(AdapterContext ctx, @NotNull Type targetType, @NotNull T simple) throws Exception {
+    public <T> Object denormalize(AdapterContext ctx, @NotNull Type targetType, @Nullable T simple) throws Exception {
         return _denormalize(ctx, targetType, simple);
     }
 
@@ -38,15 +39,18 @@ public class ConfigDenormalizer {
     }
 
     @SuppressWarnings("rawtypes")
-    private <T> Object _denormalize(AdapterContext ctx, @NotNull Type targetType, @NotNull T simple) throws Exception {
+    private <T> Object _denormalize(AdapterContext ctx, @NotNull Type targetType, @Nullable T simple) throws Exception {
+        if (simple == null)
+            return null;
         if (ComplexTypes.isArray(targetType))
             return _denormalizeToArray(ctx, targetType, simple); // flat operation
         Class<?> erasureType = ComplexTypes.erasure(targetType);
         TypeAdapter adapter = configFactory.getTypeAdapter(erasureType);
         if (adapter == null)
             return _denormalizeToInstance(ctx, ObjectUtil.newInstance(erasureType), erasureType, simple); // flat operation
-        if (ctx.commitDepth() > contextDepthLimit) // prevent overflow due to bad type-adapting
+        if (ctx.getDepth() > contextDepthLimit) // prevent overflow due to bad type-adapting
             return null;
+        ctx.commitDepth();
         Object v = adapter.complexify(ctx, targetType, simple);
         ctx.releaseDepth();
         return v;
@@ -66,8 +70,8 @@ public class ConfigDenormalizer {
     }
 
     private <T> Object _denormalizeToInstance(AdapterContext ctx, Object instance, Class<?> targetType, T simple) throws Exception {
-        if (!(simple instanceof Wrapper)) return null;
-        Wrapper wrapper = (Wrapper) simple;
+        if (!(simple instanceof Dictionary)) return null;
+        Dictionary wrapper = (Dictionary) simple;
         Schema schema = configFactory.getSchema(targetType);
         for (Property property : schema.properties()) {
             if (property.isConstant())
@@ -82,6 +86,8 @@ public class ConfigDenormalizer {
                 String key = entry == null ? property.name() : entry.getKey();
                 throw new InvalidValueException(key, property.validator().message());
             }
+            if (ComplexTypes.erasure(property.type()).isPrimitive() && value == null)
+                continue;
             property.field().set(instance, value);
         }
         return instance;

@@ -6,4 +6,5 @@ public class Item {
     @Validate("size=3|")
     public String name;
     public int stock;
+    public Item subItem;
 }

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class Schema {
+public final class Schema {
     private final Class<?> type;
     private final List<Property> properties;
     private final Map<String, Property> lookup;

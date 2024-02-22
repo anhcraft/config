@@ -22,8 +22,8 @@
 
 ```mermaid
 flowchart LR
-    POJO -->|Normalize| Wrapper -->|Serialize| Raw-config
-    Raw-config -->|Deserialize| Wrapper -->|Denormalize| POJO
+    POJO -->|Normalize| Dictionary -->|Serialize| Raw-config
+    Raw-config -->|Deserialize| Dictionary -->|Denormalize| POJO
 ```
 
 ```mermaid
@@ -38,12 +38,12 @@ flowchart TD
     subgraph Normalization
       Schema1(Schema) -->|Provide| Normalizer
       Instance1(Instance) -->|Provide| Normalizer
-      Normalizer --->|Normalize| Wrapper1(Wrapper)
+      Normalizer --->|Normalize| Dictionary1(Dictionary)
     end
     Factory --->|Construct| Normalizer
     Factory --->|Construct| Denormalizer
     subgraph Denormalization
-      Wrapper4(Wrapper) -->|Provide| Denormalizer
+      Dictionary4(Dictionary) -->|Provide| Denormalizer
       Schema2(Schema) -->|Provide| Denormalizer
       Denormalizer --->|Denormalize| Instance2(Instance)
     end
@@ -54,34 +54,13 @@ flowchart TD
   ConfigFormat --->|Provide| Deserializer
   subgraph Deserialization
     Raw-config2(Raw Config) -->|Provide| Deserializer
-    Deserializer --->|Deserialize| Wrapper3(Wrapper)
+    Deserializer --->|Deserialize| Dictionary3(Dictionary)
   end
   subgraph Serialization
-    Wrapper2(Wrapper) -->|Provide| Serializer
+    Dictionary2(Dictionary) -->|Provide| Serializer
     Serializer --->|Serialize| Raw-config1(Raw Config)
   end
   ConfigFormat --->|Provide| Serializer
-```
-
-- Demo code:
-```java
-public static void main(String[] args) {
-    ConfigFactory factory = ConfigFactory.builder()
-            .useBuiltInComponents(true)
-            .registerAdapter(MyModel.class, MyModelAdapter.class)
-            .build();
-
-    Container container = factory.getNormalizer().normalize(MyModel.class, new MyModelInstance());
-    container.set("key", "value");
-    
-    YamlSerializer yaml = YamlSerializer.builder()
-            .compact(false)
-            .build();
-    String output = yaml.serialize(container);
-    container = yaml.deserialize(output);
-
-    MyModel instance = factory.getDenormalizer().denormalize(MyModel.class, container);
-}
 ```
 
 # Structure
@@ -89,7 +68,7 @@ public static void main(String[] args) {
 | Java           | Blueprint | Configuration |
 |----------------|-----------|---------------|
 | Class          | Schema    | Schema        |
-| Instance, POJO | -         | Wrapper       |
+| Instance, POJO | -         | Dictionary    |
 | Field          | Property  | Setting       |
 | Value          | -         | Value         |
 
@@ -125,8 +104,8 @@ public static void main(String[] args) {
   - Use `@Exclude` to avoid conflict, since other serialization library (such as Gson) ignore transient fields
 - `@Describe`: describe the property
 - `@Optional`: the optional only works for reference data types (including primitive wrappers) during denormalization
-  - When `@Optional` is absent, the field value is `null` when the corresponding setting is absent from the Wrapper
-  - When it is present, the field value will be kept as it is when the corresponding setting is absent from the Wrapper
+  - When `@Optional` is absent, the field value is `null` when the corresponding setting is absent from the Dictionary
+  - When it is present, the field value will be kept as it is when the corresponding setting is absent from the Dictionary
 - `@Validate`: validate the setting value
   - The difference between using `@Validate` and a separate validation is that `@Validate` integrates well with the ConfigDoc
   - When validation fails, the setting is skipped (see also: `@Optional`)
@@ -135,7 +114,7 @@ public static void main(String[] args) {
   - **Note:** A transient field is ignored from the schema. However, using `@Transisent` includes the field and only avoid normalization
 - `@Constant`: strictly avoid denormalization
   - **Note:** A constant/final field is included in the schema and denormalizable by default. However, using `@Constant` explicitly avoid denormalization
-- `@Payload`: specify the payload type - see: Generic resolution
+- `@Payload`: specify the payload type (see: Generic resolution)
 
 ### Validation
 - Provides simple value validation
@@ -169,13 +148,11 @@ public static void main(String[] args) {
 - Built-in: default, PascalCase, snake_case, kebab-case
 - Naming style can be manually-defined when constructing ConfigFactory
 
-## Wrapper
-- The wrapper is the intermediate representation of configuration
-- The wrapper is independent of the schema
-
-### Wrapper Instance
-- A wrapper instance is a mutable K-V container
-- The wrapper includes none, one or many settings
+## Dictionary
+- The dictionary is the intermediate representation of configuration
+- The dictionary can also be called the wrapper
+- The dictionary is independent of the schema
+- The dictionary includes none, one or many settings
 
 ### Setting
 - The setting has no value restrictions
@@ -183,7 +160,7 @@ public static void main(String[] args) {
 
 # Data types
 ## Simple data types
-- Simple data type is a terminology used within the Wrapper context
+- Simple data type is a terminology used within the Dictionary context
 - Simple data types are the most basic data types that any configuration format should support
   - Scalar types: 
     - Number, boolean, character
@@ -194,7 +171,7 @@ public static void main(String[] args) {
 - The term _simple_ is used to distinct from _primitive_ data types which does not include string. String is a reference type in Java, however, it is a scalar type (simple type) in terms of configuration.
 
 ## Complex data types
-- Beyond the Wrapper context, a data type is said to be complex which includes:
+- Beyond the context of Dictionary, a data type is said to be complex which includes:
   - Java primitives
   - Reference types such as primitive wrappers, String, Collection, etc
 
@@ -211,15 +188,15 @@ public static void main(String[] args) {
 
 ### Normalizer
 - The normalizer is constructed from a factory
-- The purpose of the normalizer is to map a complex type into a simple type, so it can be put into a wrapper
+- The purpose of the normalizer is to map a complex type into a simple type, so it can be put into a Dictionary
 
-| Java data type        | Wrapper-compatible | Note                              |
+| Java data type        | Dictionary-compatible | Note                              |
 |-----------------------|--------------------|-----------------------------------|
 | Primitive             | Scalar             | No conversion                     |
-| Wrapper of primitives | Scalar             | No conversion                     |
+| Dictionary of primitives | Scalar             | No conversion                     |
 | String                | Scalar             | No conversion                     |
 | Array of simple type  | Array              | No conversion                     |
-| Wrapper container     | Container          | No conversion                     |
+| Dictionary container     | Container          | No conversion                     |
 | Array of complex type | Array              | Built-in type-adapting            |
 | Iterable              | Array              | Built-in type-adapting            |
 | Map                   | Container          | Built-in type-adapting            |
@@ -248,14 +225,13 @@ flowchart TB
 - The adapter has two main method:
   - Normalize a POJO into a wrapper
   - Denormalize a wrapper into the POJO
-- The adapter should be stateless
 
-### Type inheritance
+### Type covariance
 - For a custom adapter of type `T`, It can work with POJO of type `T` or type `T' extends T`
 - Normalization: It must be able to normalize type `T` into a wrapper. As a result, any `T' extends T` can be upcasted to type `T` and be normalized with loss of information
 - Denormalization: A wrapper can be normalized into type `S` which `S` is `T` or downcast to `T' extends T`. `S` is found using type resolution.
 
-### Avoid information loss
+### Avoid loss of information
 - As the type adapter of type `T` can process any type `T' extends T`, information from subclass may be lost during normalization. To avoid, it is possible to define type adapter `T'` so that:
   - Type adapter `T'` processes type `T'` and any ` extends T'`
   - Type adapter `T` only processes type `T` and any type ` super T'`
@@ -273,34 +249,36 @@ flowchart TB
 | String    | String    | No conversion |
 
 ### Array
-- An array of type `T` will be converted into a dynamic-typing, ordered (wrapper) array
+- An array of type `T` will be converted into a new dynamic-typing, ordered array
 - Nested elements must be normalized and may have different target types
 
+### Dictionary
+No conversion.
+
 ### Other reference types
-- For reference type `T`, there must be an adapter that is compatible to `T`
-- If no type adapter available, the type cannot be normalized
+The complex object is auto-handled by default, or manually handled using type adapters.
 
 ## Denormalization
 
 ### Scalar Type
-| Source    | Target             | Note                                                             |
-|-----------|--------------------|------------------------------------------------------------------|
-| Number    | `? extends Number` | Casting                                                          |
-| Number    | Boolean            | `true` if non-negative                                           |
-| Number    | Character          | ASCII code, Unicode codepoint                                    |
-| Number    | String             | Stringify, up to 4 decimal points, pre/post zeros trimmed        |
-| Boolean   | Boolean            | No conversion                                                    |
-| Boolean   | Number             | `1` if true, `0` otherwise                                       |
-| Boolean   | Character          | `T` if true, `F` otherwise                                       |
-| Boolean   | String             | `true` if true, `false` otherwise                                |
-| Character | Character          | No conversion                                                    |
-| Character | Number             | ASCII code, Unicode codepoint                                    |
-| Character | Boolean            | Must be `t`, `f` (case-insensitive)                              |
-| Character | String             | Stringify                                                        |
-| String    | String             | No conversion                                                    |
-| String    | Number             | Parse number                                                     |
-| String    | Boolean            | `true` if `t`, `true`, `1` (case-insensitive), `false` otherwise |
-| String    | Character          | The first character                                              |
+| Source    | Target             | Note                                                 |
+|-----------|--------------------|------------------------------------------------------|
+| Number    | `? extends Number` | Casting                                              |
+| Number    | Boolean            | `true` if positive                                   |
+| Number    | Character          | Unicode codepoint                                    |
+| Number    | String             | Stringify                                            |
+| Boolean   | Boolean            | No conversion                                        |
+| Boolean   | Number             | `1` if true, `0` otherwise                           |
+| Boolean   | Character          | `1` if true, `0` otherwise                           |
+| Boolean   | String             | `true` if true, `false` otherwise                    |
+| Character | Character          | No conversion                                        |
+| Character | Number             | Unicode codepoint                                    |
+| Character | Boolean            | Must be `1`, `0` (case-insensitive)                  |
+| Character | String             | Stringify                                            |
+| String    | String             | No conversion                                        |
+| String    | Number             | Parse number                                         |
+| String    | Boolean            | Must be `true`, `false`, `1`, `0` (case-insensitive) |
+| String    | Character          | The first character, or `\0` if empty                |
 
 ### Array
 | Source | Target | Note                             |
@@ -308,9 +286,8 @@ flowchart TB
 | Scalar | Array  | Instantiate an array of length 1 |
 | Array  | Array  | Deep conversion                  |
 
-### Other reference types
-- For reference type `T`, there must be an adapter that is compatible to `T`
-- If no type adapter available, the type cannot be denormalized
+### Dictionary
+The dictionary is converted into an instance. By default, attempts to instantiate using the default constructor, if not, forces instantiation without invoking constructors. Otherwise, uses type adapter to manually process the conversion.
 
 ## Built-in Type Adapters
 
@@ -352,17 +329,19 @@ public class Person {
 | Map                     | LinkedHashMap       | Container   |
 | SortedMap               | TreeMap             | Container   |
 
+To denormalize collections and maps, the field must supply the type of elements (See: Generic resolution)
+
 ### Other reference types
 
 | Interface/Abstract Type | Implementation Type | Simple Type |
 |-------------------------|---------------------|-------------|
 | Enum                    | `? extends Enum`    | String      |
 
-| Class Type | Simple Type |
-|------------|-------------|
-| UUID       | String      |
-| URL        | String      |
-| URI        | String      |
+| Complex Type | Simple Type |
+|--------------|-------------|
+| UUID         | String      |
+| URL          | String      |
+| URI          | String      |
 
 ## Generic resolution
 From the example above:
@@ -387,7 +366,7 @@ public class Person {
 ```
 
 ### Type Adapter
-Type adapter is selected based on the raw type
+Type adapter is lookup based on the raw type
 
 | Type                   | Raw Type     |
 |------------------------|--------------|
@@ -400,7 +379,7 @@ Type adapter is selected based on the raw type
 For container types such as ones in the Collections API, normalization relies on the type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no restriction on the value type (except that the key must be a string)
 
 ### Denormalization
-- It is risky to denormalize a dynamically-typed container into a compound type. For example, heap pollution may occur:
+- Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize elements in a container because there is no way to know its schema. Besides that, the type of every element in the container must be compatible to each other. For example, heap pollution may occur:
 ```java
 @Configurable
 public class Person {
@@ -411,30 +390,29 @@ public class Person {
   }
 }
 ```
-
-- `@Payload` is an optional annotation that enforces payload type. It works with compound types which have built-in type-adapter.
+- Java does record type variables via Reflection, so it is possible to exact the schema to denormalize elements. This is the default behaviour.
 ```java
 @Configurable
 public class Person {
-  @Payload(Job.class)
-  public List jobs;
-  
-  public Job getJob(int i) {
-      return jobs.get(i); // must be a Job
-  }
+  public List<Job> jobs; // runtime: List; generics parameters=[Job]
 }
 ```
-- To improve readability, if there is a non-empty compound instance defined, payload type enforcement automatically applies, and can be overridden with `@Payload`
+- However, certain use cases need other way to provide actual types. Consider the following code, the list accepts all `T extends Job`. When denormalizing the list, which subtype of `Job` should it use?
 ```java
 @Configurable
-public class Person {
-  public List jobs = List.of(Job.DEFAULT);
-  
-  public Job getJob(int i) {
-      return jobs.get(i); // must be a Job
-  }
+public class Person<T extends Job> {
+  public List<T> jobs;
 }
 ```
+- `@Payload` is an optional annotation that explicitly specifies the actual types. It uses the same order as type variables of the associated field.
+```java
+@Configurable
+public class Person<T extends Job> {
+  @Payload(JobImpl.class)
+  public List<T> jobs;
+}
+```
+- `@Payload` means to provide a simple approach. Nested type parameters are unsupported. Variance of element implementation is unsupported. These complex use cases must use type adapters.
 
 ## Recursive (de)normalization
 ```java
@@ -471,7 +449,7 @@ public class Child extends Parent {
 ## Normalizablity
 - Built-in type adapters:
   + Primitives
-  + Wrapper of primitives
+  + Dictionary of primitives
   + String
   + Enum of normalizable types
   + Array of normalizable types

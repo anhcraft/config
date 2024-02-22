@@ -17,7 +17,7 @@ public class LongAdapter implements ScalarAdapter<Long> {
         else if (value instanceof Boolean)
             return complexify(ctx, targetType, ((Boolean) value) ? 1 : 0);
         else if (value instanceof Character)
-            return complexify(ctx, targetType, Character.getNumericValue(((Character) value)));
+            return (long) value;
         return null;
     }
 }

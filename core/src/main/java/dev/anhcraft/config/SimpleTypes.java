@@ -5,13 +5,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 
-public class SimpleTypes {
+public final class SimpleTypes {
     public static <T> boolean validate(@NotNull Class<T> value) {
         if (String.class.isAssignableFrom(value) ||
                 Number.class.isAssignableFrom(value) ||
                 Boolean.class.isAssignableFrom(value) ||
                 Character.class.isAssignableFrom(value) ||
-                Wrapper.class.isAssignableFrom(value))
+                Dictionary.class.isAssignableFrom(value))
             return true;
         if (value.isArray())
             return validate(value.getComponentType());
@@ -25,7 +25,7 @@ public class SimpleTypes {
                 value instanceof Number ||
                 value instanceof Boolean ||
                 value instanceof Character ||
-                value instanceof Wrapper)
+                value instanceof Dictionary)
             return true;
         if (value.getClass().isArray()) {
             Class<?> componentType = value.getClass().getComponentType();
@@ -46,17 +46,18 @@ public class SimpleTypes {
     public static <T> int getContainerSize(@NotNull T simpleValue) {
         if (simpleValue.getClass().isArray())
             return Array.getLength(simpleValue);
-        else if (simpleValue instanceof Wrapper)
-            return ((Wrapper) simpleValue).size();
+        else if (simpleValue instanceof Dictionary)
+            return ((Dictionary) simpleValue).size();
         else
             return 1;
     }
 
+    @Nullable
     public static <T> Object getContainerElement(T simple, int i) {
         if (simple.getClass().isArray())
             return Array.get(simple, i);
-        else if (simple instanceof Wrapper)
-            return ((Wrapper) simple).locate(i);
+        else if (simple instanceof Dictionary)
+            return ((Dictionary) simple).getValueAt(i);
         else
             return simple;
     }

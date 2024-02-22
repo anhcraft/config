@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
-public class PropertyNaming {
+public final class PropertyNaming {
     private final String primary;
     private final Set<String> aliases;
 

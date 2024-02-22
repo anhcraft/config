@@ -6,7 +6,7 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
-public class ObjectUtil {
+public final class ObjectUtil {
     private static Unsafe unsafe;
 
     static {

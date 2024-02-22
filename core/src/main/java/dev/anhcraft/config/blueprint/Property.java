@@ -6,11 +6,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class Property {
+public final class Property {
     public static final byte MODIFIER_OPTIONAL = 1;
     public static final byte MODIFIER_TRANSIENT = 2;
     public static final byte MODIFIER_CONSTANT = 4;
@@ -19,15 +20,15 @@ public class Property {
     private final List<String> description;
     private final byte modifier; // optional, transient, constant
     private final Validator validator;
-    private final Class<?> payloadType;
+    private final List<Class<?>> payloadType;
     private final Field field;
 
-    public Property(@NotNull PropertyNaming naming, @NotNull List<String> description, byte modifier, @NotNull Validator validator, @Nullable Class<?> payloadType, @NotNull Field field) {
+    public Property(@NotNull PropertyNaming naming, @NotNull List<String> description, byte modifier, @NotNull Validator validator, @Nullable Class<?>[] payloadType, @NotNull Field field) {
         this.naming = naming;
         this.description = Collections.unmodifiableList(description);
         this.modifier = modifier;
         this.validator = validator;
-        this.payloadType = payloadType;
+        this.payloadType = Collections.unmodifiableList(Arrays.asList(payloadType));
         this.field = field;
     }
 
@@ -68,7 +69,7 @@ public class Property {
     }
 
     @Nullable
-    public Class<?> payloadType() {
+    public List<Class<?>> payloadType() {
         return payloadType;
     }
 
