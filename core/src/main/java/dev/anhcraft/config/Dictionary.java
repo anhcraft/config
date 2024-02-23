@@ -11,18 +11,18 @@ public class Dictionary extends AbstractMap<String, Object> {
     private List<String> sortedKeys;
     private Set<Map.Entry<String, Object>> entryView;
 
-    @NotNull
-    public static Dictionary wrap(@NotNull Map<String, Object> map) {
+    public static @NotNull Dictionary wrap(@NotNull Map<String, Object> map) {
         Dictionary container = new Dictionary();
         container.backend = new LinkedHashMap<>(map);
         return container;
     }
 
-    @NotNull
-    public static Dictionary copyOf(@NotNull Dictionary dict) {
-        Dictionary container = new Dictionary();
-        container.backend = new LinkedHashMap<>(dict.backend);
-        return container;
+    public static @NotNull Dictionary copyOf(@NotNull Dictionary dict) {
+        return wrap(dict.backend);
+    }
+
+    public static @NotNull Dictionary copyOf(@NotNull Dictionary dict, boolean deep) {
+        return deep ? SimpleTypes.deepClone(dict) : wrap(dict.backend);
     }
 
     public Dictionary() {
@@ -40,7 +40,7 @@ public class Dictionary extends AbstractMap<String, Object> {
     @Override
     public @Nullable Object put(@NotNull String key, @Nullable Object value) {
         if (!SimpleTypes.validate(value))
-            throw new IllegalArgumentException("invalid value");
+            throw new IllegalArgumentException(String.format("Object of type %s is not a simple type", value.getClass().getName()));
         // TODO deep clone array since the element can be mutated to be a non-simple type
         Object previous = backend.get(key);
         if ((previous == null && value != null) || (previous != null && value == null))

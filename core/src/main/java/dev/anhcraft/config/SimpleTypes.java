@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class SimpleTypes {
     public static <T> boolean validate(@NotNull Class<T> value) {
@@ -36,6 +38,7 @@ public final class SimpleTypes {
                     if (!validate(Array.get(value, i)))
                         return false;
                 }
+                return true;
             } else { // Otherwise, we can do quick O(1) check
                 return validate(componentType);
             }
@@ -60,5 +63,31 @@ public final class SimpleTypes {
             return ((Dictionary) simple).getValueAt(i);
         else
             return simple;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T deepClone(T value) {
+        if (value instanceof String ||
+                value instanceof Number ||
+                value instanceof Boolean ||
+                value instanceof Character)
+            return value; // immutable
+        else if (value instanceof Dictionary) {
+            LinkedHashMap<String, Object> backend = ((Dictionary) value).unwrap();
+            for (Map.Entry<String, Object> entry : backend.entrySet()) {
+                entry.setValue(deepClone(entry.getValue()));
+            }
+            return (T) Dictionary.wrap(backend);
+        }
+        else if (value.getClass().isArray()) {
+            Class<?> componentType = value.getClass().getComponentType();
+            int n = Array.getLength(value);
+            Object result = Array.newInstance(componentType, n);
+            for (int i = 0; i < n; i++) {
+                Array.set(result, i, deepClone(Array.get(value, i)));
+            }
+            return (T) result;
+        }
+        throw new IllegalArgumentException(String.format("Object of type %s is not a simple type", value.getClass().getName()));
     }
 }

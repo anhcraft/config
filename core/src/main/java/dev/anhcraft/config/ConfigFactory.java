@@ -4,6 +4,7 @@ import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
 import dev.anhcraft.config.blueprint.Schema;
+import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class ConfigFactory {
@@ -22,18 +24,20 @@ public class ConfigFactory {
     private final ConfigNormalizer normalizer;
     private final ConfigDenormalizer denormalizer;
     private final Map<Class<?>, Schema> schemas;
+    private final Function<ConfigFactory, Context> contextProvider;
 
     ConfigFactory(Builder builder) {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
         this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, builder.validationRegistry);
-        this.normalizer = new ConfigNormalizer(this, builder.contextDepthLimit, builder.normalizerSettings);
-        this.denormalizer = new ConfigDenormalizer(this, builder.contextDepthLimit);
+        this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
+        this.denormalizer = new ConfigDenormalizer(this);
         this.schemas = new LinkedHashMap<>() {
             @Override
             protected boolean removeEldestEntry(Map.Entry eldest){
                 return size() > builder.schemaCacheCapacity;
             }
         };
+        this.contextProvider = builder.contextProvider;
     }
 
     @SuppressWarnings("unchecked")
@@ -49,6 +53,11 @@ public class ConfigFactory {
             clazz = clazz.getSuperclass();
         } while (clazz != null);
         return null;
+    }
+
+    @NotNull
+    public Context createContext() {
+        return contextProvider.apply(this);
     }
 
     @NotNull
@@ -70,9 +79,9 @@ public class ConfigFactory {
         private final Map<Class<?>, TypeAdapter<?>> typeAdapters = new HashMap<>();
         private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
         private UnaryOperator<String> namingStrategy = NamingStrategy.DEFAULT;
+        private Function<ConfigFactory, Context> contextProvider = Context::new;
         private int schemaCacheCapacity = 100;
-        private int contextDepthLimit = 20;
-        private byte normalizerSettings = 1;
+        private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
 
         public Builder() {
             typeAdapters.put(byte.class, new ByteAdapter());
@@ -94,68 +103,61 @@ public class ConfigFactory {
             typeAdapters.put(URI.class, new UriAdapter());
         }
 
-        @NotNull
-        public <T> Builder adaptType(@NotNull Class<T> type, @NotNull TypeAdapter<T> adapter) {
+        public @NotNull <T> Builder adaptType(@NotNull Class<T> type, @NotNull TypeAdapter<T> adapter) {
             typeAdapters.put(type, adapter);
             return this;
         }
 
-        @NotNull
-        public Builder useValidationRegistry(@NotNull ValidationRegistry validation) {
+        public @NotNull Builder useValidationRegistry(@NotNull ValidationRegistry validation) {
             validationRegistry = validation;
             return this;
         }
 
-        @NotNull
-        public Builder useNamingStrategy(@NotNull UnaryOperator<String> function) {
+        public @NotNull Builder useNamingStrategy(@NotNull UnaryOperator<String> function) {
             namingStrategy = function;
             return this;
         }
 
-        @NotNull
-        public Builder setSchemaCacheCapacity(int capacity) {
+        public @NotNull Builder provideContext(@NotNull Function<ConfigFactory, Context> provider) {
+            contextProvider = provider;
+            return this;
+        }
+
+        public @NotNull Builder setSchemaCacheCapacity(int capacity) {
             schemaCacheCapacity = capacity;
             return this;
         }
 
         /**
-         * Sets the limit of the context depth.<br>
-         * The context depth is the number of recursive calls to different type-adapting. The limit exists
-         * to prevent unnecessary recursions which can lead to stack overflows and performance issues.<br>
-         * The context depth is set to 20 by default.
-         * @param contextDepthLimit the limit
+         * Ignores the default values when normalizing into a {@link Dictionary} ({@code 0} and {@code false})<br>
+         * By default, sets to {@code true}
+         * @param ignore if the default values should be ignored
          * @return this
          */
-        @NotNull
-        public Builder setContextDepthLimit(int contextDepthLimit) {
-            this.contextDepthLimit = contextDepthLimit;
+        public @NotNull Builder ignoreDefaultValues(boolean ignore) {
+            normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES, ignore);
+            return this;
+        }
+
+        public @NotNull Builder ignoreEmptyArray(boolean ignore) {
+            normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY, ignore);
+            return this;
+        }
+
+        public @NotNull Builder ignoreEmptyDictionary(boolean ignore) {
+            normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY, ignore);
             return this;
         }
 
         /**
-         * Ignores the default values when normalizing into a {@link Dictionary}.<br>
-         * Includes: {@code 0} and {@code false}
-         * @param ignore if the default values should be ignored
+         * In normalization and denormalization, deep clones simple values. This applies to arrays, dictionaries and
+         * theirs nested children.<br>
+         * By defaults, sets to {@code false} to improve performance.
+         * @param deepClone if simple values should be deep cloned
          * @return this
          */
-        @NotNull
-        public Builder ignoreDefaultValues(boolean ignore) {
-            if (ignore) normalizerSettings |= 1;
-            else normalizerSettings &= ~1;
-            return this;
-        }
-
-        @NotNull
-        public Builder ignoreEmptyArray(boolean ignore) {
-            if (ignore) normalizerSettings |= 2;
-            else normalizerSettings &= ~2;
-            return this;
-        }
-
-        @NotNull
-        public Builder ignoreEmptyDictionary(boolean ignore) {
-            if (ignore) normalizerSettings |= 4;
-            else normalizerSettings &= ~4;
+        public @NotNull Builder deepClone(boolean deepClone) {
+            normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.DEEP_CLONE, deepClone);
             return this;
         }
 

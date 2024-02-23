@@ -8,6 +8,10 @@
 - Lightweight and simple
 - Loosely-couped modularity and extendability
 
+## Reference
+- [Gson Design Document](https://github.com/google/gson/blob/main/GsonDesignDocument.md)
+- [Guava Reflection Explained](https://github.com/google/guava/wiki/ReflectionExplained)
+
 # Architecture
 
 ## Modules
@@ -78,8 +82,10 @@ flowchart TD
 - The schema is factory-dependent (see ConfigFactory below)
 
 ## Property
-- A property represents a **non-transient instance** field
-  - A **final**, non-transient, instance field is also a property
+- A property represents a field in the associated class
+  - Transient fields, synthetic fields, native fields are excluded
+  - `@Exclude` to explicitly exclude a field
+  - A **final** field may be a property if it does not violate rules above
 - The property may contain value restrictions
 - The property can be any of Java data types
 - By default, the property name is derived from the field name
@@ -150,7 +156,7 @@ flowchart TD
 
 ## Dictionary
 - The dictionary is the intermediate representation of configuration
-- The dictionary can also be called the wrapper
+- The dictionary is also called "the wrapper"
 - The dictionary is independent of the schema
 - The dictionary includes none, one or many settings
 
@@ -178,7 +184,7 @@ flowchart TD
 ## Conversion
 - The process of converting a complex data type into a simple data type is called normalization.
 - The process of converting a simple data type into a complex data type is called denormalization.
-- (De)normalization does not guarantee consistency. It is dependent on type-adapting and value processing.
+- Conversion does not guarantee consistency. It depends on type-adapting and value processing.
 
 # Factory
 - The factory is the central instance containing built-in and custom-registered components.
@@ -190,78 +196,75 @@ flowchart TD
 - The normalizer is constructed from a factory
 - The purpose of the normalizer is to map a complex type into a simple type, so it can be put into a Dictionary
 
-| Java data type        | Dictionary-compatible | Note                              |
-|-----------------------|--------------------|-----------------------------------|
-| Primitive             | Scalar             | No conversion                     |
-| Dictionary of primitives | Scalar             | No conversion                     |
-| String                | Scalar             | No conversion                     |
-| Array of simple type  | Array              | No conversion                     |
-| Dictionary container     | Container          | No conversion                     |
-| Array of complex type | Array              | Built-in type-adapting            |
-| Iterable              | Array              | Built-in type-adapting            |
-| Map                   | Container          | Built-in type-adapting            |
-| _other_               | Container          | Automatic or custom type-adapting |
-
 ### Denormalizer
 - The denormalizer is also constructed from a factory
 - The purpose of the denormalizer is to map a simple Java data type into the target complex type
-- The denormalization is much complexer than the normalization:
-  - Relies on the given type which may be an interface (abstract class), not an implementation class
-  - Have to correctly find out an implementation class and instantiate it
-  - Dynamic value resolution due to end-user convenience: cast string to a scalar value and vice versa, wrap a scalar value in compound type, etc
 
-```mermaid
-flowchart TB
-  SimpleTypes -->|Provide| TypeAdapter
-  SimpleValues -->|Provide| TypeAdapter
-  ComplexType -->|Provide| TypeAdapter
-  TypeAdapter -->|Denormalize| ComplexObject
-```
+### Schema Storage
+Schema(s) of classes resides in the schema. The option `schemaCacheCapacity` limits the number of schemas in the cache.
 
 ## Type Adapters
 - It is possible to register custom adapters or override existing adapter(s) including the built-in
-- By default, Config does automatic type-adapting by using the schema and normalize an instance into a container. Using type adapter, it is possible to control the process, e.g: do complex logic, scalarize the object, etc
-- For non-POJOs, it is recommended to have their own type adapters
+- By default, Config does automatic type-adapting by using the schema to normalize an instance into a container, and vice versa. However, that process does not always work (see below). Using type adapter, it is possible to control the process, e.g: do complex logic, scalarize the object, etc
+- Type adapter is meant provide the final result. For example, when an object of class `T` is normalized into a Dictionary, only one type adapter that is compatible to `T` will be called. Type adapting is not pipeline. Even though, it is allowed to manually call another type-adapting.
 - The adapter has two main method:
-  - Normalize a POJO into a wrapper
-  - Denormalize a wrapper into the POJO
+  - Simplify a complex object into a simple object
+  - Complexify a simple object into a complex object
+
+### Type adapter searching
+To find the type adapter compatible to type `T`, the factory starts searching from `T` up to the root of class hierarchy. Searching ends when the type adapter at a level exists. If none is found, the normalizer/denormalizer does automatic type-adapting.
 
 ### Type covariance
-- For a custom adapter of type `T`, It can work with POJO of type `T` or type `T' extends T`
-- Normalization: It must be able to normalize type `T` into a wrapper. As a result, any `T' extends T` can be upcasted to type `T` and be normalized with loss of information
+- For a custom adapter of type `T`, It can work with instance of type `T` or type `T' extends T`
+- Normalization: It must be able to normalize type `T`. As a result, any `T' extends T` can be upcasted to type `T` and be normalized with loss of information
 - Denormalization: A wrapper can be normalized into type `S` which `S` is `T` or downcast to `T' extends T`. `S` is found using type resolution.
-
-### Avoid loss of information
 - As the type adapter of type `T` can process any type `T' extends T`, information from subclass may be lost during normalization. To avoid, it is possible to define type adapter `T'` so that:
   - Type adapter `T'` processes type `T'` and any ` extends T'`
   - Type adapter `T` only processes type `T` and any type ` super T'`
   - Note that: `T' extends T` which mean they are under the same hierarchy
 
+### Automatic type-adapting
+- By default, the library does automatic type-adapting to cover common use cases without the need of defining type adapters (See below)
+
 ## Normalization
-- To normalize a complex type into a simple type
 
 ### Scalar Type
-| Source    | Target    | Note          |
-|-----------|-----------|---------------|
-| Number    | Number    | No conversion |
-| Boolean   | Boolean   | No conversion |
-| Character | Character | No conversion |
-| String    | String    | No conversion |
+| Source     | Target     | Action                          |
+|------------|------------|---------------------------------|
+| Number     | Number     | No conversion                   |
+| Boolean    | Boolean    | No conversion                   |
+| Character  | Character  | No conversion                   |
+| String     | String     | No conversion                   |
 
 ### Array
-- An array of type `T` will be converted into a new dynamic-typing, ordered array
-- Nested elements must be normalized and may have different target types
+- Array of simple types can be skipped. If `deepClone` option is enabled, the normalizer recursively clones the array.
+- Otherwise, the array is converted into a new dynamic-typing, ordered array. Its elements are recursively normalized.
 
 ### Dictionary
-No conversion.
+- The dictionary can be skipped. If `deepClone` option is enabled, the normalizer recursively clones the dictionary.
 
 ### Other reference types
-The complex object is auto-handled by default, or manually handled using type adapters.
+- First, the normalizer searches for the nearest compatible type adapter. If one exists, the normalizer forwards the process to that type adapter. The normalizer throws an exception if the output is not a simple object.
+- If none type adapter exists, the normalizer continues with automatic type-adapting.
+
+### Automatic type-adapting
+- Automatic type-adapting (within normalization context) means to convert a complex object into a Dictionary using the compatible schema.
+- A schema of type `S` is compatible to the complex object of type `T` if `S` is `T` or `S` is supertype of `T`
+- First, the normalizer checks if the complex object is a Dictionary. If so, it does soft-copy or deep-copy into the destination Dictionary.
+- Otherwise, the normalizer uses the schema to recursively normalizer every property.
+  + `@Transient` property is skipped
+  + `null` value can remove the corresponding setting in the destination Dictionary (if the dictionary contains existing settings)
+  + Default value, empty array and empty dictionary may be omitted
+  + The normalizer does a final simple-type validation
 
 ## Denormalization
+- The denormalization is much complexer than the normalization:
+  - Relies on the given type which may be an interface (abstract class), not an implementation class, which means it is required to correctly find out the appropriate implementation class and instantiate it
+  - Due to type erasure, it is impossible to know the exact type of generic fields
+  - Dynamic value resolution due to end-user convenience: cast string to a scalar value and vice versa, wrap a scalar value in compound type, etc
 
 ### Scalar Type
-| Source    | Target             | Note                                                 |
+| Source    | Target             | Action                                               |
 |-----------|--------------------|------------------------------------------------------|
 | Number    | `? extends Number` | Casting                                              |
 | Number    | Boolean            | `true` if positive                                   |
@@ -379,7 +382,7 @@ Type adapter is lookup based on the raw type
 For container types such as ones in the Collections API, normalization relies on the type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no restriction on the value type (except that the key must be a string)
 
 ### Denormalization
-- Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize elements in a container because there is no way to know its schema. Besides that, the type of every element in the container must be compatible to each other. For example, heap pollution may occur:
+- Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize elements in a container because there is no way to know its schema. Besides that, it is critical to avoid heap pollution by ensuring type compatibility of elements in the container. For example:
 ```java
 @Configurable
 public class Person {
@@ -412,7 +415,21 @@ public class Person<T extends Job> {
   public List<T> jobs;
 }
 ```
-- `@Payload` means to provide a simple approach. Nested type parameters are unsupported. Variance of element implementation is unsupported. These complex use cases must use type adapters.
+```java
+@Configurable
+public class Person<T extends Job> {
+  @Payload(JobImpl[].class)
+  public List<T[]> jobs;
+}
+```
+```java
+@Configurable
+public class Person<T extends Job> {
+  @Payload({String.class, })
+  public Map<String, List<T[]>[]> jobs;
+}
+```
+- `@Payload` means to provide a simple approach. Exact type checking is unsupported. Variance of element implementation is unsupported. These complex use cases must use type adapters.
 
 ## Recursive (de)normalization
 ```java

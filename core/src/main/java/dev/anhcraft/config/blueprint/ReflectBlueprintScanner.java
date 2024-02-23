@@ -1,5 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
+import dev.anhcraft.config.ComplexTypes;
+import dev.anhcraft.config.error.UnsupportedSchemaException;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.validate.DisabledValidator;
@@ -23,6 +25,9 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
 
     @Override
     public @NotNull Schema scanSchema(@NotNull Class<?> type) {
+        if (!ComplexTypes.isEligibleForSchema(type))
+            throw new UnsupportedSchemaException(String.format("Cannot create schema for %s", type.getName()));
+
         Map<String, Property> lookup = new LinkedHashMap<>();
         List<Property> properties = new ArrayList<>();
 
@@ -49,7 +54,9 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
     }
 
     private boolean isExcluded(Field field) {
-        return Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) || field.getAnnotation(Exclude.class) != null;
+        return Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) ||
+                Modifier.isNative(field.getModifiers()) || field.isSynthetic() ||
+                field.getAnnotation(Exclude.class) != null;
     }
 
     private PropertyNaming scanName(Field field, Set<String> existing) {
@@ -117,6 +124,6 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
         if (payloadMeta != null) {
             return payloadMeta.value();
         }
-        return null;
+        return new Class[0];
     }
 }

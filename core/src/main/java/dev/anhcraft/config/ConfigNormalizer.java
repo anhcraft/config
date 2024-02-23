@@ -1,9 +1,13 @@
 package dev.anhcraft.config;
 
-import dev.anhcraft.config.adapter.AdapterContext;
+import dev.anhcraft.config.SettingFlag.Normalizer;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
+import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.context.ElementScope;
+import dev.anhcraft.config.context.PropertyScope;
+import dev.anhcraft.config.error.IllegalTypeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,40 +32,36 @@ import java.lang.reflect.Array;
  */
 public final class ConfigNormalizer {
     private final ConfigFactory configFactory;
-    private final int contextDepthLimit;
     private final byte settings;
 
-    public ConfigNormalizer(ConfigFactory configFactory, int contextDepthLimit, byte settings) {
+    public ConfigNormalizer(ConfigFactory configFactory, byte settings) {
         this.configFactory = configFactory;
-        this.contextDepthLimit = contextDepthLimit;
         this.settings = settings;
     }
 
     /**
      * Normalizes the given complex object into a simple object.<br>
-     * This creates a new {@link AdapterContext} to facilitate recursive calls.
+     * This creates a new {@link Context} to facilitate recursive calls.
      * @param complex the complex object
      * @return the simple object or {@code null} if the object cannot be normalized
      * @param <T> the type of the simple object
      * @throws Exception may throw exceptions during normalization
-     * @see #normalize(AdapterContext, Class, Object)
+     * @see #normalize(Context, Class, Object)
      */
-    @Nullable
-    public <T> Object normalize(@NotNull T complex) throws Exception {
-        return normalize(new AdapterContext(configFactory, 0), complex);
+    public <T> @Nullable Object normalize(@NotNull T complex) throws Exception {
+        return normalize(configFactory.createContext(), complex);
     }
 
     /**
      * Normalizes the given complex object into a simple object.
-     * @param ctx the {@link AdapterContext} to use
+     * @param ctx the {@link Context} to use
      * @param complex the complex object
      * @return the simple object or {@code null} if the object cannot be normalized
      * @param <T> the type of the simple object
      * @throws Exception may throw exceptions during normalization
-     * @see #normalize(AdapterContext, Class, Object)
+     * @see #normalize(Context, Class, Object)
      */
-    @Nullable
-    public <T> Object normalize(@NotNull AdapterContext ctx, @NotNull T complex) throws Exception {
+    public <T> @Nullable Object normalize(@NotNull Context ctx, @NotNull T complex) throws Exception {
         //noinspection unchecked
         return normalize(ctx, (Class<T>) complex.getClass(), complex);
     }
@@ -71,7 +71,7 @@ public final class ConfigNormalizer {
      * This normalizes {@code complex} using the schema of {@code type} and its superclasses. {@code <S>} can
      * be bounded to a certain supertype of {@code <T>} to make the simple object more generic. However, this
      * only works for the first layer of the transformation.
-     * @param ctx the {@link AdapterContext} to use
+     * @param ctx the {@link Context} to use
      * @param type the class or superclass of the complex object
      * @param complex the complex object
      * @return the simple object or {@code null} if the object cannot be normalized
@@ -79,116 +79,137 @@ public final class ConfigNormalizer {
      * @param <T> the type of the simple object
      * @throws Exception may throw exceptions during normalization
      */
-    @Nullable
-    public <S, T extends S> Object normalize(@NotNull AdapterContext ctx, @NotNull Class<S> type, @NotNull T complex) throws Exception {
-        validateType(type, complex);
+    public <S, T extends S> @Nullable Object normalize(@NotNull Context ctx, @NotNull Class<S> type, @NotNull T complex) throws Exception {
+        validateType(ctx, type, complex);
         return _normalize(ctx, type, complex);
     }
 
     /**
      * Normalizes the given complex object into the given dictionary.<br>
-     * This creates a new {@link AdapterContext} to facilitate recursive calls.
+     * This creates a new {@link Context} to facilitate recursive calls.
      * @param complex the complex object
      * @param dictionary the dictionary
      * @param <T> the type of the complex object
      * @throws Exception may throw exceptions during normalization
-     * @see #normalize(AdapterContext, Class, Object)
+     * @see #normalize(Context, Class, Object)
      */
     public <T> void normalizeToDictionary(@NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
         //noinspection unchecked
-        normalizeToDictionary(new AdapterContext(configFactory, 0), (Class<T>) complex.getClass(), complex, dictionary);
+        normalizeToDictionary(configFactory.createContext(), (Class<T>) complex.getClass(), complex, dictionary);
     }
 
     /**
      * Normalizes the given complex object into the given dictionary.
-     * @param ctx the {@link AdapterContext} to use
+     * @param ctx the {@link Context} to use
      * @param complex the complex object
      * @param dictionary the dictionary
      * @param <T> the type of the complex object
      * @throws Exception may throw exceptions during normalization
-     * @see #normalize(AdapterContext, Class, Object)
+     * @see #normalize(Context, Class, Object)
      */
-    public <T> void normalizeToDictionary(@NotNull AdapterContext ctx, @NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
+    public <T> void normalizeToDictionary(@NotNull Context ctx, @NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
         //noinspection unchecked
         normalizeToDictionary(ctx, (Class<T>) complex.getClass(), complex, dictionary);
     }
 
     /**
      * Normalizes the given complex object into the given dictionary.
-     * @param ctx the {@link AdapterContext} to use
+     * @param ctx the {@link Context} to use
      * @param type the class or superclass of the complex object
      * @param complex the complex object
      * @param dictionary the dictionary
      * @param <S> the type or supertype of the complex object
      * @param <T> the type of the complex object
      * @throws Exception may throw exceptions during normalization
-     * @see #normalize(AdapterContext, Class, Object)
+     * @see #normalize(Context, Class, Object)
      */
-    public <S, T extends S> void normalizeToDictionary(@NotNull AdapterContext ctx, @NotNull Class<S> type, @NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
-        validateType(type, complex);
+    public <S, T extends S> void normalizeToDictionary(@NotNull Context ctx, @NotNull Class<S> type, @NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
+        validateType(ctx, type, complex);
         _dynamicNormalize(ctx, type, complex, dictionary);
     }
 
     // ======== Internal implementations ========
 
-    private <S, T extends S> void validateType(Class<S> type, T complex) {
+    private <S, T extends S> void validateType(Context ctx, Class<S> type, T complex) {
         if (!type.isAssignableFrom(complex.getClass()))
-            throw new IllegalArgumentException("the given type is not the correct type or a supertype of the given complex object");
+            throw new IllegalTypeException(ctx, String.format("%s is not assignable from %s", type.getName(), complex.getClass().getName()));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
-    private Object _normalize(AdapterContext ctx, Class<?> type, Object complex) throws Exception {
-        if (SimpleTypes.validate(complex))
+    private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
+        if (SimpleTypes.validate(complex)) {
+            if (SettingFlag.has(settings, Normalizer.DEEP_CLONE))
+                return SimpleTypes.deepClone(complex);
             return complex;
-        if (type.isArray())
-            return _normalizeArray(ctx, complex); // flat operation
-        TypeAdapter adapter = configFactory.getTypeAdapter(type);
-        if (adapter == null) { // flat operation
-            Dictionary container = new Dictionary();
-            _dynamicNormalize(ctx, type, complex, container);
-            return container;
         }
-        if (ctx.getDepth() > contextDepthLimit) // prevent overflow due to bad type-adapting
-            return null;
-        ctx.commitDepth();
-        Object v = adapter.simplify(ctx, type, complex);
-        ctx.releaseDepth();
-        return v;
+        if (type.isArray()) {
+            return _normalizeArray(ctx, complex);
+        }
+        TypeAdapter adapter = configFactory.getTypeAdapter(type);
+        if (adapter != null) {
+            Object result = adapter.simplify(ctx, type, complex);
+            if (!SimpleTypes.validate(result)) {
+                String msg = String.format("Simple type expected but got %s", result.getClass().getName());
+                throw new IllegalTypeException(ctx, msg);
+            }
+            return result;
+        }
+        Dictionary container = new Dictionary();
+        _dynamicNormalize(ctx, type, complex, container);
+        return container;
     }
 
-    private Object _normalizeArray(AdapterContext ctx, Object complex) throws Exception {
+    private Object _normalizeArray(Context ctx, Object complex) throws Exception {
         int n = Array.getLength(complex);
         Object[] result = new Object[n];
         for (int i = 0; i < n; i++) {
             Object elem = Array.get(complex, i);
             Class<?> clazz = elem.getClass();
+            ctx.enterScope(new ElementScope(i));
             result[i] = _normalize(ctx, clazz, elem);
+            ctx.exitScope();
         }
         return result;
     }
 
-    private void  _dynamicNormalize(AdapterContext ctx, Class<?> type, Object complex, Dictionary container) throws Exception {
-        if (complex instanceof Dictionary)
-            container.putAll((Dictionary) complex);
+    private void  _dynamicNormalize(Context ctx, Class<?> type, Object complex, Dictionary container) throws Exception {
+        if (complex instanceof Dictionary) {
+            if (SettingFlag.has(settings, Normalizer.DEEP_CLONE)) { // TODO reduce allocations
+                container.putAll(SimpleTypes.deepClone((Dictionary) complex));
+            } else {
+                container.putAll((Dictionary) complex);
+            }
+            return;
+        }
+
         Schema schema = ctx.getFactory().getSchema(type);
         for (Property property : schema.properties()) {
             if (property.isTransient())
                 continue;
+
             // TODO should we have @Optional for wrapper-side?
             Object value = property.field().get(complex);
-            if (value != null)
+            if (value != null) {
+                ctx.enterScope(new PropertyScope(property, property.name()));
                 value = _normalize(ctx, value.getClass(), value);
+                ctx.exitScope();
+            }
 
-            if ((settings & 1) > 0 && value instanceof Number && Math.abs(((Number) value).floatValue()) < 1e-8)
+            if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
+                    value instanceof Number && Math.abs(((Number) value).floatValue()) < 1e-8)
                 continue;
-            if ((settings & 1) > 0 && value instanceof Boolean && !((Boolean) value))
+            if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
+                    value instanceof Boolean && !((Boolean) value))
                 continue;
-            if ((settings & 2) > 0 && value != null && value.getClass().isArray() && Array.getLength(value) == 0)
+            if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_ARRAY) &&
+                    value != null && value.getClass().isArray() && Array.getLength(value) == 0)
                 continue;
-            if ((settings & 4) > 0 && value instanceof Dictionary && ((Dictionary) value).isEmpty())
+            if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_DICTIONARY) &&
+                    value instanceof Dictionary && ((Dictionary) value).isEmpty())
                 continue;
 
-            container.put(property.name(), value);
+            if (SimpleTypes.validate(value))
+                container.put(property.name(), value);
         }
     }
 }
