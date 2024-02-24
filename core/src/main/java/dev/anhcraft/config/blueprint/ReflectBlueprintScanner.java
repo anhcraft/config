@@ -114,7 +114,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
     private Validator scanValidation(Field field) {
         Validate validateMeta = field.getAnnotation(Validate.class);
         if (validateMeta != null) {
-            return validationRegistry.parseString(validateMeta.value());
+            return validationRegistry.parseString(validateMeta.value(), validateMeta.silent());
         }
         return DisabledValidator.INSTANCE;
     }

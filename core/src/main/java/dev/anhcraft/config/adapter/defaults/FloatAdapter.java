@@ -1,13 +1,13 @@
 package dev.anhcraft.config.adapter.defaults;
 
 import dev.anhcraft.config.context.Context;
-import dev.anhcraft.config.adapter.ScalarAdapter;
+import dev.anhcraft.config.adapter.TypeAnnotator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public class FloatAdapter implements ScalarAdapter<Float> {
+public class FloatAdapter implements TypeAnnotator<Float> {
     @Override
     public @Nullable Float complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
         if (value instanceof Number)

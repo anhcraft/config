@@ -204,12 +204,19 @@ flowchart TD
 Schema(s) of classes resides in the schema. The option `schemaCacheCapacity` limits the number of schemas in the cache.
 
 ## Type Adapters
+- The type adapter of complex type `T` works around complex objects of type `T` and simple objects
 - It is possible to register custom adapters or override existing adapter(s) including the built-in
 - By default, Config does automatic type-adapting by using the schema to normalize an instance into a container, and vice versa. However, that process does not always work (see below). Using type adapter, it is possible to control the process, e.g: do complex logic, scalarize the object, etc
 - Type adapter is meant provide the final result. For example, when an object of class `T` is normalized into a Dictionary, only one type adapter that is compatible to `T` will be called. Type adapting is not pipeline. Even though, it is allowed to manually call another type-adapting.
 - The adapter has two main method:
   - Simplify a complex object into a simple object
   - Complexify a simple object into a complex object
+
+### Special type adapters
+- Type inferencer: the only purpose is to simplify a complex object
+  - The denormalizer does not use this type adapter, instead fallback to automatic type-adapting
+- Type annotator: the only purpose is to complexify a simple object
+  - The normalizer does not use this type adapter, instead fallback to automatic type-adapting
 
 ### Type adapter searching
 To find the type adapter compatible to type `T`, the factory starts searching from `T` up to the root of class hierarchy. Searching ends when the type adapter at a level exists. If none is found, the normalizer/denormalizer does automatic type-adapting.
@@ -244,14 +251,14 @@ To find the type adapter compatible to type `T`, the factory starts searching fr
 - The dictionary can be skipped. If `deepClone` option is enabled, the normalizer recursively clones the dictionary.
 
 ### Other reference types
-- First, the normalizer searches for the nearest compatible type adapter. If one exists, the normalizer forwards the process to that type adapter. The normalizer throws an exception if the output is not a simple object.
-- If none type adapter exists, the normalizer continues with automatic type-adapting.
+- First, the normalizer searches for the nearest type adapter from the supplied class up to the root of class hierarchy. If one exists, which is not a type annotator, the normalizer forwards the process to that type adapter. The normalizer throws an exception if the output is not a simple object.
+- If the type adapter exists as a type annotator, or no type adapter exists, the normalizer does automatic type-adapting.
 
 ### Automatic type-adapting
 - Automatic type-adapting (within normalization context) means to convert a complex object into a Dictionary using the compatible schema.
 - A schema of type `S` is compatible to the complex object of type `T` if `S` is `T` or `S` is supertype of `T`
 - First, the normalizer checks if the complex object is a Dictionary. If so, it does soft-copy or deep-copy into the destination Dictionary.
-- Otherwise, the normalizer uses the schema to recursively normalizer every property.
+- Otherwise, the normalizer uses the schema to recursively normalize every property.
   + `@Transient` property is skipped
   + `null` value can remove the corresponding setting in the destination Dictionary (if the dictionary contains existing settings)
   + Default value, empty array and empty dictionary may be omitted
@@ -264,6 +271,8 @@ To find the type adapter compatible to type `T`, the factory starts searching fr
   - Dynamic value resolution due to end-user convenience: cast string to a scalar value and vice versa, wrap a scalar value in compound type, etc
 
 ### Scalar Type
+- To denormalize scalar values, the library uses type annotator. A type annotator is a special type adapter that serves denormalization only.
+
 | Source    | Target             | Action                                               |
 |-----------|--------------------|------------------------------------------------------|
 | Number    | `? extends Number` | Casting                                              |
@@ -284,61 +293,45 @@ To find the type adapter compatible to type `T`, the factory starts searching fr
 | String    | Character          | The first character, or `\0` if empty                |
 
 ### Array
-| Source | Target | Note                             |
-|--------|--------|----------------------------------|
-| Scalar | Array  | Instantiate an array of length 1 |
-| Array  | Array  | Deep conversion                  |
+| Source | Target | Action                                           |
+|--------|--------|:-------------------------------------------------|
+| Scalar | Array  | Denormalize and instantiate an array of length 1 |
+| Array  | Array  | Recursive conversion                             |
 
 ### Dictionary
-The dictionary is converted into an instance. By default, attempts to instantiate using the default constructor, if not, forces instantiation without invoking constructors. Otherwise, uses type adapter to manually process the conversion.
+- When the target type is a Dictionary or a supertype of Dictionary, the library copies direct reference to the source, or deep clone if `deepClone` is enabled
 
-## Built-in Type Adapters
+### Other reference types
+- First, the denormalizer searches for the nearest type adapter from the supplied class up to the root of class hierarchy. If one exists, which is not a type inferencer, the denormalizer forwards the process to that type adapter.
+- If the type adapter exists as a type inferencer, or no type adapter exists, the denormalizer does automatic type-adapting.
+
+### Automatic type-adapting
+- Automatic type-adapting (within denormalization context) means to convert/write a Dictionary into an instance using the compatible schema.
+- A schema of type `S` is compatible to the complex object of type `T` if `S` is `T` or `S` is supertype of `T`
+- First, the denormalizer checks if the simple object is a Dictionary, otherwise, the output is always `null` or the process terminates (if the target instance is given)
+  - The instance can be supplied or automatically constructed.
+  - When constructs an instance, the denormalizer searches for the default constructor (empty parameters), if none exists, it forces instantiation without invoking any constructor
+- Otherwise, the denormalizer uses the schema to recursively denormalize every property.
+  + `@Constant` property is skipped
+  + It searches for the corresponding setting in the dictionary using the primary name, if not exists, fallback into other aliases (in order)
+  + `null` value is skipped if the property is `@Optional`
+  + If the target type is primitive, `null` value is skipped
+  + If the value is non-null, the denormalizer checks if it is compatible to the target type
+  + Validates the value, if success, writes to the field
+
+## Common type support
 
 ### Java Collections
-Consider the following code:
-
-```java
-@Configurable
-public class Person {
-  @Optional
-  public String name = "Guest";
-  public int birth;
-  public Map<String, MyModel> relationship;
-  public List<Job> jobs;
-  public ArrayList<Pet> pets;
-  public AbstractList emails;
-}
-```
-
-- By convention, common implementations, mutable data structures are preferred.
-- For example:
-  + `Map` will be resolved to `LinkedHashMap`
-  + `List` will be resolved to `ArrayList`
-  + `ArrayList` will be leaved as it is
-  + `AbstractList` will be resolved to `ArrayList`
-
+Common, mutable data structures are preferred.
 
 ![./assets/hierarchy-of-collection-framework-in-java.webp](./assets/hierarchy-of-collection-framework-in-java.webp)
 
-| Interface/Abstract Type | Implementation Type | Simple Type |
-|-------------------------|---------------------|-------------|
-| Iterable                | ArrayList           | Array       |
-| Collection              | ArrayList           | Array       |
-| List                    | ArrayList           | Array       |
-| Queue                   | ArrayBlockingQueue  | Array       |
-| Deque                   | ArrayDeque          | Array       |
-| Set                     | LinkedHashSet       | Array       |
-| SortedSet               | TreeSet             | Array       |
-| Map                     | LinkedHashMap       | Container   |
-| SortedMap               | TreeMap             | Container   |
-
 To denormalize collections and maps, the field must supply the type of elements (See: Generic resolution)
 
-### Other reference types
+### Enum
+For user convenience, the enum name is converted to lowercase upon normalization, and convert back to uppercase upon denormalization
 
-| Interface/Abstract Type | Implementation Type | Simple Type |
-|-------------------------|---------------------|-------------|
-| Enum                    | `? extends Enum`    | String      |
+### Other reference types
 
 | Complex Type | Simple Type |
 |--------------|-------------|

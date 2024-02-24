@@ -14,4 +14,9 @@ public class DisabledValidator implements Validator {
     public @NotNull String message() {
         return "";
     }
+
+    @Override
+    public boolean silent() {
+        return true;
+    }
 }

@@ -1,13 +1,13 @@
 package dev.anhcraft.config.adapter.defaults;
 
 import dev.anhcraft.config.context.Context;
-import dev.anhcraft.config.adapter.ScalarAdapter;
+import dev.anhcraft.config.adapter.TypeAnnotator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public class ShortAdapter implements ScalarAdapter<Short> {
+public class ShortAdapter implements TypeAnnotator<Short> {
     @Override
     public @Nullable Short complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
         if (value instanceof Number)

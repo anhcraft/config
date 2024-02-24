@@ -6,9 +6,11 @@ import org.jetbrains.annotations.NotNull;
 public class AggeratedValidator implements Validator {
     private final Validation[] validators;
     private String lastMessage = "";
+    private boolean silent;
 
-    public AggeratedValidator(@NotNull Validation[] validators) {
+    public AggeratedValidator(@NotNull Validation[] validators, boolean silent) {
         this.validators = validators;
+        this.silent = silent;
     }
 
     @Override
@@ -25,5 +27,10 @@ public class AggeratedValidator implements Validator {
     @Override
     public @NotNull String message() {
         return lastMessage;
+    }
+
+    @Override
+    public boolean silent() {
+        return silent;
     }
 }

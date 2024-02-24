@@ -30,7 +30,7 @@ public class ConfigFactory {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
         this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, builder.validationRegistry);
         this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
-        this.denormalizer = new ConfigDenormalizer(this);
+        this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
         this.schemas = new LinkedHashMap<>() {
             @Override
             protected boolean removeEldestEntry(Map.Entry eldest){
@@ -44,7 +44,7 @@ public class ConfigFactory {
     @Nullable
     public <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
         // TODO cache the type adapter
-        Class<?> clazz = type;
+        Class<?> clazz = ComplexTypes.wrapPrimitive(type);
         do {
             TypeAdapter<?> adapter = typeAdapters.get(clazz);
             if (adapter != null) {
@@ -82,29 +82,31 @@ public class ConfigFactory {
         private Function<ConfigFactory, Context> contextProvider = Context::new;
         private int schemaCacheCapacity = 100;
         private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
+        private byte denormalizerSettings = 0;
 
         public Builder() {
-            typeAdapters.put(byte.class, new ByteAdapter());
             typeAdapters.put(Byte.class, new ByteAdapter());
-            typeAdapters.put(short.class, new ShortAdapter());
             typeAdapters.put(Short.class, new ShortAdapter());
-            typeAdapters.put(int.class, new IntegerAdapter());
             typeAdapters.put(Integer.class, new IntegerAdapter());
-            typeAdapters.put(long.class, new LongAdapter());
             typeAdapters.put(Long.class, new LongAdapter());
-            typeAdapters.put(float.class, new FloatAdapter());
             typeAdapters.put(Float.class, new FloatAdapter());
-            typeAdapters.put(double.class, new DoubleAdapter());
             typeAdapters.put(Double.class, new DoubleAdapter());
+            typeAdapters.put(Character.class, new CharacterAdapter());
+            typeAdapters.put(Boolean.class, new BooleanAdapter());
             typeAdapters.put(String.class, new StringAdapter());
+            typeAdapters.put(Dictionary.class, new DictionaryAdapter());
             typeAdapters.put(Iterable.class, new IterableAdapter());
+            typeAdapters.put(Map.class, new MapAdapter());
+            typeAdapters.put(Enum.class, new EnumAdapter());
             typeAdapters.put(UUID.class, new UuidAdapter());
             typeAdapters.put(URL.class, new UrlAdapter());
             typeAdapters.put(URI.class, new UriAdapter());
         }
 
         public @NotNull <T> Builder adaptType(@NotNull Class<T> type, @NotNull TypeAdapter<T> adapter) {
-            typeAdapters.put(type, adapter);
+            if (TypeAdapter.class.isAssignableFrom(type))
+                throw new IllegalArgumentException("Wrong type?");
+            typeAdapters.put(ComplexTypes.wrapPrimitive(type), adapter);
             return this;
         }
 
@@ -158,6 +160,7 @@ public class ConfigFactory {
          */
         public @NotNull Builder deepClone(boolean deepClone) {
             normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.DEEP_CLONE, deepClone);
+            denormalizerSettings = SettingFlag.set(denormalizerSettings, SettingFlag.Denormalizer.DEEP_CLONE, deepClone);
             return this;
         }
 

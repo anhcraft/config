@@ -53,7 +53,7 @@ public class Dictionary extends AbstractMap<String, Object> {
     // ======== Extra implementations ========
 
     @Nullable
-    public Map.Entry<String, Object> tryGet(@NotNull String name, @NotNull Set<String> aliases) {
+    public Map.Entry<String, Object> search(@NotNull String name, @NotNull Set<String> aliases) {
         Object value = get(name);
         if (value != null) {
             return Map.entry(name, value);

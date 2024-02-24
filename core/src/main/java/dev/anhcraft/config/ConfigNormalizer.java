@@ -2,6 +2,7 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.SettingFlag.Normalizer;
 import dev.anhcraft.config.adapter.TypeAdapter;
+import dev.anhcraft.config.adapter.TypeAnnotator;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
@@ -37,6 +38,10 @@ public final class ConfigNormalizer {
     public ConfigNormalizer(ConfigFactory configFactory, byte settings) {
         this.configFactory = configFactory;
         this.settings = settings;
+    }
+
+    public byte getSettings() {
+        return settings;
     }
 
     /**
@@ -146,7 +151,7 @@ public final class ConfigNormalizer {
             return _normalizeArray(ctx, complex);
         }
         TypeAdapter adapter = configFactory.getTypeAdapter(type);
-        if (adapter != null) {
+        if (adapter != null && !(adapter instanceof TypeAnnotator)) {
             Object result = adapter.simplify(ctx, type, complex);
             if (!SimpleTypes.validate(result)) {
                 String msg = String.format("Simple type expected but got %s", result.getClass().getName());

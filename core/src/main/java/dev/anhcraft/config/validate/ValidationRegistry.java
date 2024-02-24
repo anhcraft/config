@@ -46,7 +46,7 @@ public class ValidationRegistry {
     }
 
     @NotNull
-    public Validator parseString(@NotNull String str) {
+    public Validator parseString(@NotNull String str, boolean silent) {
         List<Validation> list = new ArrayList<>();
         String[] tuples = str.trim().split("\\s*,\\s*");
 
@@ -62,7 +62,7 @@ public class ValidationRegistry {
             list.add(validation.apply(args.length > 1 ? args[1] : ""));
         }
 
-        return new AggeratedValidator(list.toArray(Validation[]::new));
+        return new AggeratedValidator(list.toArray(Validation[]::new), silent);
     }
 
     public static class Builder {

@@ -7,8 +7,27 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ComplexTypes {
+    public final static Map<Class<?>, Class<?>> map = new HashMap<>();
+
+    static {
+        map.put(byte.class, Byte.class);
+        map.put(short.class, Short.class);
+        map.put(int.class, Integer.class);
+        map.put(long.class, Long.class);
+        map.put(float.class, Float.class);
+        map.put(double.class, Double.class);
+        map.put(char.class, Character.class);
+        map.put(boolean.class, Boolean.class);
+    }
+
+    public static @NotNull Class<?> wrapPrimitive(@NotNull Class<?> clazz) {
+        return map.getOrDefault(clazz, clazz);
+    }
+
     public static boolean isEligibleForSchema(@NotNull Class<?> clazz) {
         return !(clazz.isPrimitive() || clazz.isEnum() || clazz.isArray() || clazz.isInterface() ||
                 clazz.isAnnotation() || clazz.isSynthetic() || clazz.isAnonymousClass());
@@ -44,5 +63,15 @@ public class ComplexTypes {
         } else {
             return (Class<?>) type;
         }
+    }
+
+    @Nullable
+    public static Type getActualType(@NotNull Type container, int i) {
+        if (container instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) container;
+            Type[] args = parameterizedType.getActualTypeArguments();
+            return i < args.length ? args[i] : null;
+        }
+        return null;
     }
 }
