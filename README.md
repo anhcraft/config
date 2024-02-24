@@ -21,7 +21,7 @@ A Java object-mapping library for configuration.
 Check out the [wiki](https://github.com/anhcraft/config/wiki/) for installation guide, tutorials and code examples.
 
 ## Branches
-- `next`: newest version (W.I.P, Java 11+)
+- `main`: newest version (W.I.P, Java 11+)
 - `ver/1.2`: 1.2.x versions (legacy, Java 8+)
 
 ## Contribution
