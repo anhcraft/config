@@ -16,6 +16,10 @@ public class PropertyScope implements Scope {
         return property;
     }
 
+    /**
+     * Gets the setting involved in this scope.
+     * @return the setting or <b>empty</b> if no setting exists
+     */
     public @NotNull String getSetting() {
         return setting;
     }

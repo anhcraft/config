@@ -8,8 +8,8 @@ import java.util.List;
 
 public class RangeValidation extends ParameterizedValidation {
     private static final DecimalFormat FORMAT = new DecimalFormat("0.#");
-    private double min = Double.MIN_VALUE;
-    private double max = Double.MAX_VALUE;
+    private Double min;
+    private Double max;
 
     public RangeValidation(@NotNull String arg) {
         super(arg);
@@ -30,13 +30,20 @@ public class RangeValidation extends ParameterizedValidation {
     public boolean check(Object value) {
         if (value instanceof Number) {
             double number = ((Number) value).doubleValue();
-            return number >= min && number <= max;
+            if (min != null && number < min) return false;
+            return max == null || !(number > max);
         }
         return true;
     }
 
     @Override
     public @NotNull String message() {
-        return String.format("must be between %s and %s", FORMAT.format(min), FORMAT.format(max));
+        if (min != null && max == null)
+            return String.format("must be at least %s", FORMAT.format(min));
+        if (min == null && max != null)
+            return String.format("must be at most %s", FORMAT.format(max));
+        if (min != null)
+            return String.format("must be between %s and %s", FORMAT.format(min), FORMAT.format(max));
+        return "";
     }
 }

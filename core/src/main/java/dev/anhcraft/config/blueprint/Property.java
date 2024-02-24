@@ -2,11 +2,9 @@ package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.validate.Validator;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -20,15 +18,13 @@ public final class Property {
     private final List<String> description;
     private final byte modifier; // optional, transient, constant
     private final Validator validator;
-    private final List<Class<?>> payloadType;
     private final Field field;
 
-    public Property(@NotNull PropertyNaming naming, @NotNull List<String> description, byte modifier, @NotNull Validator validator, @Nullable Class<?>[] payloadType, @NotNull Field field) {
+    public Property(@NotNull PropertyNaming naming, @NotNull List<String> description, byte modifier, @NotNull Validator validator, @NotNull Field field) {
         this.naming = naming;
         this.description = Collections.unmodifiableList(description);
         this.modifier = modifier;
         this.validator = validator;
-        this.payloadType = Collections.unmodifiableList(Arrays.asList(payloadType));
         this.field = field;
     }
 
@@ -68,14 +64,9 @@ public final class Property {
         return validator;
     }
 
-    @Nullable
-    public List<Class<?>> payloadType() {
-        return payloadType;
-    }
-
     @NotNull
     public Type type() {
-        return field.getType();
+        return field.getGenericType();
     }
 
     @NotNull

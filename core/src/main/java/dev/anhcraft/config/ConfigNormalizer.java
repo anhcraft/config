@@ -9,6 +9,7 @@ import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
+import dev.anhcraft.config.type.SimpleTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -168,10 +169,12 @@ public final class ConfigNormalizer {
         int n = Array.getLength(complex);
         Object[] result = new Object[n];
         for (int i = 0; i < n; i++) {
-            Object elem = Array.get(complex, i);
-            Class<?> clazz = elem.getClass();
             ctx.enterScope(new ElementScope(i));
-            result[i] = _normalize(ctx, clazz, elem);
+            {
+                Object elem = Array.get(complex, i);
+                Class<?> clazz = elem.getClass();
+                result[i] = _normalize(ctx, clazz, elem);
+            }
             ctx.exitScope();
         }
         return result;
@@ -192,29 +195,33 @@ public final class ConfigNormalizer {
             if (property.isTransient())
                 continue;
 
-            // TODO should we have @Optional for wrapper-side?
-            Object value = property.field().get(complex);
-            if (value != null) {
-                ctx.enterScope(new PropertyScope(property, property.name()));
-                value = _normalize(ctx, value.getClass(), value);
-                ctx.exitScope();
+            ctx.enterScope(new PropertyScope(property, property.name()));
+            scope:
+            {
+
+                // TODO should we have @Optional for wrapper-side?
+                Object value = property.field().get(complex);
+                if (value != null) {
+                    value = _normalize(ctx, value.getClass(), value);
+                }
+
+                if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
+                        value instanceof Number && Math.abs(((Number) value).floatValue()) < 1e-8)
+                    break scope;
+                if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
+                        value instanceof Boolean && !((Boolean) value))
+                    break scope;
+                if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_ARRAY) &&
+                        value != null && value.getClass().isArray() && Array.getLength(value) == 0)
+                    break scope;
+                if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_DICTIONARY) &&
+                        value instanceof Dictionary && ((Dictionary) value).isEmpty())
+                    break scope;
+
+                if (SimpleTypes.validate(value))
+                    container.put(property.name(), value);
             }
-
-            if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
-                    value instanceof Number && Math.abs(((Number) value).floatValue()) < 1e-8)
-                continue;
-            if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES) &&
-                    value instanceof Boolean && !((Boolean) value))
-                continue;
-            if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_ARRAY) &&
-                    value != null && value.getClass().isArray() && Array.getLength(value) == 0)
-                continue;
-            if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_DICTIONARY) &&
-                    value instanceof Dictionary && ((Dictionary) value).isEmpty())
-                continue;
-
-            if (SimpleTypes.validate(value))
-                container.put(property.name(), value);
+            ctx.exitScope();
         }
     }
 }

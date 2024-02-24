@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SizeValidation extends ParameterizedValidation {
-    private int min = 0;
-    private int max = Integer.MAX_VALUE;
+    private Integer min;
+    private Integer max;
 
     public SizeValidation(@NotNull String arg) {
         super(arg);
@@ -35,11 +35,20 @@ public class SizeValidation extends ParameterizedValidation {
             number = ((Collection<?>) value).size();
         else if (value instanceof Map)
             number = ((Map<?, ?>) value).size();
-        return (number == -1) || (number >= min && number <= max);
+        if ((number == -1))
+            return true;
+        if (min != null && number < min) return false;
+        return max == null || !(number > max);
     }
 
     @Override
     public @NotNull String message() {
-        return String.format("must be between %d and %d", min, max);
+        if (min != null && max == null)
+            return String.format("must be at least %d", min);
+        if (min == null && max != null)
+            return String.format("must be at most %d", max);
+        if (min != null)
+            return String.format("must be between %d and %d", min, max);
+        return "";
     }
 }
