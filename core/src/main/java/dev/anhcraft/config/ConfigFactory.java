@@ -5,6 +5,7 @@ import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -171,6 +172,25 @@ public class ConfigFactory {
         public @NotNull Builder deepClone(boolean deepClone) {
             normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.DEEP_CLONE, deepClone);
             denormalizerSettings = SettingFlag.set(denormalizerSettings, SettingFlag.Denormalizer.DEEP_CLONE, deepClone);
+            return this;
+        }
+
+        /**
+         * When parsing a number, strictly checks the number range. For example:
+         * <ul>
+         *     <li>Without this flag: {@code adaptByte("255.001") == -1}</li>
+         *     <li>With this flag: {@code adaptByte("255.001")} throws {@link InvalidValueException}</li>
+         * </ul>
+         * When this flag is off, the denormalizer parses the string as {@link Double} first, and then casts it to
+         * the desired number type. When it is on, the denormalizer parses the string using the "parse" method of
+         * the desired number type, e.g: {@link Integer#parseInt(String)} for the integer adapter.<br>
+         * Note: the string is always trimmed before parsing no matter this flag is on or off.<br>
+         * This setting is {@code false} by default to enhance user convenience.
+         * @param strict should strictly parse numbers
+         * @return this
+         */
+        public @NotNull Builder strictNumberParsing(boolean strict) {
+            denormalizerSettings = SettingFlag.set(denormalizerSettings, SettingFlag.Denormalizer.STRICT_NUMBER_PARSING, strict);
             return this;
         }
 

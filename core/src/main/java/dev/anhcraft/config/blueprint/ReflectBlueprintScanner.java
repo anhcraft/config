@@ -14,6 +14,9 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
+/**
+ * A Reflection-based {@link BlueprintScanner}
+ */
 public class ReflectBlueprintScanner implements BlueprintScanner {
     private final UnaryOperator<String> namingStrategy;
     private final ValidationRegistry validationRegistry;
@@ -25,7 +28,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
 
     @Override
     public @NotNull Schema scanSchema(@NotNull Class<?> type) {
-        if (!ComplexTypes.isEligibleForSchema(type))
+        if (!ComplexTypes.isNormalClassOrAbstract(type))
             throw new UnsupportedSchemaException(String.format("Cannot create schema for %s", type.getName()));
 
         Map<String, Property> lookup = new LinkedHashMap<>();

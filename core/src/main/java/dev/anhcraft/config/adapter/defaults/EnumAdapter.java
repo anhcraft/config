@@ -8,18 +8,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 
-public class EnumAdapter implements TypeAdapter<Enum<?>> {
+@SuppressWarnings("rawtypes")
+public class EnumAdapter implements TypeAdapter<Enum> {
 
     @Override
-    public @Nullable Object simplify(@NotNull Context ctx, @NotNull Class<Enum<?>> sourceType, @NotNull Enum<?> value) throws Exception {
+    public @Nullable Object simplify(@NotNull Context ctx, @NotNull Class<? extends Enum> sourceType, @NotNull Enum value) throws Exception {
         return value.name().toLowerCase();
     }
 
     @Override
-    public @Nullable Enum<?> complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+    public @Nullable Enum complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
         if (value instanceof String) {
-            //noinspection rawtypes,unchecked
-            return Enum.valueOf((Class) ComplexTypes.erasure(targetType), ((String) value).toUpperCase());
+            try {
+                //noinspection rawtypes,unchecked
+                return Enum.valueOf((Class) ComplexTypes.erasure(targetType), ((String) value).trim().toUpperCase());
+            } catch (IllegalArgumentException ignored) {} // TODO add strict enum parsing
         }
         return null;
     }

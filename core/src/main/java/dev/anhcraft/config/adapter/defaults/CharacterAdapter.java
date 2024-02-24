@@ -15,7 +15,9 @@ public class CharacterAdapter implements TypeAnnotator<Character> {
         else if (value instanceof String)
             return ((String) value).isEmpty() ? '\0' : ((String) value).charAt(0);
         else if (value instanceof Boolean)
-            return complexify(ctx, ((Boolean) value) ? '1' : '0', targetType);
+            return ((Boolean) value) ? '1' : '0';
+        else if (value instanceof Character)
+            return (Character) value;
         return null;
     }
 }

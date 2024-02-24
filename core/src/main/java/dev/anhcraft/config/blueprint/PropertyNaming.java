@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Represents naming information of a {@link Property}.
+ */
 public final class PropertyNaming {
     private final String primary;
     private final Set<String> aliases;
@@ -14,11 +17,19 @@ public final class PropertyNaming {
         this.aliases = aliases;
     }
 
+    /**
+     * Gets the primary name.
+     * @return the primary name
+     */
     @NotNull
     public String primary() {
         return primary;
     }
 
+    /**
+     * Gets all aliases.
+     * @return the aliases
+     */
     @NotNull
     public Set<String> aliases() {
         return aliases;

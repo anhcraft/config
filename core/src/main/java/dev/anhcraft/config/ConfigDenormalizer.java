@@ -54,7 +54,7 @@ public class ConfigDenormalizer {
 
     private <T> void validateSimpleType(Context ctx, T simple) {
         if (!SimpleTypes.validate(simple))
-            throw new IllegalTypeException(ctx, "Supplied argument is not a simple object");
+            throw new IllegalTypeException(ctx, "Supplied argument is not a simple object: " + simple);
     }
 
     private void validateComplexType(Context ctx, @NotNull Object instance, @NotNull Type targetType) {
@@ -63,7 +63,7 @@ public class ConfigDenormalizer {
             if (!erasureType.isAssignableFrom(instance.getClass()))
                 throw new IllegalTypeException(ctx, "Supplied instance is not compatible to " + erasureType.getName());
         } catch (ClassNotFoundException e) {
-            throw new IllegalTypeException(ctx, "Cannot perform type check");
+            throw new IllegalTypeException(ctx, "Cannot perform type check", e);
         }
     }
 

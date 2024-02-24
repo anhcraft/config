@@ -3,6 +3,9 @@ package dev.anhcraft.config.error;
 import dev.anhcraft.config.context.Context;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents an exception occurred within a {@link Context}
+ */
 public class ContextException extends RuntimeException {
     private final Context context;
 

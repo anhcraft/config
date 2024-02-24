@@ -327,6 +327,7 @@ Common, mutable data structures are preferred.
 ![./assets/hierarchy-of-collection-framework-in-java.webp](./assets/hierarchy-of-collection-framework-in-java.webp)
 
 To denormalize collections and maps, the field must supply the type of elements (See: Generic resolution)
+  - If the source is a scalar value, it is auto-converted into an array of length 1 and then continue converting into an appropriate collection
 
 ### Enum
 For user convenience, the enum name is converted to lowercase upon normalization, and convert back to uppercase upon denormalization

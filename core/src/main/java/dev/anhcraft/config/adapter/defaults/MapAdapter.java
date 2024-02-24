@@ -11,28 +11,29 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public class MapAdapter implements TypeAdapter<Map<?, ?>> {
-    @SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class MapAdapter implements TypeAdapter<Map> {
     @Override
-    public @Nullable Object simplify(@NotNull Context ctx, @NotNull Class<Map<?, ?>> sourceType, @NotNull Map<?, ?> value) throws Exception {
+    public @Nullable Object simplify(@NotNull Context ctx, @NotNull Class<? extends Map> sourceType, @NotNull Map value) throws Exception {
         Dictionary dict = new Dictionary();
-        for (Map.Entry<?, ?> object : value.entrySet()) {
-            Object key = ctx.simplify(ctx, (Class) object.getKey().getClass(), object.getKey());
-            if (key == null || SimpleTypes.getContainerSize(key) > 1)
+        Set<Map.Entry> entries = value.entrySet();
+        for (Map.Entry object : entries) {
+            Object key = ctx.simplify(ctx, object.getKey().getClass(), object.getKey());
+            if (key == null || !SimpleTypes.isScalar(key.getClass()))
                 continue;
-            Object val = ctx.simplify(ctx, (Class) object.getValue().getClass(), object.getValue());
+            Object val = ctx.simplify(ctx, object.getValue().getClass(), object.getValue());
             if (val == null)
                 continue;
             dict.put(String.valueOf(key), val);
         }
-        return dict;
+        return dict.isEmpty() ? null : dict;
     }
 
     @Override
-    public @Nullable Map<?, ?> complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+    public @Nullable Map complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
         if (value instanceof Dictionary) {
-            Type keyType = ComplexTypes.getActualType(targetType, 0);
-            Type valueType = ComplexTypes.getActualType(targetType, 1);
+            Type keyType = ComplexTypes.getActualTypeArgument(targetType, 0);
+            Type valueType = ComplexTypes.getActualTypeArgument(targetType, 1);
             if (keyType == null || valueType == null)
                 return null;
 
