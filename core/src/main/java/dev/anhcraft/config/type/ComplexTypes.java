@@ -30,7 +30,7 @@ public class ComplexTypes {
         return map.getOrDefault(clazz, clazz);
     }
 
-    public static boolean isEligibleForSchema(@NotNull Class<?> clazz) {
+    public static boolean isNormalClassOrAbstract(@NotNull Class<?> clazz) {
         return !(clazz.isPrimitive() || clazz.isEnum() || clazz.isArray() || clazz.isInterface() ||
                 clazz.isAnnotation() || clazz.isSynthetic() || clazz.isAnonymousClass());
     }
@@ -94,11 +94,13 @@ public class ComplexTypes {
     }
 
     @Nullable
-    public static Type getActualType(@NotNull Type container, int i) {
+    public static Type getActualTypeArgument(@NotNull Type container, int i) {
         if (container instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) container;
             Type[] args = parameterizedType.getActualTypeArguments();
             return i < args.length ? args[i] : null;
+        } else if (container instanceof TypeResolver) {
+            return getActualTypeArgument(((TypeResolver) container).provideType(), i);
         }
         return null;
     }

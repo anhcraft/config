@@ -22,7 +22,8 @@ public class BooleanAdapter implements TypeAnnotator<Boolean> {
             char c = (char) value;
             if (c == '1') return true;
             else if (c == '0') return false;
-        }
+        } else if (value instanceof Boolean)
+            return (Boolean) value;
         return null;
     }
 }

@@ -5,6 +5,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * Represents the schema of a class.<br>
+ * The schema is scanner-dependent and thus is factory-dependent even though in certain cases, it is possible
+ * to compare two {@link Schema} by comparing their associated {@link Class}
+ */
 public final class Schema {
     private final Class<?> type;
     private final List<Property> properties;
@@ -16,6 +21,10 @@ public final class Schema {
         this.lookup = Collections.unmodifiableMap(lookup);
     }
 
+    /**
+     * Gets the associated class.
+     * @return the class
+     */
     @NotNull
     public Class<?> type() {
         return type;

@@ -9,7 +9,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class SimpleTypes {
+    public static <T> boolean isScalar(@NotNull Class<T> value) {
+        if (value.isPrimitive())
+            return true;
+        return String.class.isAssignableFrom(value) ||
+                Number.class.isAssignableFrom(value) ||
+                Boolean.class.isAssignableFrom(value) ||
+                Character.class.isAssignableFrom(value);
+    }
+
     public static <T> boolean validate(@NotNull Class<T> value) {
+        if (value.isPrimitive())
+            return true;
         if (String.class.isAssignableFrom(value) ||
                 Number.class.isAssignableFrom(value) ||
                 Boolean.class.isAssignableFrom(value) ||

@@ -2,6 +2,9 @@ package dev.anhcraft.config.error;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A schema is unsupported.
+ */
 public class UnsupportedSchemaException extends RuntimeException {
 
     public UnsupportedSchemaException(@NotNull String message) {
