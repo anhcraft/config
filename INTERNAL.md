@@ -342,42 +342,36 @@ For user convenience, the enum name is converted to lowercase upon normalization
 ## Generic resolution
 From the example above:
 ```java
-@Configurable
 public class Person {
   public Map<String, MyModel> relationship;
   public List<Job> jobs;
-  public ArrayList<Pet> pets;
   public AbstractList emails;
 }
 ```
 Due to type erasure at compile-time, the code above turns into:
 ```java
-@Configurable
 public class Person {
   public Map relationship;
   public List jobs;
-  public ArrayList pets;
   public AbstractList emails;
 }
 ```
 
 ### Type Adapter
-Type adapter is lookup based on the raw type
+Type adapter lookup relies on the raw type
 
 | Type                   | Raw Type     |
 |------------------------|--------------|
 | `Map<String, MyModel>` | Map          |
 | `List<Job>`            | List         |
-| `ArrayList<Pet>`       | ArrayList    |
 | `AbstractList`         | AbstractList |
 
 ### Normalization
-For container types such as ones in the Collections API, normalization relies on the type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no restriction on the value type (except that the key must be a string)
+For container types such as ones in the Collections API, normalization relies on the actual type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no restriction on the value type (except that the key must be a string)
 
 ### Denormalization
-- Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize elements in a container because there is no way to know its schema. Besides that, it is critical to avoid heap pollution by ensuring type compatibility of elements in the container. For example:
+- Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize into a container because there is no way to know its payload type. For example:
 ```java
-@Configurable
 public class Person {
   public List jobs;
   
@@ -386,88 +380,68 @@ public class Person {
   }
 }
 ```
-- Java does record type variables via Reflection, so it is possible to exact the schema to denormalize elements. This is the default behaviour.
+- Java does record parameterized types bound to fields, so it is possible use Reflection and exact full type information
 ```java
-@Configurable
 public class Person {
-  public List<Job> jobs; // runtime: List; generics parameters=[Job]
+  public List<Job> jobs; // runtime: List; actual arguments=[Job]
+}
+
+public Person createPerson() {
+    return new Person();
 }
 ```
-- However, certain use cases need other way to provide actual types. Consider the following code, the list accepts all `T extends Job`. When denormalizing the list, which subtype of `Job` should it use?
+- However, when there is type variable bound to the class, and there is a field relying on that variable, we have to look up the actual type of the field using the actual type of the class. However, it is impossible to know the actual type because Reflection does not support retrieving type information from local variables, method parameters, etc
 ```java
-@Configurable
 public class Person<T extends Job> {
   public List<T> jobs;
 }
-```
-- `@Payload` is an optional annotation that explicitly specifies the actual types. It uses the same order as type variables of the associated field.
-```java
-@Configurable
-public class Person<T extends Job> {
-  @Payload(JobImpl.class)
-  public List<T> jobs;
-}
-```
-```java
-@Configurable
-public class Person<T extends Job> {
-  @Payload(JobImpl[].class)
-  public List<T[]> jobs;
-}
-```
-```java
-@Configurable
-public class Person<T extends Job> {
-  @Payload({String.class, })
-  public Map<String, List<T[]>[]> jobs;
-}
-```
-- `@Payload` means to provide a simple approach. Exact type checking is unsupported. Variance of element implementation is unsupported. These complex use cases must use type adapters.
 
-## Recursive (de)normalization
-```java
-@Configurable
-public class Warehouse {
-  public List<Item[]> stacks;
+public static Person<PartTimeJob> createStudent() {
+  return new Person<PartTimeJob>(); // erasure -> new Person()
 }
-@Configurable
-public class Item {
-  public String name;
-  public int stock;
-}
-```
-```yml
-stacks:
-  - - name: Candy
-      stock: 5
-    - name: Snack
-      stock: 3
-  - - name: Coca
-      stock: 2
-```
 
-## Inherited (de)normalization
-```java
-@Configurable
-public class Parent {
+// the field has type Person<PartTimeJob>
+public static Person<PartTimeJob> SINGLETON = createStudent();
+
+public static void main(String[] args) throws Exception {
+    // cannot get type info from a local variable
+    Person<PartTimeJob> person = createStudent();
+
+    // it is impossible to get type info for value passed
+    continueOperation(person);
 }
-//@Configurable // not needed
-public class Child extends Parent {
+```
+- There is a trick called Super Type Tokens which is widely-used used including Gson. An old blog from Neal Gafter explained the trick: https://gafter.blogspot.com/2006/12/super-type-tokens.html
+- Basically, if there is a parameterized class extending a parameterized superclass, and the subclass provides actual type parameters, then it is possible to retrieve type info:
+```java
+public static void main(String[] args) {
+    // Create an anonymous class extending Person and instantiate it
+    Person<PartTimeJob> person = new Person<>(){};
+    // the diamond syntax above is similar to
+    // Person<PartTimeJob> person = new Person<PartTimeJob>(){};
+
+    Type superclass = person.getClass().getGenericSuperclass();
+    Type actualType = ((ParameterizedType) superclass).getActualTypeArguments()[0];
+}
+```
+- Not all classes are extendable, especially when developers want to work with external classes. So, some library introduces a type resolver (e.g in Gson, it is called TypeToken). The type resolver can capture type using Super Type Tokens trick.
+```java
+public abstract class TypeResolver<T> {
+    public final Type capture() {
+        Type superclass = getClass().getGenericSuperclass();
+        return ((ParameterizedType) superclass).getActualTypeArguments()[0];
+    }
+}
+
+public static void main(String[] args) {
+    Person<PartTimeJob> person = new Person<>();
+    Type type = new TypeResolver<Person<PartTimeJob>>(){}.capture();
+    denormalize(person, type);
 }
 ```
 
-## Normalizablity
-- Built-in type adapters:
-  + Primitives
-  + Dictionary of primitives
-  + String
-  + Enum of normalizable types
-  + Array of normalizable types
-  + Java Collections with tuple of normalizable types
-    + `Collection<E>` with normalizable `E` 
-    + `Map<K, V>` with `K` can be normalized into string and `V` is a normalizable type
-  + URL, URI, UUID
-- `@Configurable` class and its subclasses
+### Complex use cases
+For complex use cases, it is required to handle manually using type adapter.
 
 ## Processors
 - Processors are annotated methods that can process before/after (de)normalization
@@ -620,5 +594,22 @@ public class Inventory {
 }
 ```
 
-## ASM support
-Runtime bytecode manipulation is unsupported. Since schema and property is factory-dependent (not singleton), the use of ASM may lead to inconsistencies between different components.
+## Inline
+Inline annotation allows to inject the fields of a specific type into the current type
+
+```java
+public class Level1WithoutInline {
+  public int foo;
+  public Level2 next;
+} // including foo and next.test
+
+public class Level1WithInline {
+    public int foo;
+    @Inline
+    public Level2 next;
+} // including foo and test
+
+public class Level2 {
+    public int bar;
+}
+```

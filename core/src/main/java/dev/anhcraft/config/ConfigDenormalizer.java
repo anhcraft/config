@@ -6,8 +6,12 @@ import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
+import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
+import dev.anhcraft.config.type.ComplexTypes;
+import dev.anhcraft.config.type.SimpleTypes;
+import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.config.util.ObjectUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,8 +93,10 @@ public class ConfigDenormalizer {
         Object object = Array.newInstance(erasureElemType, len);
         for (int i = 0; i < len; i++) {
             ctx.enterScope(new ElementScope(i));
-            Object elem = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
-            Array.set(object, i, elem);
+            {
+                Object elem = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
+                Array.set(object, i, elem);
+            }
             ctx.exitScope();
         }
         return object;
@@ -98,36 +104,46 @@ public class ConfigDenormalizer {
 
     private <T> void _denormalizeToInstance(Context ctx, T simple, Type targetType, Object instance) throws Exception {
         if (!(simple instanceof Dictionary)) return;
+
+        TypeResolver resolver = TypeResolver.of(targetType);
         Dictionary dict = (Dictionary) simple;
         Schema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
+
         for (Property property : schema.properties()) {
             if (property.isConstant())
                 continue;
 
             Map.Entry<String, Object> entry = dict.search(property.name(), property.aliases());
             Object value = entry == null ? null : entry.getValue();
-            if (value != null) {
-                value = _denormalize(ctx, value, property.type());
+
+            ctx.enterScope(new PropertyScope(property, entry == null ? "" : entry.getKey()));
+            scope:
+            {
+                if (value != null) {
+                    Type solvedType = resolver.resolve(property.type());
+                    value = _denormalize(ctx, value, solvedType);
+                }
+
+                if (property.isOptional() && value == null)
+                    break scope;
+
+                Class<?> propertyTypeErasure = ComplexTypes.erasure(property.type());
+
+                if (value == null && propertyTypeErasure.isPrimitive())
+                    break scope;
+
+                if (value != null && propertyTypeErasure.isAssignableFrom(value.getClass()))
+                    break scope;
+
+                if (!property.validator().check(value)) {
+                    if (property.validator().silent())
+                        break scope;
+                    throw new InvalidValueException(ctx, property.validator().message());
+                }
+
+                property.field().set(instance, value);
             }
-
-            if (property.isOptional() && value == null)
-                continue;
-
-            Class<?> propertyTypeErasure = ComplexTypes.erasure(property.type());
-
-            if (value == null && propertyTypeErasure.isPrimitive())
-                continue;
-
-            if (value != null && propertyTypeErasure.isAssignableFrom(value.getClass()))
-                continue;
-
-            if (!property.validator().check(value)) {
-                if (property.validator().silent())
-                    continue;
-                throw new InvalidValueException(ctx, property.validator().message());
-            }
-
-            property.field().set(instance, value);
+            ctx.exitScope();
         }
     }
 }

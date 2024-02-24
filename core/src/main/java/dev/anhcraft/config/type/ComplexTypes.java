@@ -1,4 +1,4 @@
-package dev.anhcraft.config;
+package dev.anhcraft.config.type;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -7,8 +7,10 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ComplexTypes {
     public final static Map<Class<?>, Class<?>> map = new HashMap<>();
@@ -60,8 +62,34 @@ public class ComplexTypes {
             return erasure(((ParameterizedType)type).getRawType());
         } else if (type instanceof TypeVariable) {
             return Object.class;
-        } else {
+        } else if (type instanceof TypeResolver) {
+            return erasure(((TypeResolver) type).provideType());
+        } else if (type instanceof Class<?>) {
             return (Class<?>) type;
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @NotNull
+    public static String describe(@NotNull Type type) {
+        if (type instanceof GenericArrayType) {
+            GenericArrayType arrayType = (GenericArrayType) type;
+            return String.format("%s[]", describe(arrayType.getGenericComponentType()));
+        } else if (type instanceof ParameterizedType) {
+            ParameterizedType paramType = (ParameterizedType) type;
+            String args = Arrays.stream(paramType.getActualTypeArguments())
+                    .map(ComplexTypes::describe)
+                    .collect(Collectors.joining(","));
+            if (paramType.getOwnerType() != null)
+                return String.format("%s.%s<%s>", describe(paramType.getOwnerType()), describe(paramType.getRawType()), args);
+            else
+                return String.format("%s<%s>", describe(paramType.getRawType()), args);
+        } else if (type instanceof TypeVariable) {
+            return ((TypeVariable<?>) type).getName();
+        } else if (type instanceof TypeResolver) {
+            return describe(((TypeResolver) type).provideType());
+        } else {
+            return String.format("%s", type.getTypeName());
         }
     }
 

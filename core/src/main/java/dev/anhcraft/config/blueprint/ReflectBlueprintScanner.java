@@ -1,6 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.ComplexTypes;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.error.UnsupportedSchemaException;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.*;
@@ -32,7 +32,11 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
         List<Property> properties = new ArrayList<>();
 
         for (Field field : type.getDeclaredFields()) {
-            field.setAccessible(true);
+            try {
+                field.setAccessible(true);
+            } catch (Exception e) { // TODO is there better way to check accessibility?
+                continue;
+            }
             if (isExcluded(field))
                 continue;
 
@@ -40,9 +44,8 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
             List<String> description = scanDescription(field);
             byte modifier = scanModifier(field);
             Validator validator = scanValidation(field);
-            Class<?>[] payloadType = scanPayloadType(field);
 
-            Property property = new Property(name, description, modifier, validator, payloadType, field);
+            Property property = new Property(name, description, modifier, validator, field);
             lookup.put(name.primary(), property);
             for (String alias : name.aliases()) {
                 lookup.put(alias, property);
@@ -117,13 +120,5 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
             return validationRegistry.parseString(validateMeta.value(), validateMeta.silent());
         }
         return DisabledValidator.INSTANCE;
-    }
-
-    private Class<?>[] scanPayloadType(Field field) {
-        Payload payloadMeta = field.getAnnotation(Payload.class);
-        if (payloadMeta != null) {
-            return payloadMeta.value();
-        }
-        return new Class[0];
     }
 }

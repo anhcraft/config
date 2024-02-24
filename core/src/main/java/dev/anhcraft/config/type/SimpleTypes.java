@@ -1,5 +1,6 @@
-package dev.anhcraft.config;
+package dev.anhcraft.config.type;
 
+import dev.anhcraft.config.Dictionary;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

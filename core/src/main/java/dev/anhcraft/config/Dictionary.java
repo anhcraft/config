@@ -1,5 +1,6 @@
 package dev.anhcraft.config;
 
+import dev.anhcraft.config.type.SimpleTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

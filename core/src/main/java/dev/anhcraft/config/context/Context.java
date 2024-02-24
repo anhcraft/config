@@ -13,6 +13,7 @@ import java.util.Iterator;
 public class Context implements TypeAdapter<Object> {
     private final ConfigFactory factory;
     private final Deque<Scope> scopes = new ArrayDeque<>();
+    private String cachedPath;
 
     public Context(@NotNull ConfigFactory factory) {
         this.factory = factory;
@@ -24,11 +25,12 @@ public class Context implements TypeAdapter<Object> {
 
     public void enterScope(@NotNull Scope scope) {
         scopes.offerLast(scope);
-        System.out.println("Visting "+buildPath(PathType.FIELD, "."));
+        cachedPath = null;
     }
 
     public void exitScope() {
         scopes.pollLast();
+        cachedPath = null;
     }
 
     public @NotNull Scope getScope(int backward) {
@@ -51,8 +53,13 @@ public class Context implements TypeAdapter<Object> {
         return scopes.size();
     }
 
-    @NotNull
-    public String buildPath(@NotNull PathType type, @NotNull String pathSeparator) {
+
+    public @NotNull String getPath() {
+        if (cachedPath == null) cachedPath = buildPath(PathType.FIELD, ".");
+        return cachedPath;
+    }
+
+    public @NotNull String buildPath(@NotNull PathType type, @NotNull String pathSeparator) {
         StringBuilder sb = new StringBuilder();
         boolean wasProperty = false;
         for (Scope scope : scopes) {

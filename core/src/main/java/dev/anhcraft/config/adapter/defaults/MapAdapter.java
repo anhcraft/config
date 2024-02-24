@@ -1,8 +1,8 @@
 package dev.anhcraft.config.adapter.defaults;
 
-import dev.anhcraft.config.ComplexTypes;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.Dictionary;
-import dev.anhcraft.config.SimpleTypes;
+import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.context.Context;
 import org.jetbrains.annotations.NotNull;

@@ -5,16 +5,15 @@ import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -43,12 +42,20 @@ public class ConfigFactory {
     @SuppressWarnings("unchecked")
     @Nullable
     public <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
-        // TODO cache the type adapter
+        // TODO optimize and cache the type adapter
         Class<?> clazz = ComplexTypes.wrapPrimitive(type);
         do {
             TypeAdapter<?> adapter = typeAdapters.get(clazz);
             if (adapter != null) {
                 return (TypeAdapter<T>) adapter;
+            }
+            for (Type inf : clazz.getGenericInterfaces()) {
+                try {
+                    adapter = typeAdapters.get(ComplexTypes.erasure(inf));
+                    if (adapter != null) {
+                        return (TypeAdapter<T>) adapter;
+                    }
+                } catch (ClassNotFoundException ignored) {} // TODO should we handle this?
             }
             clazz = clazz.getSuperclass();
         } while (clazz != null);
@@ -85,6 +92,7 @@ public class ConfigFactory {
         private byte denormalizerSettings = 0;
 
         public Builder() {
+            // TODO cache, and move imports to local files
             typeAdapters.put(Byte.class, new ByteAdapter());
             typeAdapters.put(Short.class, new ShortAdapter());
             typeAdapters.put(Integer.class, new IntegerAdapter());
@@ -96,6 +104,8 @@ public class ConfigFactory {
             typeAdapters.put(String.class, new StringAdapter());
             typeAdapters.put(Dictionary.class, new DictionaryAdapter());
             typeAdapters.put(Iterable.class, new IterableAdapter());
+            typeAdapters.put(List.class, new IterableAdapter());
+            typeAdapters.put(Set.class, new IterableAdapter());
             typeAdapters.put(Map.class, new MapAdapter());
             typeAdapters.put(Enum.class, new EnumAdapter());
             typeAdapters.put(UUID.class, new UuidAdapter());
