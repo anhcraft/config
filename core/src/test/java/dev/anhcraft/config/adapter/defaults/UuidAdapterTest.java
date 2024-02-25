@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UuidAdapterTest {;
+public class UuidAdapterTest {
     private static Context context;
     private static UuidAdapter adapter;
 
