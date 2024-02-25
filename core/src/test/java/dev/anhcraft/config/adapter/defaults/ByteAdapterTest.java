@@ -6,9 +6,10 @@ import dev.anhcraft.config.error.InvalidValueException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-public class ByteAdapterTest {;
+public class ByteAdapterTest {
     private static Context context;
     private static ByteAdapter adapter;
 

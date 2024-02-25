@@ -12,7 +12,7 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UrlAdapterTest {;
+public class UrlAdapterTest {
     private static Context context;
     private static UrlAdapter adapter;
 

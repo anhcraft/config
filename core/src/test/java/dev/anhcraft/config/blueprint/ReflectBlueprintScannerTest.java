@@ -33,25 +33,12 @@ public class ReflectBlueprintScannerTest {
         assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(List.class));
         assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(PathType.class));
         assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(Name.class));
-        assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(new TypeToken<>(){}.getClass()));
+        assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(new TypeToken<>() {
+        }.getClass()));
     }
 
     @Nested
     public class ModelTest {
-        public class Profile {
-            @Name("id")
-            public String user;
-
-            @Alias("birth")
-            @Describe("Age in years")
-            public final int age = 18;
-
-            public transient double balance;
-
-            @Exclude
-            public List<String> education;
-        }
-
         @SuppressWarnings("DataFlowIssue")
         @Test
         public void testScan() {
@@ -83,6 +70,18 @@ public class ReflectBlueprintScannerTest {
             assertFalse(schema.property("birth").isConstant());
             assertFalse(schema.property("birth").isTransient());
             assertFalse(schema.property("birth").isOptional());
+        }
+
+        public class Profile {
+            @Alias("birth")
+            @Describe("Age in years")
+            public final int age = 18;
+            @Name("id")
+            public String user;
+            public transient double balance;
+
+            @Exclude
+            public List<String> education;
         }
     }
 }

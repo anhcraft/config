@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-public class StringAdapterTest {;
+public class StringAdapterTest {
     private static Context context;
     private static StringAdapter adapter;
 

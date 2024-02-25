@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-public class IntegerAdapterTest {;
+public class IntegerAdapterTest {
     private static Context context;
     private static IntegerAdapter adapter;
 

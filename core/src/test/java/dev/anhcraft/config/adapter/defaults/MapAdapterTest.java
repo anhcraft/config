@@ -7,7 +7,10 @@ import dev.anhcraft.config.type.TypeToken;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -72,7 +75,8 @@ public class MapAdapterTest {
                 "1", "Truck",
                 "2", "Motorcycle"
         ));
-        Map<Integer, String> vehicle = adapter.complexify(context, dict, new TypeToken<HashMap<Integer, String>>(){});
+        Map<Integer, String> vehicle = adapter.complexify(context, dict, new TypeToken<HashMap<Integer, String>>() {
+        });
         assertInstanceOf(Map.class, vehicle);
         assertEquals("Car", vehicle.get(0));
         assertEquals("Truck", vehicle.get(1));
@@ -92,7 +96,8 @@ public class MapAdapterTest {
                         "Banana", "15.0001"
                 ))
         ));
-        Map<String, Map<String, Integer>> stock = adapter.complexify(context, dict, new TypeToken<Map<String, Map<String, Integer>>>(){});
+        Map<String, Map<String, Integer>> stock = adapter.complexify(context, dict, new TypeToken<Map<String, Map<String, Integer>>>() {
+        });
         assertInstanceOf(LinkedHashMap.class, stock);
         assertInstanceOf(LinkedHashMap.class, stock.get("Bob"));
         assertEquals(new LinkedHashMap<>(Map.of("Apple", 10, "Banana", 20)), stock.get("Bob"));
@@ -104,20 +109,23 @@ public class MapAdapterTest {
     public void testComplexifyUseHashMap() throws Exception {
         assertInstanceOf(HashMap.class, adapter.complexify(context,
                 Dictionary.wrap(Map.of("foo", "bar")),
-                new TypeToken<HashMap<String, String>>(){}));
+                new TypeToken<HashMap<String, String>>() {
+                }));
     }
 
     @Test
     public void testComplexifyUseTreeMap() throws Exception {
         assertInstanceOf(TreeMap.class, adapter.complexify(context,
                 Dictionary.wrap(Map.of("foo", "bar")),
-                new TypeToken<TreeMap<String, String>>(){}));
+                new TypeToken<TreeMap<String, String>>() {
+                }));
     }
 
     @Test
     public void testComplexifyUseLinkedHashMap() throws Exception {
         assertInstanceOf(LinkedHashMap.class, adapter.complexify(context,
                 Dictionary.wrap(Map.of("foo", "bar")),
-                new TypeToken<Map<String, String>>(){}));
+                new TypeToken<Map<String, String>>() {
+                }));
     }
 }
