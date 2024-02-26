@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TypeTokenTest {
     @Test
     public void testCapture() {
-        System.out.println(new TypeToken<>(){}.capture());
         assertEquals("java.util.List<java.lang.String>", describe(new TypeToken<List<String>>(){}.capture()));
         assertEquals("java.util.List<java.lang.String[]>", describe(new TypeToken<List<String[]>>(){}.capture()));
         assertEquals("java.util.List<java.lang.String[]>[]", describe(new TypeToken<List<String[]>[]>(){}.capture()));
