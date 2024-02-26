@@ -28,7 +28,7 @@ public class ConfigFactory {
 
     ConfigFactory(Builder builder) {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
-        this.blueprintScanner = new ReflectBlueprintScanner(builder.namingStrategy, builder.validationRegistry);
+        this.blueprintScanner = new ReflectBlueprintScanner(builder.namingPolicy, builder.validationRegistry);
         this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
         this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
         this.schemas = new LinkedHashMap<>() {
@@ -86,7 +86,7 @@ public class ConfigFactory {
     public static class Builder {
         private final Map<Class<?>, TypeAdapter<?>> typeAdapters = new HashMap<>();
         private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
-        private UnaryOperator<String> namingStrategy = NamingStrategy.DEFAULT;
+        private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
         private Function<ConfigFactory, Context> contextProvider = Context::new;
         private int schemaCacheCapacity = 100;
         private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
@@ -126,8 +126,8 @@ public class ConfigFactory {
             return this;
         }
 
-        public @NotNull Builder useNamingStrategy(@NotNull UnaryOperator<String> function) {
-            namingStrategy = function;
+        public @NotNull Builder useNamingPolicy(@NotNull UnaryOperator<String> function) {
+            namingPolicy = function;
             return this;
         }
 

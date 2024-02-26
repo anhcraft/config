@@ -2,7 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.Dictionary;
-import dev.anhcraft.config.NamingStrategy;
+import dev.anhcraft.config.NamingPolicy;
 import model.*;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public class Main {
         ConfigFactory factory = ConfigFactory.create()
                 .ignoreDefaultValues(true)
                 .ignoreEmptyDictionary(true)
-                .useNamingStrategy(NamingStrategy.KEBAB_CASE)
+                .useNamingPolicy(NamingPolicy.KEBAB_CASE)
                 .build();
         Dictionary wrapper = (Dictionary) factory.getNormalizer().normalize(item);
         System.out.println(GSON.toJson(wrapper));

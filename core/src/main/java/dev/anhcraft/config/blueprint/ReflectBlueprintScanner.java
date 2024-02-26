@@ -18,21 +18,20 @@ import java.util.function.UnaryOperator;
  * A Reflection-based {@link BlueprintScanner}
  */
 public class ReflectBlueprintScanner implements BlueprintScanner {
-    private final UnaryOperator<String> namingStrategy;
+    private final UnaryOperator<String> namingPolicy;
     private final ValidationRegistry validationRegistry;
 
-    public ReflectBlueprintScanner(@NotNull UnaryOperator<String> namingStrategy, @NotNull ValidationRegistry validationRegistry) {
-        this.namingStrategy = namingStrategy;
+    public ReflectBlueprintScanner(@NotNull UnaryOperator<String> namingPolicy, @NotNull ValidationRegistry validationRegistry) {
+        this.namingPolicy = namingPolicy;
         this.validationRegistry = validationRegistry;
     }
 
     @Override
     public @NotNull Schema scanSchema(@NotNull Class<?> type) {
         if (!ComplexTypes.isNormalClassOrAbstract(type))
-            throw new UnsupportedSchemaException(String.format("Cannot create schema for %s", type.getName()));
+            throw new UnsupportedSchemaException(String.format("Cannot create schema for '%s'", type.getName()));
 
-        Map<String, Property> lookup = new LinkedHashMap<>();
-        List<Property> properties = new ArrayList<>();
+        Map<String, Field> fields = new LinkedHashMap<>();
 
         for (Field field : type.getDeclaredFields()) {
             try {
@@ -42,16 +41,34 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
             }
             if (isExcluded(field))
                 continue;
+            String primaryName = namingPolicy.apply(field.getName()).trim();
+            if (primaryName.isBlank())
+                throw new UnsupportedSchemaException(String.format("Schema '%s' contains naming error due to naming policy", type.getName()));
+            if (fields.containsKey(primaryName))
+                throw new UnsupportedSchemaException(String.format("Schema '%s' contains naming conflicts due to naming policy", type.getName()));
+            fields.put(primaryName, field);
+        }
 
-            PropertyNaming name = scanName(field, Set.copyOf(lookup.keySet()));
+        Map<String, Property> lookup = new LinkedHashMap<>();
+        Set<String> nameClaimed = new HashSet<>(fields.keySet()); // initially, "lookup" cannot be used
+        List<Property> properties = new ArrayList<>();
+
+        for (Map.Entry<String, Field> entry : fields.entrySet()) {
+            String primaryName = entry.getKey();
+            Field field = entry.getValue();
+
+            PropertyNaming name = scanName(field, primaryName, nameClaimed);
             List<String> description = scanDescription(field);
             byte modifier = scanModifier(field);
             Validator validator = scanValidation(field);
 
             Property property = new Property(name, description, modifier, validator, field);
             lookup.put(name.primary(), property);
+            nameClaimed.remove(primaryName);
+            nameClaimed.add(name.primary());
             for (String alias : name.aliases()) {
                 lookup.put(alias, property);
+                nameClaimed.add(alias);
             }
             properties.add(property);
         }
@@ -65,17 +82,17 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
                 field.getAnnotation(Exclude.class) != null;
     }
 
-    private PropertyNaming scanName(Field field, Set<String> existing) {
-        Set<String> aliases = Collections.emptySet(); // use empty singleton to reduce allocations
+    private PropertyNaming scanName(Field field, String originalPrimaryName, Set<String> existing) {
+        Set<String> aliases = new LinkedHashSet<>();
         String primary = null;
 
         Name nameMeta = field.getAnnotation(Name.class);
         if (nameMeta != null) {
             for (String name : nameMeta.value()) {
-                if (name.isBlank() || existing.contains(name) || aliases.contains(name)) continue;
+                name = name.trim();
+                if (name.isEmpty() || existing.contains(name) || aliases.contains(name)) continue;
                 if (primary == null) {
                     primary = name;
-                    aliases = new LinkedHashSet<>();
                 } else {
                     aliases.add(name);
                 }
@@ -84,18 +101,14 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
 
         Alias aliasMeta = field.getAnnotation(Alias.class);
         if (aliasMeta != null) {
-            aliases = new LinkedHashSet<>();
             for (String alias : aliasMeta.value()) {
-                if (alias.isBlank() || existing.contains(alias) || aliases.contains(alias)) continue;
+                alias = alias.trim();
+                if (alias.isEmpty() || existing.contains(alias) || aliases.contains(alias)) continue;
                 aliases.add(alias);
             }
         }
 
-        if (primary == null) {
-            primary = namingStrategy.apply(field.getName());
-        }
-
-        return new PropertyNaming(primary, aliases);
+        return new PropertyNaming(primary == null ? originalPrimaryName : primary, aliases);
     }
 
     private List<String> scanDescription(Field field) {
