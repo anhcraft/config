@@ -40,7 +40,7 @@ public class Dictionary extends AbstractMap<String, Object> {
 
     @Override
     public @Nullable Object put(@NotNull String key, @Nullable Object value) {
-        if (!SimpleTypes.validate(value))
+        if (!SimpleTypes.test(value))
             throw new IllegalArgumentException(String.format("Object of type %s is not a simple type", value.getClass().getName()));
         // TODO deep clone array since the element can be mutated to be a non-simple type
         Object previous = backend.get(key);

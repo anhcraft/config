@@ -9,30 +9,61 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class SimpleTypes {
-    public static <T> boolean isScalar(@NotNull Class<T> value) {
-        if (value.isPrimitive())
+    /**
+     * Checks whether the given class type is scalar.<br>
+     * Scalar classes including String, Number, Boolean, Character and their primitive classes
+     * @param type The class type
+     * @return true if the class type is scalar
+     */
+    public static boolean isScalar(@NotNull Class<?> type) {
+        if (type.isPrimitive())
             return true;
-        return String.class.isAssignableFrom(value) ||
-                Number.class.isAssignableFrom(value) ||
-                Boolean.class.isAssignableFrom(value) ||
-                Character.class.isAssignableFrom(value);
+        return String.class.isAssignableFrom(type) ||
+                Number.class.isAssignableFrom(type) ||
+                Boolean.class.isAssignableFrom(type) ||
+                Character.class.isAssignableFrom(type);
     }
 
-    public static <T> boolean validate(@NotNull Class<T> value) {
-        if (value.isPrimitive())
+    /**
+     * Validates whether the given class type is a simple type.<br>
+     * Simple types are:
+     * <ul>
+     *     <li>Number, Boolean, Character and their primitive classes</li>
+     *     <li>String and Dictionary</li>
+     *     <li>Array of simple types</li>
+     * </ul>
+     * @param type The class type
+     * @return true if the class type is a simple type
+     * @param <T> The class type
+     */
+    public static <T> boolean validate(@NotNull Class<T> type) {
+        if (type.isPrimitive())
             return true;
-        if (String.class.isAssignableFrom(value) ||
-                Number.class.isAssignableFrom(value) ||
-                Boolean.class.isAssignableFrom(value) ||
-                Character.class.isAssignableFrom(value) ||
-                Dictionary.class.isAssignableFrom(value))
+        if (String.class.isAssignableFrom(type) ||
+                Number.class.isAssignableFrom(type) ||
+                Boolean.class.isAssignableFrom(type) ||
+                Character.class.isAssignableFrom(type) ||
+                Dictionary.class.isAssignableFrom(type))
             return true;
-        if (value.isArray())
-            return validate(value.getComponentType());
+        if (type.isArray())
+            return validate(type.getComponentType());
         return false;
     }
 
-    public static <T> boolean validate(@Nullable T value) {
+    /**
+     * Tests whether the given value is a simple value.<br>
+     * Simple values are:
+     * <ul>
+     *     <li>Null</li>
+     *     <li>Number, Boolean and Character</li>
+     *     <li>String and Dictionary</li>
+     *     <li>Array of simple values</li>
+     * </ul>
+     * @param value The value
+     * @return true if the value is a simple value
+     * @param <T> The value type
+     */
+    public static <T> boolean test(@Nullable T value) {
         if (value == null)
             return true;
         if (value instanceof String ||
@@ -47,7 +78,7 @@ public final class SimpleTypes {
             if (componentType == Object.class) {
                 int n = Array.getLength(value);
                 for (int i = 0; i < n; i++) {
-                    if (!validate(Array.get(value, i)))
+                    if (!test(Array.get(value, i)))
                         return false;
                 }
                 return true;
@@ -58,27 +89,53 @@ public final class SimpleTypes {
         return false;
     }
 
-    public static <T> int getContainerSize(@NotNull T simpleValue) {
-        if (simpleValue.getClass().isArray())
-            return Array.getLength(simpleValue);
-        else if (simpleValue instanceof Dictionary)
-            return ((Dictionary) simpleValue).size();
+    /**
+     * Gets the size of the container, compatible to all simple types.
+     * @param value The container
+     * @return The size of the container (array, dictionary) or {@code 1} for scalar values
+     * @param <T> The container type
+     */
+    public static <T> int getContainerSize(@NotNull T value) {
+        if (value.getClass().isArray())
+            return Array.getLength(value);
+        else if (value instanceof Dictionary)
+            return ((Dictionary) value).size();
         else
             return 1;
     }
 
+    /**
+     * Gets the element of the container at the given index, compatible to all simple types.<br>
+     * Throws {@link ArrayIndexOutOfBoundsException} if the index is out of bounds.<br>
+     * For dictionary, this method gets the value using {@link Dictionary#getValueAt(int)}, not the entry.
+     * @param value The container
+     * @param i The index
+     * @return The element of the container (array, dictionary) or the given value (scalar)
+     * @param <T> The container type
+     */
     @Nullable
-    public static <T> Object getContainerElement(T simple, int i) {
-        if (simple.getClass().isArray())
-            return Array.get(simple, i);
-        else if (simple instanceof Dictionary)
-            return ((Dictionary) simple).getValueAt(i);
+    public static <T> Object getContainerElement(@Nullable T value, int i) {
+        if (value == null)
+            return null;
+        if (value.getClass().isArray())
+            return Array.get(value, i);
+        else if (value instanceof Dictionary)
+            return ((Dictionary) value).getValueAt(i);
         else
-            return simple;
+            return value;
     }
 
+    /**
+     * Clones the given value recursively.
+     * @param value The value
+     * @return The cloned value
+     * @param <T> The value type
+     */
     @SuppressWarnings("unchecked")
-    public static <T> T deepClone(T value) {
+    @Nullable
+    public static <T> T deepClone(@Nullable T value) {
+        if (value == null)
+            return null;
         if (value instanceof String ||
                 value instanceof Number ||
                 value instanceof Boolean ||

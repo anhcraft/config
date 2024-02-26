@@ -29,7 +29,7 @@ import java.lang.reflect.Array;
  * It is possible to encapsulate the output by specifying the superclass as the target type. This results in implicit
  * creation of the schema of the superclass. The result hides the details of the actual class and only contains the
  * information since the superclass up to the root of class hierarchy.
- * @see SimpleTypes#validate(Object)
+ * @see SimpleTypes#test(Object)
  * @see TypeAdapter
  */
 public final class ConfigNormalizer {
@@ -143,7 +143,7 @@ public final class ConfigNormalizer {
 
     @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
     private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
-        if (SimpleTypes.validate(complex)) {
+        if (SimpleTypes.test(complex)) {
             if (SettingFlag.has(settings, Normalizer.DEEP_CLONE))
                 return SimpleTypes.deepClone(complex);
             return complex;
@@ -154,7 +154,7 @@ public final class ConfigNormalizer {
         TypeAdapter adapter = configFactory.getTypeAdapter(type);
         if (adapter != null && !(adapter instanceof TypeAnnotator)) {
             Object result = adapter.simplify(ctx, type, complex);
-            if (!SimpleTypes.validate(result)) {
+            if (!SimpleTypes.test(result)) {
                 String msg = String.format("Simple type expected but got %s", result.getClass().getName());
                 throw new IllegalTypeException(ctx, msg);
             }
@@ -218,7 +218,7 @@ public final class ConfigNormalizer {
                         value instanceof Dictionary && ((Dictionary) value).isEmpty())
                     break scope;
 
-                if (SimpleTypes.validate(value))
+                if (SimpleTypes.test(value))
                     container.put(property.name(), value);
             }
             ctx.exitScope();

@@ -53,7 +53,7 @@ public class ConfigDenormalizer {
     }
 
     private <T> void validateSimpleType(Context ctx, T simple) {
-        if (!SimpleTypes.validate(simple))
+        if (!SimpleTypes.test(simple))
             throw new IllegalTypeException(ctx, "Supplied argument is not a simple object: " + simple);
     }
 

@@ -8,7 +8,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A type resolver is a thin abstract using an existing resolved type to resolve other types.<br>
+ * A resolved type is a type that having actual type arguments and no type variables.<br>
+ * For example: {@code List<Integer>} is a resolved type, however, {@code List<T>} is not.<br>
+ * To construct a type resolver, it is recommended to use {@link #of(Type)}.
+ * @see TypeToken
+ */
 public abstract class TypeResolver implements Type {
+    /**
+     * Constructs a type resolver.<br>
+     * Note: A class is not a resolved type, use {@link TypeToken} instead.
+     * @param type the type
+     * @return a type resolver or the given type if it is already a {@link TypeResolver}
+     */
     public static @NotNull TypeResolver of(@NotNull Type type) {
         if (type instanceof TypeResolver)
             return (TypeResolver) type;
@@ -22,8 +35,21 @@ public abstract class TypeResolver implements Type {
 
     private Map<String, Type> typeMapping;
 
+    /**
+     * Provides the resolved type.
+     * @return the resolved type
+     */
     public abstract @NotNull Type provideType();
 
+    /**
+     * Gets the type mapping for the resolved type.<br>
+     * For example, if the given type is {@code Map<String, Integer>}
+     * <ul>
+     *     <li>{@code Map} has two type variables {@code K, V}</li>
+     *     <li>The returned mapping is {@code (K -> String), (V -> Integer)}</li>
+     * </ul>
+     * @return the type mapping
+     */
     @NotNull
     public Map<String, Type> getTypeMapping() {
         if (typeMapping != null)
@@ -43,6 +69,17 @@ public abstract class TypeResolver implements Type {
         return typeMapping = map;
     }
 
+    /**
+     * Resolves the given type.<br>
+     * For example, if the given type is {@code Map<String, Integer>}
+     * <ul>
+     *     <li>{@code Map} has two type variables {@code K, V}</li>
+     *     <li>The mapping is {@code (K -> String), (V -> Integer)}</li>
+     * </ul>
+     * If given {@code List<K>}, this returns {@code List<String>}.
+     * @param type the type
+     * @return the resolved type
+     */
     public @NotNull Type resolve(@NotNull Type type) {
         /*
             Resolve an unresolved type containing type variables using the type captured
