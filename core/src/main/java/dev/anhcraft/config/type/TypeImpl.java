@@ -1,10 +1,13 @@
 package dev.anhcraft.config.type;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 
+@ApiStatus.Internal
 final class TypeImpl {
 
     static final class WildcardTypeImpl implements WildcardType {
