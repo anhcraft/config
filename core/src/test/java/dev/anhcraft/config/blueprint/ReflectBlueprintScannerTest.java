@@ -1,6 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.NamingStrategy;
+import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.context.PathType;
 import dev.anhcraft.config.error.UnsupportedSchemaException;
 import dev.anhcraft.config.meta.*;
@@ -20,7 +20,7 @@ public class ReflectBlueprintScannerTest {
 
     @BeforeAll
     public static void setUp() {
-        scanner = new ReflectBlueprintScanner(NamingStrategy.DEFAULT, ValidationRegistry.DEFAULT);
+        scanner = new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
     }
 
     @Test
@@ -32,6 +32,118 @@ public class ReflectBlueprintScannerTest {
         assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(Name.class));
         assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(new TypeToken<>() {
         }.getClass()));
+    }
+
+    @Nested
+    public class ConflictNamingPolicyTest {
+        @Test
+        public void testConflictNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT);
+            assertThrows(UnsupportedSchemaException.class, () -> custom.scanSchema(FooBar.class));
+        }
+
+        public class FooBar {
+            public int foo;
+            public int bar;
+        }
+    }
+
+    @Nested
+    public class ValidNamingPolicyTest {
+        @Test
+        public void testDefaultNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(FooBar.class);
+            assertEquals(Set.of("fooBar", "barFoo"), schema.propertyNames());
+            assertNotNull(schema.property("fooBar"));
+            assertEquals("fooBar", schema.property("fooBar").field().getName());
+            assertNotNull(schema.property("barFoo"));
+            assertEquals("barFoo", schema.property("barFoo").field().getName());
+        }
+
+        @Test
+        public void testKebabCaseNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(FooBar.class);
+            assertEquals(Set.of("foo-bar", "bar-foo"), schema.propertyNames());
+            assertNotNull(schema.property("foo-bar"));
+            assertEquals("fooBar", schema.property("foo-bar").field().getName());
+            assertNotNull(schema.property("bar-foo"));
+            assertEquals("barFoo", schema.property("bar-foo").field().getName());
+        }
+
+        @Test
+        public void testSnakeCaseNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(FooBar.class);
+            assertEquals(Set.of("foo_bar", "bar_foo"), schema.propertyNames());
+            assertNotNull(schema.property("foo_bar"));
+            assertEquals("fooBar", schema.property("foo_bar").field().getName());
+            assertNotNull(schema.property("bar_foo"));
+            assertEquals("barFoo", schema.property("bar_foo").field().getName());
+        }
+
+        @Test
+        public void testPascalCaseNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(FooBar.class);
+            assertEquals(Set.of("FooBar", "BarFoo"), schema.propertyNames());
+            assertNotNull(schema.property("FooBar"));
+            assertEquals("fooBar", schema.property("FooBar").field().getName());
+            assertNotNull(schema.property("BarFoo"));
+            assertEquals("barFoo", schema.property("BarFoo").field().getName());
+        }
+
+        public class FooBar {
+            public int fooBar;
+            public int barFoo;
+        }
+    }
+
+    @Nested
+    public class NamingResolutionTest {
+        @Test
+        public void testDefaultNamingPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(Container.class);
+            assertEquals(Set.of("cold", "upperStorage", "up", "upper", "lowerStorage", "lo", "lower", "backup", "coldStorage"), schema.propertyNames());
+            assertEquals("upperStorage", schema.property("upperStorage").field().getName());
+            assertEquals("upperStorage", schema.property("up").field().getName());
+            assertEquals("upperStorage", schema.property("upper").field().getName());
+            assertEquals("lowerStorage", schema.property("lowerStorage").field().getName());
+            assertEquals("lowerStorage", schema.property("lo").field().getName());
+            assertEquals("lowerStorage", schema.property("lower").field().getName());
+            assertEquals("backupStorage", schema.property("backup").field().getName());
+            assertEquals("backupStorage", schema.property("cold").field().getName());
+            assertEquals("coldStorage", schema.property("coldStorage").field().getName());
+        }
+
+        @Test
+        public void testDefaultCustomPolicy() {
+            ReflectBlueprintScanner custom = new ReflectBlueprintScanner(s -> s.length() > 2 ? s.substring(0, 2) : s, ValidationRegistry.DEFAULT);
+            Schema schema = custom.scanSchema(Container.class);
+            assertEquals(Set.of("up","lo","lowerStorage","co","upper","lower","backup","cold"), schema.propertyNames());
+            assertEquals("upperStorage", schema.property("up").field().getName());
+            assertEquals("upperStorage", schema.property("upper").field().getName());
+            assertEquals("lowerStorage", schema.property("lo").field().getName());
+            assertEquals("lowerStorage", schema.property("lower").field().getName());
+            assertEquals("backupStorage", schema.property("lowerStorage").field().getName());
+            assertEquals("backupStorage", schema.property("backup").field().getName());
+            assertEquals("backupStorage", schema.property("cold").field().getName());
+            assertEquals("coldStorage", schema.property("co").field().getName());
+        }
+
+        public class Container {
+            @Alias({"", "up", " up ", "upper"})
+            public int[] upperStorage;
+            @Alias({"lo", "up", "lower"})
+            public int[] lowerStorage;
+            @Name({"  lowerStorage", "  backup ", "cold"})
+            @Alias({" ", "lo", "  backup"})
+            public int[] backupStorage;
+            @Name("cold")
+            public int[] coldStorage;
+        }
     }
 
     @Nested

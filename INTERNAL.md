@@ -89,22 +89,18 @@ flowchart TD
 - The property may contain value restrictions
 - The property can be any of Java data types
 - By default, the property name is derived from the field name
-  - Property name conversion is customizable (see Naming Strategy below)
+  - Property name conversion is customizable (see Naming Policy below)
+  - Property name can be customized (see Primary Strategy)
 - The property is factory-dependent (see ConfigFactory below)
 
 ### Property annotations
 - Annotations is the main approach to provide property metadata
 - `@Name`: set the property primary name and aliases
-  - `value` to define a list of possible name.
-  - A name is valid if it is non-blank and not conflicted with previous name/aliases. If conflict exists, the name is implicitly discarded.
-  - The first valid name is primary and used for normalization. Valid aliases are fallback options used solely on denormalization.
-  - If no valid name exists, the default naming strategy is used: By default, the property name is derived from the field name
+  - `value` to define a list of possible names
+  - See: Naming Strategy
 - `@Alias`: set the property aliases
   - `value` to define a list of possible aliases
-  - It is similar to defining aliases using `@Name` except that:
-    - Using `@Name`, the first valid name is the primary, the remaining valid names are aliases
-    - Using `@Alias` only specifies the aliases. If `@Alias` is present while `@Name` is not, the primary name is auto-generated
-  - If `@Name` and `@Alias` are both defined, the order of alias definition is `@Name` first, followed by `@Alias`
+  - See: Naming Strategy
 - `@Exclude`: exclude the field / let it no longer be a property
   - A static field or transient field is also ignored
   - Use `@Exclude` to avoid conflict, since other serialization library (such as Gson) ignore transient fields
@@ -148,11 +144,30 @@ flowchart TD
   - Upper bound: `size=|3`
   - Two-sided bound: `size=2|7`
 
-### Naming Strategy
+### Naming Policy
 - When `@Name` is absent, the field name is also the property name. It is possible to change the styling, for example, enforce property name to be kebab-case.
 - Field name is assumed to be **camelCase** (Java convention)
 - Built-in: default, PascalCase, snake_case, kebab-case
-- Naming style can be manually-defined when constructing ConfigFactory
+- Naming policy can be manually-defined when constructing ConfigFactory
+- Custom naming policy must follow a bijective function, otherwise an exception is raised during schema creation (see: Naming Strategy)
+
+### Naming Strategy
+- First, each property is named as its corresponding field's name after applying Naming Policy. If naming collision happens, e.g. for two distinct properties, a custom naming policy outputs the same name, an exception throws.
+- It is initially guaranteed that at this time naming follows a bijective function:
+  - Every name in a schema is unique
+  - Two distinct properties must have two distinct names
+  - Two distinct names are mapped into two distinct properties
+  - The initial name of each property is called primary name
+- The blueprint scanner inspects every property for `@Name` and `@Alias` in order:
+  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be used later.
+  - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
+  - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
+- To conclude, naming in a schema must follow the following rules:
+  - Every name in a schema is unique
+  - Two distinct properties must have two set of unique names
+  - Two distinct names may be mapped to the same property
+  - Each property must have a primary name and an optional set of aliases
+  - Naming in a schema follows an onto function `Name → Property`
 
 ## Dictionary
 - The dictionary is the intermediate representation of configuration

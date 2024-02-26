@@ -1,6 +1,6 @@
 package dev.anhcraft.config.meta;
 
-import dev.anhcraft.config.NamingStrategy;
+import dev.anhcraft.config.NamingPolicy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  *     <li>If only {@link Alias} exists, the primary name is auto-generated, {@link Alias} provides aliases</li>
  * </ul>
  * When the primary name is auto-generated, it is taken from the associated field's name. The name may be transformed
- * using {@link NamingStrategy} such as to transform from camelCase to snake_case.
+ * using {@link NamingPolicy} such as to transform from camelCase to snake_case.
  * @see Alias
  */
 @Retention(RetentionPolicy.RUNTIME)
