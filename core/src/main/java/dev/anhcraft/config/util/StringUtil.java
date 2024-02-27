@@ -1,11 +1,23 @@
 package dev.anhcraft.config.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public final class StringUtil {
-    // A fast split algorithm that does not use regex, and works for empty fragments
-    public static List<String> fastSplit(String str, char separator) {
+    /**
+     * Splits the given string into fragments. The difference of this compared to {@link String#split(String)} is:
+     * <ul>
+     *     <li>This works fast without pattern matching</li>
+     *     <li>The fragment can be empty</li>
+     * </ul>
+     * For example, using {@code "3|".split("|")} returns {@code ["3"]}, while this method returns {@code ["3", ""]}
+     * @param str the string
+     * @param separator the separator
+     * @return the list
+     */
+    public static @NotNull List<String> fastSplit(@NotNull String str, char separator) {
         if (str.isEmpty())
             return List.of();
         List<String> list = new ArrayList<>();
@@ -14,6 +26,7 @@ public final class StringUtil {
             if (c == separator) {
                 list.add(buffer.toString());
                 buffer.setLength(0);
+                continue;
             }
             buffer.append(c);
         }
@@ -23,5 +36,30 @@ public final class StringUtil {
             list.add(buffer.toString());
         }
         return list;
+    }
+
+    /**
+     * Splits a string in camelCase into lowercase fragments.
+     * @param camelCase the string
+     * @return the list
+     */
+    public static @NotNull List<String> splitCamelCase(@NotNull String camelCase) {
+        List<String> parts = new ArrayList<>();
+        StringBuilder buffer = new StringBuilder();
+        for (char c : camelCase.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                if (buffer.length() > 0) {
+                    parts.add(buffer.toString());
+                    buffer.setLength(0);
+                }
+                buffer.append(Character.toLowerCase(c));
+            } else {
+                buffer.append(c);
+            }
+        }
+        if (buffer.length() > 0) {
+            parts.add(buffer.toString());
+        }
+        return parts;
     }
 }

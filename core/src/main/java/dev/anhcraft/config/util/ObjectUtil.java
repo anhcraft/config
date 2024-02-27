@@ -17,16 +17,19 @@ public final class ObjectUtil {
         } catch (IllegalAccessException | NoSuchFieldException ignored) {}
     }
 
+    /**
+     * Instantiates the given class using the default constructor. If fails, attempts to allocate an instance without
+     * invoking any constructor.
+     * @param clazz the class
+     * @return an instance
+     * @throws InstantiationException if two approaches fail
+     */
     @NotNull
     public static Object newInstance(@NotNull Class<?> clazz) throws InstantiationException {
         try {
             return clazz.getDeclaredConstructor().newInstance();
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            try {
-                return unsafe.allocateInstance(clazz);
-            } catch (InstantiationException q) { // TODO make a separate exception type
-                throw new RuntimeException("Failed to create instance of " + clazz);
-            }
+            return unsafe.allocateInstance(clazz);
         }
     }
 }
