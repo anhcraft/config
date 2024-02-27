@@ -38,11 +38,15 @@ public class SizeValidation extends ParameterizedValidation {
     }
 
     private int parseInt(String s) {
-        int value = Integer.parseInt(s);
-        if (value < 0) {
-            throw new ValidationParseException("Invalid validation argument: " + s);
+        try {
+            int value = Integer.parseInt(s);
+            if (value < 0) {
+                throw new ValidationParseException("Invalid validation argument: " + s);
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            throw new ValidationParseException("Invalid validation argument: " + s, e);
         }
-        return value;
     }
 
     @Override

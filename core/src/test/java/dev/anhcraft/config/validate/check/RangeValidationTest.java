@@ -21,7 +21,7 @@ public class RangeValidationTest {
         Assertions.assertDoesNotThrow(() -> new RangeValidation("-0.0005"));
         Assertions.assertDoesNotThrow(() -> new RangeValidation("-0.0005|"));
         Assertions.assertDoesNotThrow(() -> new RangeValidation("|-0.0005"));
-        Assertions.assertDoesNotThrow(() -> new RangeValidation("-0.0001|-0.0005"));
+        Assertions.assertDoesNotThrow(() -> new RangeValidation("-0.0002|-0.0001"));
         Assertions.assertDoesNotThrow(() -> new RangeValidation("-.0001"));
         Assertions.assertDoesNotThrow(() -> new RangeValidation("0.000001|0.000001"));
     }

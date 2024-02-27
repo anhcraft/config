@@ -27,7 +27,7 @@ public class RangeValidation extends ParameterizedValidation {
                 min = parseDouble(parts.get(0));
             if (!parts.get(1).isEmpty())
                 max = parseDouble(parts.get(1));
-            if (max != null && min != null && Math.abs(min)-Math.abs(max) > 1e-8) {
+            if (max != null && min != null && min-max > 1e-8) {
                throw new ValidationParseException("Invalid validation argument: " + arg);
             }
         } else {
@@ -36,11 +36,15 @@ public class RangeValidation extends ParameterizedValidation {
     }
 
     private double parseDouble(String s) {
-        double value = Double.parseDouble(s);
-        if (Double.isInfinite(value) || Double.isNaN(value)) {
-            throw new ValidationParseException("Invalid validation argument: " + s);
+        try {
+            double value = Double.parseDouble(s);
+            if (Double.isInfinite(value) || Double.isNaN(value)) {
+                throw new ValidationParseException("Invalid validation argument: " + s);
+            }
+            return value;
+        } catch (NumberFormatException e) {
+            throw new ValidationParseException("Invalid validation argument: " + s, e);
         }
-        return value;
     }
 
     @Override
