@@ -1,5 +1,6 @@
 package dev.anhcraft.config.validate;
 
+import dev.anhcraft.config.error.ValidationParseException;
 import dev.anhcraft.config.validate.check.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +14,16 @@ public class ValidationRegistry {
     public static final NotEmptyValidation NOT_EMPTY = new NotEmptyValidation();
     public static final NotBlankValidation NOT_BLANK = new NotBlankValidation();
 
+    /**
+     * The default validation registry.<br>
+     * <ul>
+     *     <li>{@link NotNullValidation}: {@code not-null, notNull, non-null, nonNull}</li>
+     *     <li>{@link NotEmptyValidation}: {@code not-empty, notEmpty, non-empty, nonEmpty}</li>
+     *     <li>{@link NotBlankValidation}: {@code not-blank, notBlank, non-blank, nonBlank}</li>
+     *     <li>{@link RangeValidation}: {@code range=min|max, range=min|, range=|max}</li>
+     *     <li>{@link SizeValidation}: {@code size=min|max, size=min|, size=|max}</li>
+     * </ul>
+     */
     // Default validator
     public static final ValidationRegistry DEFAULT = ValidationRegistry.create()
             .add(Set.of("not-null", "notNull", "non-null", "nonNull"), (s) -> NOT_NULL)
@@ -22,14 +33,19 @@ public class ValidationRegistry {
             .add(Set.of("size"), SizeValidation::new)
             .build();
 
-    private final Map<String, Function<String, Validation>> validations;
+    private final Map<String, ValidationConstructor> validations;
 
-    public static ValidationRegistry composite(ValidationRegistry... validators) {
-        return new ValidationRegistry(validators);
+    /**
+     * Combines multiple validation registries into one.
+     * @param registries the validation registries
+     * @return a new validation registry
+     */
+    public static @NotNull ValidationRegistry composite(@NotNull ValidationRegistry... registries) {
+        return new ValidationRegistry(registries);
     }
 
     ValidationRegistry(ValidationRegistry... compositions) {
-        Map<String, Function<String, Validation>> mixed = new HashMap<>();
+        Map<String, ValidationConstructor> mixed = new HashMap<>();
         for (ValidationRegistry composition : compositions) {
             mixed.putAll(composition.validations);
         }
@@ -40,54 +56,90 @@ public class ValidationRegistry {
         validations = Collections.unmodifiableMap(builder.validations);
     }
 
+    /**
+     * Gets the function to construct the given type of validation.
+     * @param type the type
+     * @return the function
+     */
     @Nullable
-    public Function<String, Validation> getValidation(@Nullable String type) {
+    public ValidationConstructor getValidationConstructor(@Nullable String type) {
         return validations.get(type);
     }
 
+    /**
+     * Constructs a validator from a string.
+     * @param str the string
+     * @param silent whether this validator is silent
+     * @return the validator
+     */
     @NotNull
     public Validator parseString(@NotNull String str, boolean silent) {
         List<Validation> list = new ArrayList<>();
         String[] tuples = str.trim().split("\\s*,\\s*");
 
         for (String tuple : tuples) {
-            String[] args = tuple.split("=");
+            if (tuple.isEmpty()) continue;
+            String[] args = tuple.split("\\s*=\\s*");
+            if (args.length > 2)
+                throw new ValidationParseException(String.format("Invalid validation syntax at parameter '%s'", tuple));
+
             String type = args[0];
-
             Function<String, Validation> validation = validations.get(type);
-            if (validation == null) {
-                continue;
-            }
+            if (validation == null)
+                throw new ValidationParseException(String.format("Validation type '%s' not found", type));
 
-            list.add(validation.apply(args.length > 1 ? args[1] : ""));
+            list.add(validation.apply(args.length == 2 ? args[1] : ""));
         }
 
-        return new AggeratedValidator(list.toArray(Validation[]::new), silent);
+        return new AggregatedValidator(list.toArray(Validation[]::new), silent);
     }
 
+    /**
+     * The builder for {@link ValidationRegistry}.
+     */
     public static class Builder {
-        private final Map<String, Function<String, Validation>> validations = new HashMap<>();
+        private final Map<String, ValidationConstructor> validations = new HashMap<>();
 
+        /**
+         * Adds a validation constructor.
+         * @param type the validation type
+         * @param constructor the validation constructor
+         * @return this
+         */
         @NotNull
-        public Builder add(@NotNull String type, @NotNull Function<String, Validation> validation) {
-            validations.put(type, validation);
+        public Builder add(@NotNull String type, @NotNull ValidationConstructor constructor) {
+            validations.put(type, constructor);
             return this;
         }
 
+        /**
+         * Adds a validation constructor.
+         * @param types a set of types that use this constructor
+         * @param constructor the validation constructor
+         * @return this
+         */
         @NotNull
-        public Builder add(@NotNull Set<String> types, @NotNull Function<String, Validation> validation) {
+        public Builder add(@NotNull Set<String> types, @NotNull ValidationConstructor constructor) {
             for (String type : types) {
-                validations.put(type, validation);
+                validations.put(type, constructor);
             }
             return this;
         }
 
+        /**
+         * Builds the validation registry.
+         * @return the validation registry
+         */
         @NotNull
         public ValidationRegistry build() {
             return new ValidationRegistry(this);
         }
     }
 
+    /**
+     * Creates a builder for {@link ValidationRegistry}.
+     * @return the builder
+     */
     @NotNull
     public static ValidationRegistry.Builder create() {
         return new ValidationRegistry.Builder();

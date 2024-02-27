@@ -2,6 +2,9 @@ package dev.anhcraft.config.validate.check;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Validates that the give string is not blank.
+ */
 public class NotBlankValidation implements Validation {
     @Override
     public boolean check(Object value) {

@@ -1,12 +1,18 @@
 package dev.anhcraft.config.validate.check;
 
+import dev.anhcraft.config.error.ValidationParseException;
 import dev.anhcraft.config.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Validates the size of containers.<br>
+ * Support: {@link String}, {@link Collection}, {@link Map} (including dictionary)
+ */
 public class SizeValidation extends ParameterizedValidation {
     private Integer min;
     private Integer max;
@@ -15,15 +21,28 @@ public class SizeValidation extends ParameterizedValidation {
         super(arg);
         List<String> parts = StringUtil.fastSplit(arg, '|');
         if (parts.size() == 1) {
-            int num = Integer.parseInt(parts.get(0));
-            min = Math.max(0, num);
-            max = Math.max(0, num);
+            int num = parseInt(parts.get(0));
+            min = num;
+            max = num;
         } else if (parts.size() == 2) {
             if (!parts.get(0).isEmpty())
-                min = Math.max(0, Integer.parseInt(parts.get(0)));
+                min = parseInt(parts.get(0));
             if (!parts.get(1).isEmpty())
-                max = Math.max(0, Integer.parseInt(parts.get(1)));
+                max = parseInt(parts.get(1));
+            if (max != null && min != null && min > max) {
+                throw new ValidationParseException("Invalid validation argument: " + arg);
+            }
+        } else {
+            throw new ValidationParseException("Invalid validation argument: " + arg);
         }
+    }
+
+    private int parseInt(String s) {
+        int value = Integer.parseInt(s);
+        if (value < 0) {
+            throw new ValidationParseException("Invalid validation argument: " + s);
+        }
+        return value;
     }
 
     @Override
@@ -35,7 +54,9 @@ public class SizeValidation extends ParameterizedValidation {
             number = ((Collection<?>) value).size();
         else if (value instanceof Map)
             number = ((Map<?, ?>) value).size();
-        if ((number == -1))
+        else if (value.getClass().isArray())
+            number = Array.getLength(value);
+        if (number == -1)
             return true;
         if (min != null && number < min) return false;
         return max == null || !(number > max);

@@ -2,6 +2,9 @@ package dev.anhcraft.config.validate;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A disabled validator always let the value pass.
+ */
 public class DisabledValidator implements Validator {
     public static final Validator INSTANCE = new DisabledValidator();
 

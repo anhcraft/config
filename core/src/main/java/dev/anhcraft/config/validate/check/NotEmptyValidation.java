@@ -5,6 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Validates that the given object is not empty.<br>
+ * Supports: {@link String}, {@link Collection}, {@link Iterable}, {@link Map} (including dictionary)
+ */
 public class NotEmptyValidation implements Validation {
     @Override
     public boolean check(Object value) {
