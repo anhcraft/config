@@ -2,7 +2,6 @@ package dev.anhcraft.config.context;
 
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.adapter.TypeAdapter;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +25,6 @@ public class Context implements TypeAdapter<Object> {
     /**
      * Use {@link ConfigFactory#createContext()}
      */
-    @Deprecated
-    @ApiStatus.Internal
     public Context(@NotNull ConfigFactory factory) { // TODO hide this constructor
         this.factory = factory;
     }

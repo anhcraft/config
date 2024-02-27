@@ -5,6 +5,7 @@ import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.context.ContextProvider;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.ValidationRegistry;
@@ -15,16 +16,18 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+/**
+ * The config factory centralizes facilities for normalization and denormalization.
+ */
 public class ConfigFactory {
     private final Map<Class<?>, TypeAdapter<?>> typeAdapters;
     private final ReflectBlueprintScanner blueprintScanner;
     private final ConfigNormalizer normalizer;
     private final ConfigDenormalizer denormalizer;
     private final Map<Class<?>, Schema> schemas;
-    private final Function<ConfigFactory, Context> contextProvider;
+    private final ContextProvider contextProvider;
 
     ConfigFactory(Builder builder) {
         this.typeAdapters = Map.copyOf(builder.typeAdapters);
@@ -40,9 +43,16 @@ public class ConfigFactory {
         this.contextProvider = builder.contextProvider;
     }
 
+    /**
+     * Gets the first type adapter which is compatible to the given type.<br>
+     * A type adapter {@code T} is compatible to type {@code T} or subtype of {@code T}<br>
+     * This method traverses from {@code T} up to {@code Object} including superclass and superinterfaces.
+     * @param type the type
+     * @return the type adapter or {@code null} if not found
+     * @param <T> the type
+     */
     @SuppressWarnings("unchecked")
-    @Nullable
-    public <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
+    public <T> @Nullable TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
         // TODO optimize and cache the type adapter
         Class<?> clazz = ComplexTypes.wrapPrimitive(type);
         do {
@@ -63,21 +73,39 @@ public class ConfigFactory {
         return null;
     }
 
+    /**
+     * Creates a new context.
+     * @return a new context
+     */
     @NotNull
     public Context createContext() {
         return contextProvider.apply(this);
     }
 
+    /**
+     * Gets the schema for the given type.<br>
+     * The result will be cached for future calls.
+     * @param type the type
+     * @return the schema
+     */
     @NotNull
     public Schema getSchema(@NotNull Class<?> type) {
         return schemas.computeIfAbsent(type, blueprintScanner::scanSchema);
     }
 
+    /**
+     * Gets the normalizer.
+     * @return the normalizer
+     */
     @NotNull
     public ConfigNormalizer getNormalizer() {
         return normalizer;
     }
 
+    /**
+     * Gets the denormalizer.
+     * @return the denormalizer
+     */
     @NotNull
     public ConfigDenormalizer getDenormalizer() {
         return denormalizer;
@@ -87,7 +115,7 @@ public class ConfigFactory {
         private final Map<Class<?>, TypeAdapter<?>> typeAdapters = new HashMap<>();
         private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
         private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
-        private Function<ConfigFactory, Context> contextProvider = Context::new;
+        private ContextProvider contextProvider = Context::new;
         private int schemaCacheCapacity = 100;
         private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
         private byte denormalizerSettings = 0;
@@ -114,6 +142,16 @@ public class ConfigFactory {
             typeAdapters.put(URI.class, new UriAdapter());
         }
 
+        /**
+         * Registers a type adapter.<br>
+         * A type adapter {@code T} is compatible to type {@code T} or subtype of {@code T}<br>
+         * By default, built-in type adapters are implicitly registered
+         * @param type the type
+         * @param adapter the type adapter
+         * @return this
+         * @param <T> the type
+         * @see ConfigFactory#getTypeAdapter(Class)
+         */
         public @NotNull <T> Builder adaptType(@NotNull Class<T> type, @NotNull TypeAdapter<T> adapter) {
             if (TypeAdapter.class.isAssignableFrom(type))
                 throw new IllegalArgumentException("Wrong type?");
@@ -121,28 +159,53 @@ public class ConfigFactory {
             return this;
         }
 
-        public @NotNull Builder useValidationRegistry(@NotNull ValidationRegistry validation) {
-            validationRegistry = validation;
+        /**
+         * Uses the given validation registry.<br>
+         * By default, uses {@link ValidationRegistry#DEFAULT}.
+         * @param registry the validation registry
+         * @return this
+         */
+        public @NotNull Builder useValidationRegistry(@NotNull ValidationRegistry registry) {
+            validationRegistry = registry;
             return this;
         }
 
+        /**
+         * Uses the given naming policy.<br>
+         * By default, uses {@link NamingPolicy#DEFAULT}.
+         * @param function the naming policy
+         * @return this
+         */
         public @NotNull Builder useNamingPolicy(@NotNull UnaryOperator<String> function) {
             namingPolicy = function;
             return this;
         }
 
-        public @NotNull Builder provideContext(@NotNull Function<ConfigFactory, Context> provider) {
+        /**
+         * Uses the given context provider.<br>
+         * By default, uses the default context provider.
+         * @param provider the context provider
+         * @return this
+         */
+        public @NotNull Builder provideContext(@NotNull ContextProvider provider) {
             contextProvider = provider;
             return this;
         }
 
+        /**
+         * Sets the capacity of the schema cache.<br>
+         * By default, sets to {@code 100}.
+         * @param capacity the capacity
+         * @return this
+         */
         public @NotNull Builder setSchemaCacheCapacity(int capacity) {
             schemaCacheCapacity = capacity;
             return this;
         }
 
         /**
-         * Ignores the default values when normalizing into a {@link Dictionary} ({@code 0} and {@code false})<br>
+         * Ignores setting default values when normalizing an instance into a {@link Dictionary}<br>
+         * The default value including number and boolean.<br>
          * By default, sets to {@code true}
          * @param ignore if the default values should be ignored
          * @return this
@@ -152,11 +215,23 @@ public class ConfigFactory {
             return this;
         }
 
+        /**
+         * Ignores setting empty array when normalizing an instance into a {@link Dictionary}<br>
+         * By default, sets to {@code false}
+         * @param ignore if empty array should be ignored
+         * @return this
+         */
         public @NotNull Builder ignoreEmptyArray(boolean ignore) {
             normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY, ignore);
             return this;
         }
 
+        /**
+         * Ignores setting empty dictionary when normalizing an instance into a {@link Dictionary}<br>
+         * By default, sets to {@code false}
+         * @param ignore if empty dictionary should be ignored
+         * @return this
+         */
         public @NotNull Builder ignoreEmptyDictionary(boolean ignore) {
             normalizerSettings = SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY, ignore);
             return this;
@@ -194,12 +269,20 @@ public class ConfigFactory {
             return this;
         }
 
+        /**
+         * Builds the config factory.
+         * @return the config factory
+         */
         @NotNull
         public ConfigFactory build() {
             return new ConfigFactory(this);
         }
     }
 
+    /**
+     * Creates a builder for {@link ConfigFactory}.
+     * @return the builder
+     */
     @NotNull
     public static Builder create() {
         return new Builder();
