@@ -1,10 +1,9 @@
 package dev.anhcraft.config.adapter;
 
 import dev.anhcraft.config.context.Context;
+import java.lang.reflect.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Type;
 
 /**
  * A {@link TypeAdapter} that is used in normalization only.
@@ -12,8 +11,8 @@ import java.lang.reflect.Type;
  */
 public interface TypeInferencer<ComplexT> extends TypeAdapter<ComplexT> {
 
-    @Nullable
-    default ComplexT complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
-        throw new UnsupportedOperationException();
-    }
+  @Nullable default ComplexT complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
+      throws Exception {
+    throw new UnsupportedOperationException();
+  }
 }

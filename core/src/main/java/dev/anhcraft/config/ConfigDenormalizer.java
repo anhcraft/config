@@ -14,13 +14,12 @@ import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.util.ObjectUtil;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.Map;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The denormalizer complexifies a simple object with the following rules:
@@ -44,176 +43,186 @@ import java.util.Map;
  * @see TypeToken
  */
 public class ConfigDenormalizer {
-    private final ConfigFactory configFactory;
-    private final byte settings;
+  private final ConfigFactory configFactory;
+  private final byte settings;
 
-    /**
-     * Use {@link ConfigFactory#getDenormalizer()}
-     */
-    @ApiStatus.Internal
-    public ConfigDenormalizer(ConfigFactory configFactory, byte settings) {
-        this.configFactory = configFactory;
-        this.settings = settings;
+  /**
+   * Use {@link ConfigFactory#getDenormalizer()}
+   */
+  @ApiStatus.Internal
+  public ConfigDenormalizer(ConfigFactory configFactory, byte settings) {
+    this.configFactory = configFactory;
+    this.settings = settings;
+  }
+
+  /**
+   * Gets the setting flags.
+   * @return the settings
+   */
+  public byte getSettings() {
+    return settings;
+  }
+
+  /**
+   * Denormalizes the given simple object into a complex object.<br>
+   * This creates a new {@link Context} to facilitate recursive calls.
+   * @param simple the simple object
+   * @param targetType the target complex type
+   * @return the complex object or {@code null} if the object cannot be denormalized
+   * @param <T> the type of the simple object
+   * @throws Exception may throw exceptions during denormalization
+   * @see #denormalize(Context, Object, Type)
+   */
+  public <T> @Nullable Object denormalize(@Nullable T simple, @NotNull Type targetType)
+      throws Exception {
+    return denormalize(configFactory.createContext(), simple, targetType);
+  }
+
+  /**
+   * Denormalizes the given simple object into a complex object.
+   * @param ctx the {@link Context} to use
+   * @param simple the simple object
+   * @param targetType the target complex type
+   * @return the complex object or {@code null} if the object cannot be denormalized
+   * @param <T> the type of the simple object
+   * @throws Exception may throw exceptions during denormalization
+   */
+  public <T> @Nullable Object denormalize(
+      @NotNull Context ctx, @Nullable T simple, @NotNull Type targetType) throws Exception {
+    validateSimpleType(ctx, simple);
+    return _denormalize(ctx, simple, targetType);
+  }
+
+  /**
+   * Denormalizes the given dictionary into the given instance.<br>
+   * This creates a new {@link Context} to facilitate recursive calls.
+   * @param simple the dictionary
+   * @param targetType the target complex type
+   * @param instance the instance
+   * @throws Exception may throw exceptions during denormalization
+   */
+  public void denormalizeToInstance(
+      @NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance)
+      throws Exception {
+    denormalizeToInstance(configFactory.createContext(), simple, targetType, instance);
+  }
+
+  /**
+   * Denormalizes the given dictionary into the given instance.
+   * @param ctx the {@link Context} to use
+   * @param simple the dictionary
+   * @param targetType the target complex type
+   * @param instance the instance
+   * @throws Exception may throw exceptions during denormalization
+   */
+  public void denormalizeToInstance(
+      @NotNull Context ctx,
+      @NotNull Dictionary simple,
+      @NotNull Type targetType,
+      @NotNull Object instance)
+      throws Exception {
+    validateSimpleType(ctx, simple);
+    validateComplexType(ctx, instance, targetType);
+    _denormalizeToInstance(ctx, simple, targetType, instance);
+  }
+
+  // ======== Internal implementations ========
+
+  private <T> void validateSimpleType(Context ctx, T simple) {
+    if (!SimpleTypes.test(simple))
+      throw new IllegalTypeException(ctx, "Supplied argument is not a simple object: " + simple);
+  }
+
+  private void validateComplexType(
+      Context ctx, @NotNull Object instance, @NotNull Type targetType) {
+    try {
+      Class<?> erasureType = ComplexTypes.erasure(targetType);
+      if (!erasureType.isAssignableFrom(instance.getClass()))
+        throw new IllegalTypeException(
+            ctx, "Supplied instance is not compatible to " + erasureType.getName());
+    } catch (ClassNotFoundException e) {
+      throw new IllegalTypeException(ctx, "Cannot perform type check", e);
     }
+  }
 
-    /**
-     * Gets the setting flags.
-     * @return the settings
-     */
-    public byte getSettings() {
-        return settings;
+  @SuppressWarnings("rawtypes")
+  private <T> Object _denormalize(Context ctx, @Nullable T simple, @NotNull Type targetType)
+      throws Exception {
+    if (simple == null) return null;
+    if (ComplexTypes.isArray(targetType)) return _denormalizeToArray(ctx, targetType, simple);
+    Class<?> erasureType = ComplexTypes.erasure(targetType);
+    TypeAdapter adapter = configFactory.getTypeAdapter(erasureType);
+    if (adapter != null && !(adapter instanceof TypeInferencer)) {
+      Object result = adapter.complexify(ctx, simple, targetType);
+      if (result != null
+          && !ComplexTypes.wrapPrimitive(erasureType).isAssignableFrom(result.getClass())) {
+        String msg =
+            String.format(
+                "Adapter returned incompatible type '%s' while the desire is '%s'",
+                result.getClass().getName(), erasureType.getName());
+        throw new IllegalTypeException(ctx, msg);
+      }
+      return result;
     }
+    if (!(simple instanceof Dictionary)) return null;
+    Object object = ObjectUtil.newInstance(erasureType);
+    _denormalizeToInstance(ctx, (Dictionary) simple, targetType, object);
+    return object;
+  }
 
-    /**
-     * Denormalizes the given simple object into a complex object.<br>
-     * This creates a new {@link Context} to facilitate recursive calls.
-     * @param simple the simple object
-     * @param targetType the target complex type
-     * @return the complex object or {@code null} if the object cannot be denormalized
-     * @param <T> the type of the simple object
-     * @throws Exception may throw exceptions during denormalization
-     * @see #denormalize(Context, Object, Type)
-     */
-    public <T> @Nullable Object denormalize(@Nullable T simple, @NotNull Type targetType) throws Exception {
-        return denormalize(configFactory.createContext(), simple, targetType);
+  private <T> Object _denormalizeToArray(Context ctx, Type targetType, T simple) throws Exception {
+    Type elemType = ComplexTypes.getComponentType(targetType);
+    if (elemType == null) return null;
+    Class<?> erasureElemType = ComplexTypes.erasure(elemType);
+    int len = SimpleTypes.getContainerSize(simple);
+    Object object = Array.newInstance(erasureElemType, len);
+    for (int i = 0; i < len; i++) {
+      ctx.enterScope(new ElementScope(i));
+      {
+        Object elem = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
+        Array.set(object, i, elem);
+      }
+      ctx.exitScope();
     }
+    return object;
+  }
 
-    /**
-     * Denormalizes the given simple object into a complex object.
-     * @param ctx the {@link Context} to use
-     * @param simple the simple object
-     * @param targetType the target complex type
-     * @return the complex object or {@code null} if the object cannot be denormalized
-     * @param <T> the type of the simple object
-     * @throws Exception may throw exceptions during denormalization
-     */
-    public <T> @Nullable Object denormalize(@NotNull Context ctx, @Nullable T simple, @NotNull Type targetType) throws Exception {
-        validateSimpleType(ctx, simple);
-        return _denormalize(ctx, simple, targetType);
-    }
+  private void _denormalizeToInstance(
+      Context ctx, Dictionary simple, Type targetType, Object instance) throws Exception {
+    TypeResolver resolver = TypeResolver.of(targetType);
+    Schema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
 
-    /**
-     * Denormalizes the given dictionary into the given instance.<br>
-     * This creates a new {@link Context} to facilitate recursive calls.
-     * @param simple the dictionary
-     * @param targetType the target complex type
-     * @param instance the instance
-     * @throws Exception may throw exceptions during denormalization
-     */
-    public void denormalizeToInstance(@NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance) throws Exception {
-        denormalizeToInstance(configFactory.createContext(), simple, targetType, instance);
-    }
+    for (Property property : schema.properties()) {
+      if (property.isConstant()) continue;
 
-    /**
-     * Denormalizes the given dictionary into the given instance.
-     * @param ctx the {@link Context} to use
-     * @param simple the dictionary
-     * @param targetType the target complex type
-     * @param instance the instance
-     * @throws Exception may throw exceptions during denormalization
-     */
-    public void denormalizeToInstance(@NotNull Context ctx, @NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance) throws Exception {
-        validateSimpleType(ctx, simple);
-        validateComplexType(ctx, instance, targetType);
-        _denormalizeToInstance(ctx, simple, targetType, instance);
-    }
+      Map.Entry<String, Object> entry = simple.search(property.name(), property.aliases());
+      Object value = entry == null ? null : entry.getValue();
 
-    // ======== Internal implementations ========
-
-    private <T> void validateSimpleType(Context ctx, T simple) {
-        if (!SimpleTypes.test(simple))
-            throw new IllegalTypeException(ctx, "Supplied argument is not a simple object: " + simple);
-    }
-
-    private void validateComplexType(Context ctx, @NotNull Object instance, @NotNull Type targetType) {
-        try {
-            Class<?> erasureType = ComplexTypes.erasure(targetType);
-            if (!erasureType.isAssignableFrom(instance.getClass()))
-                throw new IllegalTypeException(ctx, "Supplied instance is not compatible to " + erasureType.getName());
-        } catch (ClassNotFoundException e) {
-            throw new IllegalTypeException(ctx, "Cannot perform type check", e);
+      ctx.enterScope(new PropertyScope(property, entry == null ? "" : entry.getKey()));
+      scope:
+      {
+        if (value != null) {
+          Type solvedType = resolver.resolve(property.type());
+          value = _denormalize(ctx, value, solvedType);
         }
-    }
 
-    @SuppressWarnings("rawtypes")
-    private <T> Object _denormalize(Context ctx, @Nullable T simple, @NotNull Type targetType) throws Exception {
-        if (simple == null)
-            return null;
-        if (ComplexTypes.isArray(targetType))
-            return _denormalizeToArray(ctx, targetType, simple);
-        Class<?> erasureType = ComplexTypes.erasure(targetType);
-        TypeAdapter adapter = configFactory.getTypeAdapter(erasureType);
-        if (adapter != null && !(adapter instanceof TypeInferencer)) {
-            Object result = adapter.complexify(ctx, simple, targetType);
-            if (result != null && !ComplexTypes.wrapPrimitive(erasureType).isAssignableFrom(result.getClass())) {
-                String msg = String.format("Adapter returned incompatible type '%s' while the desire is '%s'", result.getClass().getName(), erasureType.getName());
-                throw new IllegalTypeException(ctx, msg);
-            }
-            return result;
+        if (property.isOptional() && value == null) break scope;
+
+        Class<?> propertyTypeErasure = ComplexTypes.erasure(property.type());
+
+        if (value == null && propertyTypeErasure.isPrimitive()) break scope;
+
+        if (value != null && !propertyTypeErasure.isAssignableFrom(value.getClass())) break scope;
+
+        if (!property.validator().check(value)) {
+          if (property.validator().silent()) break scope;
+          throw new InvalidValueException(
+              ctx, String.format("'%s' %s", value, property.validator().message()));
         }
-        if (!(simple instanceof Dictionary))
-            return null;
-        Object object = ObjectUtil.newInstance(erasureType);
-        _denormalizeToInstance(ctx, (Dictionary) simple, targetType, object);
-        return object;
+
+        property.field().set(instance, value);
+      }
+      ctx.exitScope();
     }
-
-    private <T> Object _denormalizeToArray(Context ctx, Type targetType, T simple) throws Exception {
-        Type elemType = ComplexTypes.getComponentType(targetType);
-        if (elemType == null) return null;
-        Class<?> erasureElemType = ComplexTypes.erasure(elemType);
-        int len = SimpleTypes.getContainerSize(simple);
-        Object object = Array.newInstance(erasureElemType, len);
-        for (int i = 0; i < len; i++) {
-            ctx.enterScope(new ElementScope(i));
-            {
-                Object elem = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
-                Array.set(object, i, elem);
-            }
-            ctx.exitScope();
-        }
-        return object;
-    }
-
-    private void _denormalizeToInstance(Context ctx, Dictionary simple, Type targetType, Object instance) throws Exception {
-        TypeResolver resolver = TypeResolver.of(targetType);
-        Schema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
-
-        for (Property property : schema.properties()) {
-            if (property.isConstant())
-                continue;
-
-            Map.Entry<String, Object> entry = simple.search(property.name(), property.aliases());
-            Object value = entry == null ? null : entry.getValue();
-
-            ctx.enterScope(new PropertyScope(property, entry == null ? "" : entry.getKey()));
-            scope:
-            {
-                if (value != null) {
-                    Type solvedType = resolver.resolve(property.type());
-                    value = _denormalize(ctx, value, solvedType);
-                }
-
-                if (property.isOptional() && value == null)
-                    break scope;
-
-                Class<?> propertyTypeErasure = ComplexTypes.erasure(property.type());
-
-                if (value == null && propertyTypeErasure.isPrimitive())
-                    break scope;
-
-                if (value != null && !propertyTypeErasure.isAssignableFrom(value.getClass()))
-                    break scope;
-
-                if (!property.validator().check(value)) {
-                    if (property.validator().silent())
-                        break scope;
-                    throw new InvalidValueException(ctx, String.format("'%s' %s", value, property.validator().message()));
-                }
-
-                property.field().set(instance, value);
-            }
-            ctx.exitScope();
-        }
-    }
+  }
 }

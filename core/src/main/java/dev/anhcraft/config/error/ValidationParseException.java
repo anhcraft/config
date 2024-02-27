@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public class ValidationParseException extends RuntimeException {
 
-    public ValidationParseException(@NotNull String message) {
-        super(message);
-    }
+  public ValidationParseException(@NotNull String message) {
+    super(message);
+  }
 
-    public ValidationParseException(@NotNull String message, @NotNull Throwable cause) {
-        super(message, cause);
-    }
+  public ValidationParseException(@NotNull String message, @NotNull Throwable cause) {
+    super(message, cause);
+  }
 }

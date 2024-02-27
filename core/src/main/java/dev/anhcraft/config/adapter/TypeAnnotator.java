@@ -9,8 +9,10 @@ import org.jetbrains.annotations.Nullable;
  * @param <ComplexT> the complex type
  */
 public interface TypeAnnotator<ComplexT> extends TypeAdapter<ComplexT> {
-    @Nullable
-    default Object simplify(@NotNull Context ctx, @NotNull Class<? extends ComplexT > sourceType, @NotNull ComplexT value) {
-        throw new UnsupportedOperationException();
-    }
+  @Nullable default Object simplify(
+      @NotNull Context ctx,
+      @NotNull Class<? extends ComplexT> sourceType,
+      @NotNull ComplexT value) {
+    throw new UnsupportedOperationException();
+  }
 }

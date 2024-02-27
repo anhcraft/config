@@ -6,15 +6,14 @@ package dev.anhcraft.config.context;
  * scope is an {@link ElementScope}, it means the process is in a multidimensional array.
  */
 public class ElementScope implements Scope {
-    private final int index;
+  private final int index;
 
-    public ElementScope(int index) {
-        if (index < 0)
-            throw new IllegalArgumentException("index cannot be negative");
-        this.index = index;
-    }
+  public ElementScope(int index) {
+    if (index < 0) throw new IllegalArgumentException("index cannot be negative");
+    this.index = index;
+  }
 
-    public int getIndex() {
-        return index;
-    }
+  public int getIndex() {
+    return index;
+  }
 }
