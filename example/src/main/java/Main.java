@@ -1,3 +1,4 @@
+import adapter.LocationAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.anhcraft.config.ConfigFactory;
@@ -43,6 +44,7 @@ public class Main {
         };
 
         ConfigFactory factory = ConfigFactory.create()
+                .adaptType(Location.class, new LocationAdapter())
                 .ignoreDefaultValues(true)
                 .ignoreEmptyDictionary(true)
                 .useNamingPolicy(NamingPolicy.KEBAB_CASE)

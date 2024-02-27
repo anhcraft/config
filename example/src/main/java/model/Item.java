@@ -1,5 +1,6 @@
 package model;
 
+import dev.anhcraft.config.meta.Describe;
 import dev.anhcraft.config.meta.Validate;
 
 import java.util.UUID;
@@ -11,8 +12,14 @@ public class Item<T> {
         this.owner = owner;
     }
 
+    @Describe("The item value")
     public T value;
+
+    @Describe("The number of items")
     @Validate("range=0|")
     public int stack;
+
+    @Describe("The owner of the item")
+    @Validate("not-null")
     public UUID owner;
 }
