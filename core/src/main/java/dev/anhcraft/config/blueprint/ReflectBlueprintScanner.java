@@ -83,7 +83,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
     }
 
     private PropertyNaming scanName(Field field, String originalPrimaryName, Set<String> existing) {
-        Set<String> aliases = new LinkedHashSet<>();
+        LinkedHashSet<String> aliases = new LinkedHashSet<>();
         String primary = null;
 
         Name nameMeta = field.getAnnotation(Name.class);

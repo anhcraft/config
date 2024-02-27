@@ -2,17 +2,17 @@ package dev.anhcraft.config.blueprint;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Represents naming information of a {@link Property}.
  */
 public final class PropertyNaming {
     private final String primary;
-    private final Set<String> aliases;
+    private final LinkedHashSet<String> aliases;
 
-    public PropertyNaming(@NotNull String primary, @NotNull Set<String> aliases) {
+    public PropertyNaming(@NotNull String primary, @NotNull LinkedHashSet<String> aliases) {
         this.primary = primary;
         this.aliases = aliases;
     }
@@ -31,7 +31,7 @@ public final class PropertyNaming {
      * @return the aliases
      */
     @NotNull
-    public Set<String> aliases() {
+    public LinkedHashSet<String> aliases() {
         return aliases;
     }
 

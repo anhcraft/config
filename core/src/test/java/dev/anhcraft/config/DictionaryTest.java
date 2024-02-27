@@ -3,8 +3,8 @@ package dev.anhcraft.config;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,9 +61,9 @@ public class DictionaryTest {
         dict.put("2", "b");
         dict.put("4", "c");
         dict.put("6", "d");
-        assertEquals(Map.entry("1", "a"), dict.search("1", Set.of("2")));
-        assertEquals(Map.entry("4", "c"), dict.search("3", Set.of("4", "1")));
-        assertNull(dict.search("3", Set.of("5")));
+        assertEquals(Map.entry("1", "a"), dict.search("1", List.of("2")));
+        assertEquals(Map.entry("4", "c"), dict.search("3", List.of("4", "1")));
+        assertNull(dict.search("3", List.of("5")));
     }
 
     @Test
