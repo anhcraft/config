@@ -32,7 +32,7 @@ public class MapAdapterTest {
         vehicle.put(2, "Motorcycle");
         Object simplified = adapter.simplify(context, Map.class, vehicle);
         assertInstanceOf(Dictionary.class, simplified);
-        assertEquals(Dictionary.wrap(Map.of(
+        assertEquals(Dictionary.copyOf(Map.of(
                 "0", "Car",
                 "1", "Truck",
                 "2", "Motorcycle"
@@ -55,12 +55,12 @@ public class MapAdapterTest {
         stock.put("Alice", Map.of("Apple", 5, "Banana", 15));
         Object simplified = adapter.simplify(context, Map.class, stock);
         assertInstanceOf(Dictionary.class, simplified);
-        assertEquals(Dictionary.wrap(Map.of(
-                "Bob", Dictionary.wrap(Map.of(
+        assertEquals(Dictionary.copyOf(Map.of(
+                "Bob", Dictionary.copyOf(Map.of(
                         "Apple", 10,
                         "Banana", 20
                 )),
-                "Alice", Dictionary.wrap(Map.of(
+                "Alice", Dictionary.copyOf(Map.of(
                         "Apple", 5,
                         "Banana", 15
                 ))
@@ -70,7 +70,7 @@ public class MapAdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testComplexify() throws Exception {
-        Dictionary dict = Dictionary.wrap(Map.of(
+        Dictionary dict = Dictionary.copyOf(Map.of(
                 "0", "Car",
                 "1", "Truck",
                 "2", "Motorcycle"
@@ -86,12 +86,12 @@ public class MapAdapterTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testComplexify2D() throws Exception {
-        Dictionary dict = Dictionary.wrap(Map.of(
-                "Bob", Dictionary.wrap(Map.of(
+        Dictionary dict = Dictionary.copyOf(Map.of(
+                "Bob", Dictionary.copyOf(Map.of(
                         "Apple", "10",
                         "Banana", "20"
                 )),
-                "Alice", Dictionary.wrap(Map.of(
+                "Alice", Dictionary.copyOf(Map.of(
                         "Apple", 5,
                         "Banana", "15.0001"
                 ))
@@ -108,7 +108,7 @@ public class MapAdapterTest {
     @Test
     public void testComplexifyUseHashMap() throws Exception {
         assertInstanceOf(HashMap.class, adapter.complexify(context,
-                Dictionary.wrap(Map.of("foo", "bar")),
+                Dictionary.copyOf(Map.of("foo", "bar")),
                 new TypeToken<HashMap<String, String>>() {
                 }));
     }
@@ -116,7 +116,7 @@ public class MapAdapterTest {
     @Test
     public void testComplexifyUseTreeMap() throws Exception {
         assertInstanceOf(TreeMap.class, adapter.complexify(context,
-                Dictionary.wrap(Map.of("foo", "bar")),
+                Dictionary.copyOf(Map.of("foo", "bar")),
                 new TypeToken<TreeMap<String, String>>() {
                 }));
     }
@@ -124,7 +124,7 @@ public class MapAdapterTest {
     @Test
     public void testComplexifyUseLinkedHashMap() throws Exception {
         assertInstanceOf(LinkedHashMap.class, adapter.complexify(context,
-                Dictionary.wrap(Map.of("foo", "bar")),
+                Dictionary.copyOf(Map.of("foo", "bar")),
                 new TypeToken<Map<String, String>>() {
                 }));
     }

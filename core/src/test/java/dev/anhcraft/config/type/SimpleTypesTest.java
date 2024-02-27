@@ -112,7 +112,7 @@ public class SimpleTypesTest {
         assertEquals(0, SimpleTypes.getContainerSize(new int[]{}));
         assertEquals(1, SimpleTypes.getContainerSize(new int[]{0}));
         assertEquals(0, SimpleTypes.getContainerSize(new Dictionary()));
-        assertEquals(1, SimpleTypes.getContainerSize(Dictionary.wrap(Map.of("foo", "bar"))));
+        assertEquals(1, SimpleTypes.getContainerSize(Dictionary.copyOf(Map.of("foo", "bar"))));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class SimpleTypesTest {
         assertEquals(1, SimpleTypes.getContainerElement(1, 0));
         assertEquals(0, SimpleTypes.getContainerElement(new Integer[]{0}, 0));
         assertEquals(0, SimpleTypes.getContainerElement(new int[]{0}, 0));
-        assertEquals("bar", SimpleTypes.getContainerElement(Dictionary.wrap(Map.of("foo", "bar")), 0));
+        assertEquals("bar", SimpleTypes.getContainerElement(Dictionary.copyOf(Map.of("foo", "bar")), 0));
     }
 
     @Test

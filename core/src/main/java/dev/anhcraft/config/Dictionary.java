@@ -7,23 +7,37 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * Represents a dictionary containing simple objects only.
+ */
 public class Dictionary extends AbstractMap<String, Object> {
-    private LinkedHashMap<String, Object> backend;
+    private final LinkedHashMap<String, Object> backend;
     private List<String> sortedKeys;
     private Set<Map.Entry<String, Object>> entryView;
 
-    public static @NotNull Dictionary wrap(@NotNull Map<String, Object> map) {
+    /**
+     * Makes a copy of the given map as a {@link Dictionary}.<br>
+     * The map is shallow-copied. Changes to the dictionary does not reflect in the original map, however, changes
+     * made to their values does reflect.<br>
+     * The given map must contain simple values only, otherwise, {@link IllegalArgumentException} throws.
+     * @param map the map
+     * @return the dictionary
+     */
+    public static @NotNull Dictionary copyOf(@NotNull Map<String, Object> map) {
         Dictionary container = new Dictionary();
-        container.backend = new LinkedHashMap<>(map);
+        container.putAll(map);
         return container;
     }
 
-    public static @NotNull Dictionary copyOf(@NotNull Dictionary dict) {
-        return wrap(dict.backend);
-    }
-
+    /**
+     * Makes a copy of the given map as a {@link Dictionary}.<br>
+     * If {@code deep} is true, the map will be deep-copied. Otherwise, it will be shallow-copied.
+     * @param dict the dictionary
+     * @param deep if true, the dictionary will be deep-copied
+     * @return the copied dictionary
+     */
     public static @NotNull Dictionary copyOf(@NotNull Dictionary dict, boolean deep) {
-        return deep ? SimpleTypes.deepClone(dict) : wrap(dict.backend);
+        return deep ? Objects.requireNonNull(SimpleTypes.deepClone(dict)) : copyOf(dict.backend);
     }
 
     public Dictionary() {
@@ -53,6 +67,12 @@ public class Dictionary extends AbstractMap<String, Object> {
 
     // ======== Extra implementations ========
 
+    /**
+     * Searches for an entry with the given name and aliases.
+     * @param name the name
+     * @param aliases the aliases
+     * @return the entry or {@code null}
+     */
     @Nullable
     public Map.Entry<String, Object> search(@NotNull String name, @NotNull Set<String> aliases) {
         Object value = get(name);
@@ -68,21 +88,42 @@ public class Dictionary extends AbstractMap<String, Object> {
         return null;
     }
 
+    /**
+     * Gets the key at the given index.
+     * @param pos the index
+     * @return the key
+     */
     public @Nullable String getKeyAt(int pos) {
         if (sortedKeys == null) // generate the cache if not exist
             sortedKeys = List.copyOf(keySet());
         return sortedKeys.get(pos);
     }
 
+    /**
+     * Gets the value at the given index.
+     * @param pos the index
+     * @return the value
+     */
     public @Nullable Object getValueAt(int pos) {
         String key = getKeyAt(pos);
         return key == null ? null : get(key);
     }
 
+    /**
+     * Renames an entry with a new key.<br>
+     * Using the new key may override another existing entry.
+     * @param from the current key
+     * @param to the new key
+     * @return the old value previously at the new key or {@code null}
+     */
     public @Nullable Object rename(@NotNull String from, @NotNull String to) {
         return put(to, remove(from));
     }
 
+    /**
+     * Unwraps the dictionary into a map.
+     * @return shallow-copied, mutable map
+     */
     @NotNull
     public LinkedHashMap<String, Object> unwrap() {
         return new LinkedHashMap<>(backend);

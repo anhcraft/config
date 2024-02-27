@@ -146,7 +146,7 @@ public final class SimpleTypes {
             for (Map.Entry<String, Object> entry : backend.entrySet()) {
                 entry.setValue(deepClone(entry.getValue()));
             }
-            return (T) Dictionary.wrap(backend);
+            return (T) Dictionary.copyOf(backend);
         }
         else if (value.getClass().isArray()) {
             Class<?> componentType = value.getClass().getComponentType();
