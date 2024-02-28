@@ -1,5 +1,7 @@
 package dev.anhcraft.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeInferencer;
 import dev.anhcraft.config.context.Context;
@@ -9,15 +11,12 @@ import dev.anhcraft.config.meta.Constant;
 import dev.anhcraft.config.meta.Denormalizer;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.Validate;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.*;
-
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.*;
 
 public class ConfigDenormalizerTest {
   @Test
@@ -207,19 +206,21 @@ public class ConfigDenormalizerTest {
     @Test
     public void testDefaultSyntax() throws Exception {
       ConfigFactory factory =
-        ConfigFactory.create()
-          .ignoreDefaultValues(true)
-          .ignoreEmptyArray(true)
-          .ignoreEmptyDictionary(true)
-          .build();
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
       Dictionary dict = new Dictionary();
-      dict.put("reports", new Dictionary[]{
-        Dictionary.copyOf(Map.of("service", "auth", "ping", 1, "status", 1)),
-        Dictionary.copyOf(Map.of("service", "logging", "ping", 2, "status", 0)),
-        Dictionary.copyOf(Map.of("service", "noti", "ping", 1, "status", 1)),
-        Dictionary.copyOf(Map.of("service", "mail", "ping", 3, "status", 0)),
-        Dictionary.copyOf(Map.of("ping", 2, "status", 0)),
-      });
+      dict.put(
+          "reports",
+          new Dictionary[] {
+            Dictionary.copyOf(Map.of("service", "auth", "ping", 1, "status", 1)),
+            Dictionary.copyOf(Map.of("service", "logging", "ping", 2, "status", 0)),
+            Dictionary.copyOf(Map.of("service", "noti", "ping", 1, "status", 1)),
+            Dictionary.copyOf(Map.of("service", "mail", "ping", 3, "status", 0)),
+            Dictionary.copyOf(Map.of("ping", 2, "status", 0)),
+          });
       ServiceCenter serviceCenter = new ServiceCenter();
       factory.getDenormalizer().denormalizeToInstance(dict, ServiceCenter.class, serviceCenter);
       assertEquals(2, serviceCenter.deadServices.size());
@@ -227,13 +228,19 @@ public class ConfigDenormalizerTest {
 
     public class ServiceCenter {
       public HealthReport[] reports;
-      @Constant
-      public Set<String> deadServices = Set.of();
+      @Constant public Set<String> deadServices = Set.of();
 
       @Denormalizer(value = "reports", strategy = Denormalizer.Strategy.AFTER)
       private void filterReport(HealthReport[] reports) {
-        reports = Arrays.stream(reports).filter(report -> report.service != null).toArray(HealthReport[]::new);
-        deadServices = Arrays.stream(reports).filter(report -> report.status == 0).map(r -> r.service).collect(Collectors.toSet());
+        reports =
+            Arrays.stream(reports)
+                .filter(report -> report.service != null)
+                .toArray(HealthReport[]::new);
+        deadServices =
+            Arrays.stream(reports)
+                .filter(report -> report.status == 0)
+                .map(r -> r.service)
+                .collect(Collectors.toSet());
       }
     }
 
@@ -244,8 +251,7 @@ public class ConfigDenormalizerTest {
 
       @Denormalizer(value = {"ping", "status"})
       private int checkNegative(int n, Context ctx) {
-        if (n < 0)
-          throw new RuntimeException("Health report is malformed at "+ctx.getPath());
+        if (n < 0) throw new RuntimeException("Health report is malformed at " + ctx.getPath());
         return n;
       }
 

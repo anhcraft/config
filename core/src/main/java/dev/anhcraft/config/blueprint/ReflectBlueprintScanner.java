@@ -2,19 +2,18 @@ package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.UnsupportedSchemaException;
-import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.*;
+import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.DisabledValidator;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import dev.anhcraft.config.validate.Validator;
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.UnaryOperator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A Reflection-based {@link BlueprintScanner}
@@ -75,7 +74,8 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       Processor normalizer = normalizers.get(field.getName());
       Processor denormalizer = denormalizers.get(field.getName());
 
-      Property property = new Property(name, description, modifier, validator, field, normalizer, denormalizer);
+      Property property =
+          new Property(name, description, modifier, validator, field, normalizer, denormalizer);
       lookup.put(name.primary(), property);
       nameClaimed.remove(primaryName);
       nameClaimed.add(name.primary());
@@ -111,7 +111,8 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
           if (!Context.class.isAssignableFrom(method.getParameterTypes()[0])) {
             continue;
           }
-          invoker = (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance, ctx);
+          invoker =
+              (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance, ctx);
           break;
         default:
           continue;
@@ -144,21 +145,29 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       switch (method.getParameterCount()) {
         case 1:
           if (method.getReturnType() == Void.TYPE)
-            invoker = (Processor.VoidDenormalizationInvoker) (ctx, instance, simple) -> {
-              method.invoke(instance, simple);
-              return null;
-            };
+            invoker =
+                (Processor.VoidDenormalizationInvoker)
+                    (ctx, instance, simple) -> {
+                      method.invoke(instance, simple);
+                      return null;
+                    };
           else
-            invoker = (Processor.DenormalizationInvoker) (ctx, instance, simple) -> method.invoke(instance, simple);
+            invoker =
+                (Processor.DenormalizationInvoker)
+                    (ctx, instance, simple) -> method.invoke(instance, simple);
           break;
         case 2:
           if (method.getReturnType() == Void.TYPE)
-            invoker = (Processor.VoidDenormalizationInvoker) (ctx, instance, simple) -> {
-              method.invoke(instance, simple, ctx);
-              return null;
-            };
+            invoker =
+                (Processor.VoidDenormalizationInvoker)
+                    (ctx, instance, simple) -> {
+                      method.invoke(instance, simple, ctx);
+                      return null;
+                    };
           else
-            invoker = (Processor.DenormalizationInvoker) (ctx, instance, simple) -> method.invoke(instance, simple, ctx);
+            invoker =
+                (Processor.DenormalizationInvoker)
+                    (ctx, instance, simple) -> method.invoke(instance, simple, ctx);
           break;
         default:
           continue;
@@ -177,17 +186,17 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
 
   private boolean isExcluded(Field field) {
     return Modifier.isStatic(field.getModifiers())
-      || Modifier.isTransient(field.getModifiers())
-      || Modifier.isNative(field.getModifiers())
-      || field.isSynthetic()
-      || field.getAnnotation(Exclude.class) != null;
+        || Modifier.isTransient(field.getModifiers())
+        || Modifier.isNative(field.getModifiers())
+        || field.isSynthetic()
+        || field.getAnnotation(Exclude.class) != null;
   }
 
   private boolean isExcluded(Method method) {
     return Modifier.isStatic(method.getModifiers())
-      || Modifier.isTransient(method.getModifiers())
-      || Modifier.isNative(method.getModifiers())
-      || method.isSynthetic();
+        || Modifier.isTransient(method.getModifiers())
+        || Modifier.isNative(method.getModifiers())
+        || method.isSynthetic();
   }
 
   private PropertyNaming scanName(Field field, String originalPrimaryName, Set<String> existing) {

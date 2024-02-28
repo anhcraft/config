@@ -1,5 +1,7 @@
 package dev.anhcraft.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeAnnotator;
 import dev.anhcraft.config.context.Context;
@@ -7,18 +9,15 @@ import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.meta.Normalizer.Strategy;
 import dev.anhcraft.config.meta.Transient;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 public class ConfigNormalizerTest {
   @Test
@@ -225,11 +224,11 @@ public class ConfigNormalizerTest {
     @Test
     public void testDefaultSyntax() throws Exception {
       ConfigFactory factory =
-        ConfigFactory.create()
-          .ignoreDefaultValues(true)
-          .ignoreEmptyArray(true)
-          .ignoreEmptyDictionary(true)
-          .build();
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
       ChatLog chatLog = new ChatLog();
       chatLog.sender = UUID.randomUUID();
       chatLog.message = "Hello";

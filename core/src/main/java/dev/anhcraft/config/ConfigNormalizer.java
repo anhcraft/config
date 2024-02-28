@@ -11,11 +11,10 @@ import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.SimpleTypes;
+import java.lang.reflect.Array;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Array;
 
 /**
  * The normalizer simplifies a complex object with the following rules:
@@ -169,7 +168,8 @@ public final class ConfigNormalizer {
   @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
   private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
     if (SimpleTypes.test(complex)) {
-      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE)) return SimpleTypes.deepClone(complex);
+      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE))
+        return SimpleTypes.deepClone(complex);
       return complex;
     }
     if (type.isArray()) {
@@ -230,17 +230,16 @@ public final class ConfigNormalizer {
           value = ((Processor.NormalizationInvoker) processor.invoker()).invoke(ctx, complex);
           if (!SimpleTypes.test(value)) {
             String msg =
-              String.format("Processor returned invalid simple type '%s'", value.getClass().getName());
+                String.format(
+                    "Processor returned invalid simple type '%s'", value.getClass().getName());
             throw new IllegalTypeException(ctx, msg);
           }
         } else {
           if (processor != null && processor.strategy() == Normalizer.Strategy.BEFORE)
             value = ((Processor.NormalizationInvoker) processor.invoker()).invoke(ctx, complex);
-          else
-            value = property.field().get(complex);
+          else value = property.field().get(complex);
 
-          if (value != null)
-            value = _normalize(ctx, value.getClass(), value);
+          if (value != null) value = _normalize(ctx, value.getClass(), value);
         }
 
         if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)

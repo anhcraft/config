@@ -1,5 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
@@ -8,14 +10,11 @@ import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.validate.ValidationRegistry;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ReflectBlueprintScannerTest {
   private static ReflectBlueprintScanner scanner;
@@ -270,7 +269,9 @@ public class ReflectBlueprintScannerTest {
       Processor processor = schema.property("timestamp").normalizer();
       assertNotNull(processor);
       assertEquals(Normalizer.Strategy.REPLACE, processor.strategy());
-      assertEquals("Thu Jan 01 07:00:00 ICT 1970", ((Processor.NormalizationInvoker) processor.invoker()).invoke(null, new Log()));
+      assertEquals(
+          "Thu Jan 01 07:00:00 ICT 1970",
+          ((Processor.NormalizationInvoker) processor.invoker()).invoke(null, new Log()));
     }
 
     @Test
@@ -281,12 +282,16 @@ public class ReflectBlueprintScannerTest {
       Processor processor1 = schema.property("timestamp").normalizer();
       assertNotNull(processor1);
       assertEquals(Normalizer.Strategy.REPLACE, processor1.strategy());
-      assertEquals("Thu Jan 01 07:00:00 ICT 1970", ((Processor.NormalizationInvoker) processor1.invoker()).invoke(null, new Log()));
+      assertEquals(
+          "Thu Jan 01 07:00:00 ICT 1970",
+          ((Processor.NormalizationInvoker) processor1.invoker()).invoke(null, new Log()));
 
       Processor processor2 = schema.property("details").normalizer();
       assertNotNull(processor2);
       assertEquals(Normalizer.Strategy.BEFORE, processor2.strategy());
-      assertThrows(InvocationTargetException.class, () -> ((Processor.NormalizationInvoker) processor2.invoker()).invoke(null, new Log()));
+      assertThrows(
+          InvocationTargetException.class,
+          () -> ((Processor.NormalizationInvoker) processor2.invoker()).invoke(null, new Log()));
     }
 
     public class Log {
@@ -318,12 +323,11 @@ public class ReflectBlueprintScannerTest {
       Processor processor = schema.property("items").denormalizer();
       assertNotNull(processor);
       assertEquals(Denormalizer.Strategy.AFTER, processor.strategy());
-      Processor.VoidDenormalizationInvoker invoker = ((Processor.VoidDenormalizationInvoker) processor.invoker());
+      Processor.VoidDenormalizationInvoker invoker =
+          ((Processor.VoidDenormalizationInvoker) processor.invoker());
       Package pkg = new Package();
-      invoker.invoke(null, pkg, new Item[]{
-        new Item(UUID.randomUUID(), 10),
-        new Item(UUID.randomUUID(), 20)
-      });
+      invoker.invoke(
+          null, pkg, new Item[] {new Item(UUID.randomUUID(), 10), new Item(UUID.randomUUID(), 20)});
       assertEquals(30, pkg.worth);
     }
 
@@ -337,9 +341,12 @@ public class ReflectBlueprintScannerTest {
       Processor processor = schema.property("id").denormalizer();
       assertNotNull(processor);
       assertEquals(Denormalizer.Strategy.REPLACE, processor.strategy());
-      Processor.DenormalizationInvoker invoker = ((Processor.DenormalizationInvoker) processor.invoker());
+      Processor.DenormalizationInvoker invoker =
+          ((Processor.DenormalizationInvoker) processor.invoker());
       Item item = new Item(UUID.randomUUID(), 0);
-      assertEquals(UUID.fromString("fe777bfe-bc20-4871-9f99-f538a8803c78"), invoker.invoke(null, item, "fe777bfe-bc20-4871-9f99-f538a8803c78"));
+      assertEquals(
+          UUID.fromString("fe777bfe-bc20-4871-9f99-f538a8803c78"),
+          invoker.invoke(null, item, "fe777bfe-bc20-4871-9f99-f538a8803c78"));
       assertNull(invoker.invoke(null, item, "foo"));
     }
 
@@ -364,7 +371,9 @@ public class ReflectBlueprintScannerTest {
 
       @Denormalizer(value = "id")
       public UUID processId(Object simple, Context ctx) {
-        if (simple.toString().matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"))
+        if (simple
+            .toString()
+            .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"))
           return UUID.fromString(simple.toString());
         return null;
       }

@@ -2,7 +2,6 @@ package dev.anhcraft.config.meta;
 
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.adapter.TypeAdapter;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

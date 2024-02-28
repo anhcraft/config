@@ -32,19 +32,16 @@ public class Processor {
     return strategy;
   }
 
-  public interface Invoker {
-
-  }
+  public interface Invoker {}
 
   public interface NormalizationInvoker extends Invoker {
     @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance) throws Exception;
   }
 
   public interface DenormalizationInvoker extends Invoker {
-    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance, @Nullable Object simple) throws Exception;
+    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance, @Nullable Object simple)
+        throws Exception;
   }
 
-  public interface VoidDenormalizationInvoker extends DenormalizationInvoker {
-
-  }
+  public interface VoidDenormalizationInvoker extends DenormalizationInvoker {}
 }
