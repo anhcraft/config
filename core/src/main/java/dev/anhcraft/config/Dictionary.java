@@ -92,8 +92,7 @@ public class Dictionary extends AbstractMap<String, Object> {
    * @return the key
    */
   public @Nullable String getKeyAt(int pos) {
-    if (sortedKeys == null) // generate the cache if not exist
-    sortedKeys = List.copyOf(keySet());
+    if (sortedKeys == null) sortedKeys = List.copyOf(keySet());
     return sortedKeys.get(pos);
   }
 
