@@ -257,7 +257,7 @@ public class ConfigNormalizerTest {
 
       @Normalizer(value = "timestamp")
       private long provideTimestamp() {
-        return System.currentTimeMillis();
+        return System.currentTimeMillis() + 1000;
       }
     }
   }
