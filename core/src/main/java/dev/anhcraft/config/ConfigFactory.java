@@ -90,7 +90,11 @@ public class ConfigFactory {
    * @return the schema
    */
   @NotNull public Schema getSchema(@NotNull Class<?> type) {
-    return schemas.computeIfAbsent(type, blueprintScanner::scanSchema);
+    Schema schema = schemas.get(type);
+    if (schema != null) return schema;
+    schema = blueprintScanner.scanSchema(type);
+    schemas.put(type, schema);
+    return schema;
   }
 
   /**
