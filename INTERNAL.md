@@ -472,7 +472,7 @@ For complex use cases, it is required to handle manually using type adapter.
 
 ### Normalization Processor
 - The `@Normalizer` annotation represents the normalization processor for a specific property.
-- Since the processor is an instance method, it can gap the value from the corresponding field directly.
+- Since the processor is an instance method, it can directly get the value from the corresponding field.
 - The syntax of normalization processor is inspired from type adapter with difference:
   - The `context` parameter is optional
   - **No** `value` parameter: the value can be obtained directly
