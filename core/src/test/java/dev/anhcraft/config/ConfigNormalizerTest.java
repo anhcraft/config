@@ -1,21 +1,24 @@
 package dev.anhcraft.config;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeAnnotator;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.IllegalTypeException;
+import dev.anhcraft.config.meta.Normalizer;
+import dev.anhcraft.config.meta.Normalizer.Strategy;
 import dev.anhcraft.config.meta.Transient;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConfigNormalizerTest {
   @Test
@@ -214,6 +217,49 @@ public class ConfigNormalizerTest {
 
     public static class Item {
       public String id;
+    }
+  }
+
+  @Nested
+  public class TestNormalizationProcessors {
+    @Test
+    public void testDefaultSyntax() throws Exception {
+      ConfigFactory factory =
+        ConfigFactory.create()
+          .ignoreDefaultValues(true)
+          .ignoreEmptyArray(true)
+          .ignoreEmptyDictionary(true)
+          .build();
+      ChatLog chatLog = new ChatLog();
+      chatLog.sender = UUID.randomUUID();
+      chatLog.message = "Hello";
+      chatLog.timestamp = System.currentTimeMillis();
+      Dictionary dict = new Dictionary();
+      factory.getNormalizer().normalizeToDictionary(chatLog, dict);
+      assertNotEquals(chatLog.sender.toString(), dict.get("sender"));
+      assertEquals("[message] Hello", dict.get("message"));
+      assertNotEquals(chatLog.timestamp, dict.get("timestamp"));
+    }
+
+    public class ChatLog {
+      private UUID sender;
+      private String message;
+      private long timestamp;
+
+      @Normalizer(value = "sender", strategy = Strategy.BEFORE)
+      private UUID provideSender() {
+        return UUID.randomUUID();
+      }
+
+      @Normalizer(value = "message")
+      private String provideSender(Context ctx) {
+        return String.format("[%s] %s", ctx.getPath(), message);
+      }
+
+      @Normalizer(value = "timestamp")
+      private long provideTimestamp() {
+        return System.currentTimeMillis();
+      }
     }
   }
 }

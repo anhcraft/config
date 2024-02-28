@@ -2,6 +2,7 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeInferencer;
+import dev.anhcraft.config.blueprint.Processor;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
@@ -9,17 +10,19 @@ import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
+import dev.anhcraft.config.meta.Denormalizer;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.util.ObjectUtil;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
-import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * The denormalizer complexifies a simple object with the following rules:
@@ -201,9 +204,27 @@ public class ConfigDenormalizer {
       ctx.enterScope(new PropertyScope(property, entry == null ? "" : entry.getKey()));
       scope:
       {
-        if (value != null) {
-          Type solvedType = resolver.resolve(property.type());
-          value = _denormalize(ctx, value, solvedType);
+        Processor processor = property.denormalizer();
+
+        if (processor != null && processor.strategy() == Denormalizer.Strategy.REPLACE) {
+          if (processor.invoker() instanceof Processor.VoidDenormalizationInvoker) {
+            ((Processor.VoidDenormalizationInvoker) processor.invoker()).invoke(ctx, instance, value);
+            break scope;
+          }
+          value = ((Processor.DenormalizationInvoker) processor.invoker()).invoke(ctx, instance, value);
+        } else {
+          if (value != null) {
+            Type solvedType = resolver.resolve(property.type());
+            value = _denormalize(ctx, value, solvedType);
+          }
+
+          if (processor != null && processor.strategy() == Denormalizer.Strategy.AFTER) {
+            if (processor.invoker() instanceof Processor.VoidDenormalizationInvoker) {
+              ((Processor.VoidDenormalizationInvoker) processor.invoker()).invoke(ctx, instance, value);
+              break scope;
+            }
+            value = ((Processor.DenormalizationInvoker) processor.invoker()).invoke(ctx, instance, value);
+          }
         }
 
         if (property.isOptional() && value == null) break scope;
@@ -212,7 +233,7 @@ public class ConfigDenormalizer {
 
         if (value == null && propertyTypeErasure.isPrimitive()) break scope;
 
-        if (value != null && !propertyTypeErasure.isAssignableFrom(value.getClass())) break scope;
+        if (value != null && !ComplexTypes.wrapPrimitive(propertyTypeErasure).isAssignableFrom(value.getClass())) break scope;
 
         if (!property.validator().check(value)) {
           if (property.validator().silent()) break scope;

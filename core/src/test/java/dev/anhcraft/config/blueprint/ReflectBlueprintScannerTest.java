@@ -1,18 +1,21 @@
 package dev.anhcraft.config.blueprint;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import dev.anhcraft.config.NamingPolicy;
+import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
 import dev.anhcraft.config.error.UnsupportedSchemaException;
 import dev.anhcraft.config.meta.*;
+import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.validate.ValidationRegistry;
-import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ReflectBlueprintScannerTest {
   private static ReflectBlueprintScanner scanner;
@@ -252,6 +255,119 @@ public class ReflectBlueprintScannerTest {
       @Exclude public List<String> education;
 
       @Optional @Transient public List<String> bio = List.of();
+    }
+  }
+
+  @SuppressWarnings("DataFlowIssue")
+  @Nested
+  public class NormalizerProcessorTest {
+    @Test
+    public void testNormalizerReplaceStrategy() throws Exception {
+      Schema schema = scanner.scanSchema(Log.class);
+      assertEquals(2, schema.properties().size());
+      assertEquals("timestamp", schema.property("timestamp").field().getName());
+
+      Processor processor = schema.property("timestamp").normalizer();
+      assertNotNull(processor);
+      assertEquals(Normalizer.Strategy.REPLACE, processor.strategy());
+      assertEquals("Thu Jan 01 07:00:00 ICT 1970", ((Processor.NormalizationInvoker) processor.invoker()).invoke(null, new Log()));
+    }
+
+    @Test
+    public void testNormalizerBeforeStrategy() throws Exception {
+      Schema schema = scanner.scanSchema(Log.class);
+      assertEquals(2, schema.properties().size());
+
+      Processor processor1 = schema.property("timestamp").normalizer();
+      assertNotNull(processor1);
+      assertEquals(Normalizer.Strategy.REPLACE, processor1.strategy());
+      assertEquals("Thu Jan 01 07:00:00 ICT 1970", ((Processor.NormalizationInvoker) processor1.invoker()).invoke(null, new Log()));
+
+      Processor processor2 = schema.property("details").normalizer();
+      assertNotNull(processor2);
+      assertEquals(Normalizer.Strategy.BEFORE, processor2.strategy());
+      assertThrows(InvocationTargetException.class, () -> ((Processor.NormalizationInvoker) processor2.invoker()).invoke(null, new Log()));
+    }
+
+    public class Log {
+      private long timestamp;
+      private String details;
+
+      @Normalizer("timestamp")
+      private String processTimestamp() {
+        return new Date(timestamp).toString();
+      }
+
+      @Normalizer(value = "details", strategy = Normalizer.Strategy.BEFORE)
+      private String appendLogPrefix(Context ctx) {
+        return String.format("[%s] %s", ctx.getPath(), details);
+      }
+    }
+  }
+
+  @SuppressWarnings("DataFlowIssue")
+  @Nested
+  public class DenormalizerProcessorTest {
+    @Test
+    public void testDenormalizerAfterStrategy() throws Exception {
+      Schema schema = scanner.scanSchema(Package.class);
+      assertEquals(2, schema.properties().size());
+      assertEquals("items", schema.property("items").field().getName());
+      assertEquals("worth", schema.property("worth").field().getName());
+
+      Processor processor = schema.property("items").denormalizer();
+      assertNotNull(processor);
+      assertEquals(Denormalizer.Strategy.AFTER, processor.strategy());
+      Processor.VoidDenormalizationInvoker invoker = ((Processor.VoidDenormalizationInvoker) processor.invoker());
+      Package pkg = new Package();
+      invoker.invoke(null, pkg, new Item[]{
+        new Item(UUID.randomUUID(), 10),
+        new Item(UUID.randomUUID(), 20)
+      });
+      assertEquals(30, pkg.worth);
+    }
+
+    @Test
+    public void testDenormalizerReplaceStrategy() throws Exception {
+      Schema schema = scanner.scanSchema(Item.class);
+      assertEquals(2, schema.properties().size());
+      assertEquals("id", schema.property("id").field().getName());
+      assertEquals("worth", schema.property("worth").field().getName());
+
+      Processor processor = schema.property("id").denormalizer();
+      assertNotNull(processor);
+      assertEquals(Denormalizer.Strategy.REPLACE, processor.strategy());
+      Processor.DenormalizationInvoker invoker = ((Processor.DenormalizationInvoker) processor.invoker());
+      Item item = new Item(UUID.randomUUID(), 0);
+      assertEquals(UUID.fromString("fe777bfe-bc20-4871-9f99-f538a8803c78"), invoker.invoke(null, item, "fe777bfe-bc20-4871-9f99-f538a8803c78"));
+      assertNull(invoker.invoke(null, item, "foo"));
+    }
+
+    public class Package {
+      private Item[] items;
+      private int worth;
+
+      @Denormalizer(value = "items", strategy = Denormalizer.Strategy.AFTER)
+      public void calculateWorth(Item[] items) {
+        worth = Arrays.stream(items).mapToInt(item -> item.worth).sum();
+      }
+    }
+
+    public class Item {
+      private UUID id;
+      private int worth;
+
+      public Item(UUID id, int worth) {
+        this.id = id;
+        this.worth = worth;
+      }
+
+      @Denormalizer(value = "id")
+      public UUID processId(Object simple, Context ctx) {
+        if (simple.toString().matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"))
+          return UUID.fromString(simple.toString());
+        return null;
+      }
     }
   }
 }

@@ -1,19 +1,21 @@
 package dev.anhcraft.config;
 
-import dev.anhcraft.config.SettingFlag.Normalizer;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeAnnotator;
+import dev.anhcraft.config.blueprint.Processor;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
+import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.SimpleTypes;
-import java.lang.reflect.Array;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Array;
 
 /**
  * The normalizer simplifies a complex object with the following rules:
@@ -167,7 +169,7 @@ public final class ConfigNormalizer {
   @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
   private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
     if (SimpleTypes.test(complex)) {
-      if (SettingFlag.has(settings, Normalizer.DEEP_CLONE)) return SimpleTypes.deepClone(complex);
+      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE)) return SimpleTypes.deepClone(complex);
       return complex;
     }
     if (type.isArray()) {
@@ -206,7 +208,7 @@ public final class ConfigNormalizer {
   private void _dynamicNormalize(Context ctx, Class<?> type, Object complex, Dictionary container)
       throws Exception {
     if (complex instanceof Dictionary) {
-      if (SettingFlag.has(settings, Normalizer.DEEP_CLONE)) { // TODO reduce allocations
+      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE)) { // TODO reduce allocations
         container.putAll(SimpleTypes.deepClone((Dictionary) complex));
       } else {
         container.putAll((Dictionary) complex);
@@ -221,24 +223,37 @@ public final class ConfigNormalizer {
       ctx.enterScope(new PropertyScope(property, property.name()));
       scope:
       {
+        Object value;
 
-        // TODO should we have @Optional for wrapper-side?
-        Object value = property.field().get(complex);
-        if (value != null) {
-          value = _normalize(ctx, value.getClass(), value);
+        Processor processor = property.normalizer();
+        if (processor != null && processor.strategy() == Normalizer.Strategy.REPLACE) {
+          value = ((Processor.NormalizationInvoker) processor.invoker()).invoke(ctx, complex);
+          if (!SimpleTypes.test(value)) {
+            String msg =
+              String.format("Processor returned invalid simple type '%s'", value.getClass().getName());
+            throw new IllegalTypeException(ctx, msg);
+          }
+        } else {
+          if (processor != null && processor.strategy() == Normalizer.Strategy.BEFORE)
+            value = ((Processor.NormalizationInvoker) processor.invoker()).invoke(ctx, complex);
+          else
+            value = property.field().get(complex);
+
+          if (value != null)
+            value = _normalize(ctx, value.getClass(), value);
         }
 
-        if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES)
+        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
             && value instanceof Number
             && Math.abs(((Number) value).floatValue()) < 1e-8) break scope;
-        if (SettingFlag.has(settings, Normalizer.IGNORE_DEFAULT_VALUES)
+        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
             && value instanceof Boolean
             && !((Boolean) value)) break scope;
-        if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_ARRAY)
+        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
             && value != null
             && value.getClass().isArray()
             && Array.getLength(value) == 0) break scope;
-        if (SettingFlag.has(settings, Normalizer.IGNORE_EMPTY_DICTIONARY)
+        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
             && value instanceof Dictionary
             && ((Dictionary) value).isEmpty()) break scope;
 

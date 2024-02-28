@@ -1,17 +1,20 @@
 package dev.anhcraft.config.blueprint;
 
+import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.UnsupportedSchemaException;
-import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
+import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.DisabledValidator;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import dev.anhcraft.config.validate.Validator;
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.UnaryOperator;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A Reflection-based {@link BlueprintScanner}
@@ -32,6 +35,9 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       throw new UnsupportedSchemaException(
           String.format("Cannot create schema for '%s'", type.getName()));
 
+    Map<String, Processor> normalizers = scanNormalizers(type);
+    Map<String, Processor> denormalizers = scanDenormalizers(type);
+
     Map<String, Field> fields = new LinkedHashMap<>();
 
     for (Field field : type.getDeclaredFields()) {
@@ -41,6 +47,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
         continue;
       }
       if (isExcluded(field)) continue;
+
       String primaryName = namingPolicy.apply(field.getName()).trim();
       if (primaryName.isBlank())
         throw new UnsupportedSchemaException(
@@ -65,8 +72,10 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       List<String> description = scanDescription(field);
       byte modifier = scanModifier(field);
       Validator validator = scanValidation(field);
+      Processor normalizer = normalizers.get(field.getName());
+      Processor denormalizer = denormalizers.get(field.getName());
 
-      Property property = new Property(name, description, modifier, validator, field);
+      Property property = new Property(name, description, modifier, validator, field, normalizer, denormalizer);
       lookup.put(name.primary(), property);
       nameClaimed.remove(primaryName);
       nameClaimed.add(name.primary());
@@ -80,12 +89,105 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
     return new Schema(type, properties, lookup);
   }
 
+  private Map<String, Processor> scanNormalizers(Class<?> type) {
+    Map<String, Processor> lookup = new LinkedHashMap<>();
+
+    for (Method method : type.getDeclaredMethods()) {
+      try {
+        method.setAccessible(true);
+      } catch (Exception e) { // TODO is there better way to check accessibility?
+        continue;
+      }
+      if (isExcluded(method) || !method.isAnnotationPresent(Normalizer.class)) continue;
+      if (method.getReturnType() == Void.TYPE) continue;
+
+      Processor.Invoker invoker;
+
+      switch (method.getParameterCount()) {
+        case 0:
+          invoker = (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance);
+          break;
+        case 1:
+          if (!Context.class.isAssignableFrom(method.getParameterTypes()[0])) {
+            continue;
+          }
+          invoker = (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance, ctx);
+          break;
+        default:
+          continue;
+      }
+
+      Normalizer normalizer = method.getAnnotation(Normalizer.class);
+      Processor processor = new Processor(invoker, normalizer.strategy());
+      for (String name : normalizer.value()) {
+        if (name.isBlank()) continue;
+        lookup.put(name.trim(), processor);
+      }
+    }
+
+    return lookup;
+  }
+
+  private Map<String, Processor> scanDenormalizers(Class<?> type) {
+    Map<String, Processor> lookup = new LinkedHashMap<>();
+
+    for (Method method : type.getDeclaredMethods()) {
+      try {
+        method.setAccessible(true);
+      } catch (Exception e) { // TODO is there better way to check accessibility?
+        continue;
+      }
+      if (isExcluded(method) || !method.isAnnotationPresent(Denormalizer.class)) continue;
+
+      Processor.Invoker invoker;
+
+      switch (method.getParameterCount()) {
+        case 1:
+          if (method.getReturnType() == Void.TYPE)
+            invoker = (Processor.VoidDenormalizationInvoker) (ctx, instance, simple) -> {
+              method.invoke(instance, simple);
+              return null;
+            };
+          else
+            invoker = (Processor.DenormalizationInvoker) (ctx, instance, simple) -> method.invoke(instance, simple);
+          break;
+        case 2:
+          if (method.getReturnType() == Void.TYPE)
+            invoker = (Processor.VoidDenormalizationInvoker) (ctx, instance, simple) -> {
+              method.invoke(instance, simple, ctx);
+              return null;
+            };
+          else
+            invoker = (Processor.DenormalizationInvoker) (ctx, instance, simple) -> method.invoke(instance, simple, ctx);
+          break;
+        default:
+          continue;
+      }
+
+      Denormalizer denormalizer = method.getAnnotation(Denormalizer.class);
+      Processor processor = new Processor(invoker, denormalizer.strategy());
+      for (String name : denormalizer.value()) {
+        if (name.isBlank()) continue;
+        lookup.put(name.trim(), processor);
+      }
+    }
+
+    return lookup;
+  }
+
   private boolean isExcluded(Field field) {
     return Modifier.isStatic(field.getModifiers())
-        || Modifier.isTransient(field.getModifiers())
-        || Modifier.isNative(field.getModifiers())
-        || field.isSynthetic()
-        || field.getAnnotation(Exclude.class) != null;
+      || Modifier.isTransient(field.getModifiers())
+      || Modifier.isNative(field.getModifiers())
+      || field.isSynthetic()
+      || field.getAnnotation(Exclude.class) != null;
+  }
+
+  private boolean isExcluded(Method method) {
+    return Modifier.isStatic(method.getModifiers())
+      || Modifier.isTransient(method.getModifiers())
+      || Modifier.isNative(method.getModifiers())
+      || method.isSynthetic();
   }
 
   private PropertyNaming scanName(Field field, String originalPrimaryName, Set<String> existing) {

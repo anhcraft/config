@@ -460,108 +460,152 @@ public static void main(String[] args) {
 For complex use cases, it is required to handle manually using type adapter.
 
 ## Processors
-- Processors are annotated methods that can process before/after (de)normalization
-- The annotation only works for instance methods
-- Private access is recommended to encapsulate the code
-- Processors are inherited from ancestors if the root is a `@Configurable` class
+- In certain use cases, it is unnecessary to create type adapter for a certain type because of following reasons:
+  + Minimize code duplication. For example, there is a validation in the constructor, what if that can be used together with denormalization.
+  + Encapsulate the logic in that class and prevent inheritance. Remember: type adapter works for subtype.
+  + Validate the value (without using `@Validate`). Using type adapter means to transform the value, so validation is not a suitable use case here.
+  + Access to private, package-private class members
+- Processors are annotated instance methods that can process values
+- There are two types: normalization processor and denormalization processor
+- A processor can bound to multiple properties. A property is allowed to have one for each type of processor (in total is 2)
+- Processors are not inherited from superclasses or interfaces
 
-### Property Normalizer
-- The Normalizer changes the complex value of a property before it is simplified
-  - The method takes a single parameter which is the value of the previous Normalizer (or the property type if it is the first one)
-  - An optional parameter is the wrapper instance
-  - The returning type can be arbitrary, and will be the input type of the next Normalizer. If it is `void`, the current parameter type will be the next input type
-  - There is no immutability guarantee
-- After passing through all Normalizer, if the value is not simple object, the built-in normalization takes place. If the value is still not simple object, it is discarded
+### Normalization Processor
+- The `@Normalizer` annotation represents the normalization processor for a specific property.
+- Since the processor is an instance method, it can gap the value from the corresponding field directly.
+- The syntax of normalization processor is inspired from type adapter with difference:
+  - The `context` parameter is optional
+  - **No** `value` parameter: the value can be obtained directly
+  - **No** `type` parameter: the actual type is determined in source code
+  - Return type must be non-void
+- Option `name` to specify the property name
+- Option `strategy` controls how it behaves:
+  - `replace`: replaces the automatic type-adapting. This processor must take the value from the corresponding field directly and returns the simplified value. (**default**)
+  - `before`: this processor executes before automatic type-adapting, it provides a new complex value. Thereby, the normalizer takes the value from this processor instead of getting from the corresponding field.
+
+#### Illustration of two strategies
+- Without using processor:
 ```mermaid
 flowchart LR
-    Original --> P1
-    P1 --> P2
-    P2 ----> Pn
-    Pn --> Simplified
+  Step1(Field) -->|Complex Value| Step2(Automatic Adapter)
+  Step2 -->|Simple Value| Step3(Filter)
+  Step3 -->|Simple Value| Step4(Dictionary)
 ```
-- For example, append a prefix to the item name upon normalization
-```java
-@Configurable
-public class Item {
-  public String name;
-  public int stock;
+- Using `replace` strategy:
+```mermaid
+flowchart LR
+  Step1(Field) -->|Complex Value| Step2(Property Normalizer)
+  Step2(Property Normalizer) -->|Simple Value| Step3(Filter)
+  Step3 -->|Simple Value| Step4(Dictionary)
+```
+- Using `before` strategy:
+```mermaid
+flowchart LR
+  Step1(Field) -->|Complex Value| Step2(Property Normalizer)
+  Step2 -->|Complex Value| Step3(Automatic Adapter)
+  Step3 -->|Simple Value| Step4(Filter)
+  Step4 -->|Simple Value| Step5(Dictionary)
+```
 
-  @Normalizer("name")
-  private String processName(String value) {
-    return String.format("x%d %s", stock, value);
+#### Syntax
+```java
+public class Log {
+  private long timestamp;
+
+  // "replace" strategy
+  // - Directly provide the simplified value
+  @Normalizer("timestamp") // "replace" is the default strategy
+  private String processTimestamp() { // may add "Context" parameter (optionally)
+    return new Date(timestamp).toString();
+  }
+}
+```
+```java
+public class Log {
+  private long timestamp;
+
+  // "before" strategy
+  // - Directly provide the field value
+  @Normalizer(value = "a", strategy = Strategy.BEFORE)
+  private long provideTimestamp() { // may add "Context" parameter (optionally)
+    return new Date(timestamp).getTime();
   }
 }
 ```
 
-### Property Denormalizer
-- The Denormalizer changes the simple value of a property before it is mapped to the instance
-  - The method takes a single parameter which is the value of the previous Denormalizer (or the simple type if it is the first one). 
-  - If the value type is not compatible to the desired type, the method is discarded.
-  - An optional parameter is the wrapper instance
-  - The returning type can be arbitrary, and will be the input type of the next Denormalizer. If it is `void`, the current parameter type will be the next input type
-  - There is no immutability guarantee
-- After passing through all Denormalizer, if the value is not compatible to the property type, the built-in denormalization takes place. If the value is still not compatible to the property type, it is discarded
-- To validate an integer upon denormalization
-```java
-@Configurable
-public class Item {
-  public String name;
-  public int stock;
+### Denormalization Processor
+- The `@Denormalizer` annotation represents the denormalization processor for a specific property.
+- The syntax of denormalization processor is inspired from type adapter with difference:
+  - The `value` parameter is required to supply the simple value
+  - The `context` parameter is optional
+  - **No** `type` parameter: the actual type is determined in source code
+  - If the return type is void, it is possible to set the value directly into the field
+- Option `name` to specify the property name
+- Option `strategy` controls how it behaves:
+  - `replace`: replaces the automatic type-adapting. This processor must take the simple value, transform it, then return the value. (**default**)
+  - `after`: this processor executes after automatic type-adapting, it takes the complex value that was previously adapted, transform it, then return the value
 
-  @Denormalizer("stock")
-  private void processStock(int value) {
-    if (value < 0) 
-        throw new IllegalArgumentException("stock must be non-negative");
-  }
-}
+#### Illustration of two strategies
+- Without using processor:
+```mermaid
+flowchart LR
+  Step1(Dictionary) -->|Simple Value| Step2(Automatic Adapter)
+  Step2 -->|Complex Value| Step3(Filter/Validator)
+  Step3 -->|Complex Value| Step4(Field)
 ```
-- For example, inject an ID to each object in a map
-```java
-@Configurable
-public class Inventory { 
-  public Map<String, Item> items;
-
-  @Denormalizer("items")
-  private void processItems(Container container) {
-      for (String prop : container.properties()) {
-        container.get(prop).set("id", prop);
-      }
-  }
-}
+- Using `replace` strategy with non-void return type:
+```mermaid
+flowchart LR
+  Step1(Dictionary) -->|Simple Value| Step2(Property Denormalizer)
+  Step2 -->|Complex Value| Step3(Filter/Validator)
+  Step3 -->|Complex Value| Step4(Field)
 ```
-
-### Instance Normalizer
-- A Normalizer that has no property specified is associated with the instance
-- The annotation has a field `at` to control pre-/post-call (defaults to `pre`)
-- For example, to validate a field as a prerequisite for normalization
-```java
-@Configurable
-public class Bag { 
-  public Item[] items;
-
-  @Normalizer
-  private void check() {
-    if (items.length == 0)
-      throw new IllegalArgumentException("items must not be empty");
-  }
-}
+- Using `replace` strategy with void return type:
+```mermaid
+flowchart LR
+  Step1(Dictionary) -->|Simple Value| Step2(Property Denormalizer)
+  Step2 -->|Complex Value| Step3(Field)
+```
+- Using `after` strategy with non-void return type:
+```mermaid
+flowchart LR
+  Step1(Dictionary) -->|Simple Value| Step2(Automatic Adapter)
+  Step2 -->|Complex Value| Step3(Property Denormalizer)
+  Step3 -->|Complex Value| Step4(Filter/Validator)
+  Step4 -->|Complex Value| Step5(Field)
+```
+- Using `after` strategy with void return type:
+```mermaid
+flowchart LR
+  Step1(Dictionary) -->|Simple Value| Step2(Automatic Adapter)
+  Step2 -->|Complex Value| Step3(Property Denormalizer)
+  Step3 -->|Complex Value| Step4(Field)
 ```
 
-### Instance Denormalizer
-- A Denormalizer that has no property specified is associated with the instance
-- The annotation has a field `at` to control pre-/post-call (defaults to `post`)
-- For example, to enforce immutability after denormalization
+#### Syntax
 ```java
-@Configurable
-public class Inventory {
-    public Map<String, Item> items;
+  public class ServiceCenter {
+    public HealthReport[] reports;
+    @Constant public Set<String> deadServices = Set.of();
 
-    @Denormalizer(at=Denormalizer.POST)
-    private void callback() {
-        if (items != null)
-            items = Map.of(items);
+    @Denormalizer(value = "reports", strategy = Denormalizer.Strategy.AFTER)
+    private void filterReport(HealthReport[] reports) { // context parameter is optional
+      reports = Arrays.stream(reports).filter(report -> report.service != null).toArray(HealthReport[]::new);
+      deadServices = Arrays.stream(reports).filter(report -> report.status == 0).map(r -> r.service).collect(Collectors.toSet());
     }
-}
+  }
+
+  public class HealthReport {
+    public String service;
+    public int ping;
+    public int status;
+
+    @Denormalizer(value = {"ping", "status"}) // default strategy is "replace"
+    private int checkNegative(int n, Context ctx) {
+      if (n < 0) throw new RuntimeException("Health report is malformed at "+ctx.getPath());
+      return n;
+    }
+  }
 ```
 
 ### KeyInjector

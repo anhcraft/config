@@ -1,13 +1,17 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.meta.*;
+import dev.anhcraft.config.meta.Constant;
+import dev.anhcraft.config.meta.Optional;
+import dev.anhcraft.config.meta.Transient;
 import dev.anhcraft.config.validate.Validator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a property in a {@link Schema}.<br>
@@ -25,18 +29,24 @@ public final class Property {
   private final byte modifier; // optional, transient, constant
   private final Validator validator;
   private final Field field;
+  private final Processor normalizer;
+  private final Processor denormalizer;
 
   public Property(
-      @NotNull PropertyNaming naming,
-      @NotNull List<String> description,
-      byte modifier,
-      @NotNull Validator validator,
-      @NotNull Field field) {
+    @NotNull PropertyNaming naming,
+    @NotNull List<String> description,
+    byte modifier,
+    @NotNull Validator validator,
+    @NotNull Field field,
+    @Nullable Processor normalizer,
+    @Nullable Processor denormalizer) {
     this.naming = naming;
     this.description = Collections.unmodifiableList(description);
     this.modifier = modifier;
     this.validator = validator;
     this.field = field;
+    this.normalizer = normalizer;
+    this.denormalizer = denormalizer;
   }
 
   /**
@@ -119,5 +129,21 @@ public final class Property {
    */
   @NotNull public Field field() {
     return field;
+  }
+
+  /**
+   * Gets the normalization processor.
+   * @return the processor
+   */
+  @Nullable public Processor normalizer() {
+    return normalizer;
+  }
+
+  /**
+   * Gets the denormalization processor.
+   * @return the processor
+   */
+  @Nullable public Processor denormalizer() {
+    return denormalizer;
   }
 }
