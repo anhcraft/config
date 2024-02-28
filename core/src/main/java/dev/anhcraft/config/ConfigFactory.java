@@ -55,20 +55,17 @@ public class ConfigFactory {
   @SuppressWarnings("unchecked")
   public <T> @Nullable TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
     // TODO optimize and cache the type adapter
-    Class<?> clazz = ComplexTypes.wrapPrimitive(type);
+    Class<?> clazz = type;
     do {
       TypeAdapter<?> adapter = typeAdapters.get(clazz);
       if (adapter != null) {
         return (TypeAdapter<T>) adapter;
       }
-      for (Type inf : clazz.getGenericInterfaces()) {
-        try {
-          adapter = typeAdapters.get(ComplexTypes.erasure(inf));
-          if (adapter != null) {
-            return (TypeAdapter<T>) adapter;
-          }
-        } catch (ClassNotFoundException ignored) {
-        } // TODO should we handle this?
+      for (Class<?> inf : clazz.getInterfaces()) {
+        adapter = typeAdapters.get(inf);
+        if (adapter != null) {
+          return (TypeAdapter<T>) adapter;
+        }
       }
       clazz = clazz.getSuperclass();
     } while (clazz != null);
@@ -132,6 +129,16 @@ public class ConfigFactory {
       typeAdapters.put(Double.class, new DoubleAdapter());
       typeAdapters.put(Character.class, new CharacterAdapter());
       typeAdapters.put(Boolean.class, new BooleanAdapter());
+
+      typeAdapters.put(byte.class, new ByteAdapter());
+      typeAdapters.put(short.class, new ShortAdapter());
+      typeAdapters.put(int.class, new IntegerAdapter());
+      typeAdapters.put(long.class, new LongAdapter());
+      typeAdapters.put(float.class, new FloatAdapter());
+      typeAdapters.put(double.class, new DoubleAdapter());
+      typeAdapters.put(char.class, new CharacterAdapter());
+      typeAdapters.put(boolean.class, new BooleanAdapter());
+
       typeAdapters.put(String.class, new StringAdapter());
       typeAdapters.put(Dictionary.class, new DictionaryAdapter());
       typeAdapters.put(Iterable.class, new IterableAdapter());
@@ -157,7 +164,7 @@ public class ConfigFactory {
     public @NotNull <T> Builder adaptType(@NotNull Class<T> type, @NotNull TypeAdapter<T> adapter) {
       if (TypeAdapter.class.isAssignableFrom(type))
         throw new IllegalArgumentException("Wrong type?");
-      typeAdapters.put(ComplexTypes.wrapPrimitive(type), adapter);
+      typeAdapters.put(type, adapter);
       return this;
     }
 
