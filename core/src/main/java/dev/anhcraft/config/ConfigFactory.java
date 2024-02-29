@@ -11,6 +11,7 @@ import dev.anhcraft.config.validate.ValidationRegistry;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The config factory centralizes facilities for normalization and denormalization.
  */
-public class ConfigFactory {
+public final class ConfigFactory {
   private final Map<Class<?>, TypeAdapter<?>> typeAdapters;
   private final ReflectBlueprintScanner blueprintScanner;
   private final ConfigNormalizer normalizer;
@@ -32,13 +33,7 @@ public class ConfigFactory {
         new ReflectBlueprintScanner(builder.namingPolicy, builder.validationRegistry);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
-    this.schemas =
-        new LinkedHashMap<>() {
-          @Override
-          protected boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > builder.schemaCacheCapacity;
-          }
-        };
+    this.schemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
   }
 
@@ -113,7 +108,14 @@ public class ConfigFactory {
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = Context::new;
-    private int schemaCacheCapacity = 100;
+    private Supplier<Map<Class<?>, Schema>> schemaCacheProvider =
+        () ->
+            new LinkedHashMap<>() {
+              @Override
+              protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > 100;
+              }
+            };
     private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
     private byte denormalizerSettings = 0;
 
@@ -200,13 +202,14 @@ public class ConfigFactory {
     }
 
     /**
-     * Sets the capacity of the schema cache.<br>
-     * By default, sets to {@code 100}.
-     * @param capacity the capacity
+     * Sets the schema cache provider.<br>
+     * By default, the schema cache is a linked hash map with a capacity of 100 classes.<br>
+     * It is possible to provide custom map implementation such as a map view from Guava Cache.
+     * @param provider the schema cache
      * @return this
      */
-    public @NotNull Builder setSchemaCacheCapacity(int capacity) {
-      schemaCacheCapacity = capacity;
+    public @NotNull Builder provideSchemaCache(SchemaCacheProvider provider) {
+      schemaCacheProvider = provider;
       return this;
     }
 
@@ -300,4 +303,9 @@ public class ConfigFactory {
   @NotNull public static Builder create() {
     return new Builder();
   }
+
+  /**
+   * Returns the schema cache.
+   */
+  public interface SchemaCacheProvider extends Supplier<Map<Class<?>, Schema>> {}
 }
