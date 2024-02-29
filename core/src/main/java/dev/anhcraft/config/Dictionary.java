@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a dictionary containing simple objects only.
+ * Represents a dictionary containing simple objects only.<br>
+ * The dictionary does not allow {@code null} keys and values.
  */
 public class Dictionary extends AbstractMap<String, Object> {
   private final LinkedHashMap<String, Object> backend;
