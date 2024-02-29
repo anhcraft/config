@@ -1,5 +1,7 @@
 package dev.anhcraft.config;
 
+import dev.anhcraft.config.adapter.AdapterProvider;
+import dev.anhcraft.config.adapter.SimpleAdapterProvider;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
@@ -20,21 +22,24 @@ import org.jetbrains.annotations.Nullable;
  * The config factory centralizes facilities for normalization and denormalization.
  */
 public final class ConfigFactory {
-  private final Map<Class<?>, TypeAdapter<?>> typeAdapters;
   private final ReflectBlueprintScanner blueprintScanner;
   private final ConfigNormalizer normalizer;
   private final ConfigDenormalizer denormalizer;
   private final Map<Class<?>, Schema> schemas;
   private final ContextProvider contextProvider;
+  private final AdapterProvider adapterProvider;
 
   ConfigFactory(Builder builder) {
-    this.typeAdapters = Map.copyOf(builder.typeAdapters);
     this.blueprintScanner =
         new ReflectBlueprintScanner(builder.namingPolicy, builder.validationRegistry);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.schemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
+    this.adapterProvider =
+        builder.adapterProvider == null
+            ? new SimpleAdapterProvider(builder.typeAdapters)
+            : builder.adapterProvider;
   }
 
   /**
@@ -45,24 +50,8 @@ public final class ConfigFactory {
    * @return the type adapter or {@code null} if not found
    * @param <T> the type
    */
-  @SuppressWarnings("unchecked")
   public <T> @Nullable TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
-    // TODO optimize and cache the type adapter
-    Class<?> clazz = type;
-    do {
-      TypeAdapter<?> adapter = typeAdapters.get(clazz);
-      if (adapter != null) {
-        return (TypeAdapter<T>) adapter;
-      }
-      for (Class<?> inf : clazz.getInterfaces()) {
-        adapter = typeAdapters.get(inf);
-        if (adapter != null) {
-          return (TypeAdapter<T>) adapter;
-        }
-      }
-      clazz = clazz.getSuperclass();
-    } while (clazz != null);
-    return null;
+    return adapterProvider.getTypeAdapter(type);
   }
 
   /**
@@ -104,7 +93,7 @@ public final class ConfigFactory {
   }
 
   public static class Builder {
-    private final Map<Class<?>, TypeAdapter<?>> typeAdapters = new HashMap<>();
+    private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = Context::new;
@@ -116,6 +105,7 @@ public final class ConfigFactory {
                 return size() > 100;
               }
             };
+    private AdapterProvider adapterProvider = null;
     private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
     private byte denormalizerSettings = 0;
 
@@ -169,6 +159,17 @@ public final class ConfigFactory {
     }
 
     /**
+     * Uses the given type adapter provider.<br>
+     * By default, uses {@link SimpleAdapterProvider}.
+     * @param provider the type adapter provider
+     * @return this
+     */
+    public @NotNull Builder useAdapterProvider(@NotNull AdapterProvider provider) {
+      adapterProvider = provider;
+      return this;
+    }
+
+    /**
      * Uses the given validation registry.<br>
      * By default, uses {@link ValidationRegistry#DEFAULT}.
      * @param registry the validation registry
@@ -208,7 +209,7 @@ public final class ConfigFactory {
      * @param provider the schema cache
      * @return this
      */
-    public @NotNull Builder provideSchemaCache(SchemaCacheProvider provider) {
+    public @NotNull Builder provideSchemaCache(@NotNull SchemaCacheProvider provider) {
       schemaCacheProvider = provider;
       return this;
     }
