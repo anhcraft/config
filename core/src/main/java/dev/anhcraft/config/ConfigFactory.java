@@ -10,6 +10,7 @@ import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.validate.ValidationRegistry;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -36,10 +37,18 @@ public final class ConfigFactory {
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.schemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
-    this.adapterProvider =
-        builder.adapterProvider == null
-            ? new SimpleAdapterProvider(builder.typeAdapters)
-            : builder.adapterProvider;
+    try {
+      this.adapterProvider =
+          builder
+              .adapterProvider
+              .getDeclaredConstructor(LinkedHashMap.class)
+              .newInstance(builder.typeAdapters);
+    } catch (InstantiationException
+        | IllegalAccessException
+        | InvocationTargetException
+        | NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -105,7 +114,7 @@ public final class ConfigFactory {
                 return size() > 100;
               }
             };
-    private AdapterProvider adapterProvider = null;
+    private Class<? extends AdapterProvider> adapterProvider = SimpleAdapterProvider.class;
     private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
     private byte denormalizerSettings = 0;
 
@@ -164,7 +173,7 @@ public final class ConfigFactory {
      * @param provider the type adapter provider
      * @return this
      */
-    public @NotNull Builder useAdapterProvider(@NotNull AdapterProvider provider) {
+    public @NotNull Builder useAdapterProvider(@NotNull Class<? extends AdapterProvider> provider) {
       adapterProvider = provider;
       return this;
     }
