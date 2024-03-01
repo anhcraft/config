@@ -20,14 +20,14 @@ public class SimpleAdapterProvider implements AdapterProvider {
   public @Nullable <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
     Class<?> clazz = type;
     do {
-      TypeAdapter<?> adapter = typeAdapters.get(clazz);
-      if (adapter != null) {
-        return (TypeAdapter<T>) adapter;
+      // Using containsKey instead of get-and-if check
+      // e.g. IndexedAdapterProvider set null to mark adapter as unavailable
+      if (typeAdapters.containsKey(clazz)) {
+        return (TypeAdapter<T>) typeAdapters.get(clazz);
       }
       for (Class<?> inf : clazz.getInterfaces()) {
-        adapter = typeAdapters.get(inf);
-        if (adapter != null) {
-          return (TypeAdapter<T>) adapter;
+        if (typeAdapters.containsKey(inf)) {
+          return (TypeAdapter<T>) typeAdapters.get(inf);
         }
       }
       clazz = clazz.getSuperclass();
