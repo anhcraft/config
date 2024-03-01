@@ -1,6 +1,9 @@
 package dev.anhcraft.config.validate;
 
 import dev.anhcraft.config.validate.check.Validation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,12 +11,12 @@ import org.jetbrains.annotations.Nullable;
  * Aggregates multiple validation and checks all of them.
  */
 public class AggregatedValidator implements Validator {
-  private final Validation[] validators;
+  private final List<Validation> validations;
   private String lastMessage = "";
   private final boolean silent;
 
   public AggregatedValidator(@NotNull Validation[] validators, boolean silent) {
-    this.validators = validators;
+    this.validations = Collections.unmodifiableList(Arrays.asList(validators));
     this.silent = silent;
   }
 
@@ -25,13 +28,21 @@ public class AggregatedValidator implements Validator {
    */
   @Override
   public boolean check(@Nullable Object value) {
-    for (Validation validation : validators) {
+    for (Validation validation : validations) {
       if (!validation.check(value)) {
         lastMessage = validation.message();
         return false;
       }
     }
     return true;
+  }
+
+  /**
+   * Gets all validations used by this validator.
+   * @return list of validations
+   */
+  public @NotNull List<Validation> validations() {
+    return validations;
   }
 
   @Override
