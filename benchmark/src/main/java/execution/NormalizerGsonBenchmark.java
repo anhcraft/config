@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 @BenchmarkMode(Mode.AverageTime)
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(time = 3, iterations = 3)
+@Warmup(time = 1, iterations = 3)
+@Fork(1)
 public class NormalizerGsonBenchmark {
   private Gson gson;
   private Store model;
