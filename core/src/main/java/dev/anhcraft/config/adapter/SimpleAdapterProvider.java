@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
  * until a compatible adapter exists.
  */
 public class SimpleAdapterProvider implements AdapterProvider {
-  private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters;
+  protected final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters;
 
   public SimpleAdapterProvider(@NotNull LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters) {
     this.typeAdapters = typeAdapters;
