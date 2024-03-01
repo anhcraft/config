@@ -9,8 +9,7 @@
         <version>1.3.0</version>
     </parent>
 
-    <groupId>dev.anhcraft.config</groupId>
-    <artifactId>core</artifactId>
+    <artifactId>config.core</artifactId>
 
     <dependencies>
         <dependency>
