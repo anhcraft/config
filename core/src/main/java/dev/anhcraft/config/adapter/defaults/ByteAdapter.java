@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ByteAdapter implements TypeAnnotator<Byte> {
+  public static final ByteAdapter INSTANCE = new ByteAdapter();
+
   @Override
   public @Nullable Byte complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

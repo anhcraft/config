@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class BooleanAdapter implements TypeAnnotator<Boolean> {
+  public static final BooleanAdapter INSTANCE = new BooleanAdapter();
+
   @Override
   public @Nullable Boolean complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

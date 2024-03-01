@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UriAdapter implements TypeAdapter<URI> {
+  public static final UriAdapter INSTANCE = new UriAdapter();
+
   @Override
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends URI> sourceType, @NotNull URI value)

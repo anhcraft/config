@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UuidAdapter implements TypeAdapter<UUID> {
+  public static final UuidAdapter INSTANCE = new UuidAdapter();
+
   @Override
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends UUID> sourceType, @NotNull UUID value)

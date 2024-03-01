@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class LongAdapter implements TypeAnnotator<Long> {
+  public static final LongAdapter INSTANCE = new LongAdapter();
+
   @Override
   public @Nullable Long complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

@@ -119,35 +119,34 @@ public final class ConfigFactory {
     private byte denormalizerSettings = 0;
 
     public Builder() {
-      // TODO cache, and move imports to local files
-      typeAdapters.put(Byte.class, new ByteAdapter());
-      typeAdapters.put(Short.class, new ShortAdapter());
-      typeAdapters.put(Integer.class, new IntegerAdapter());
-      typeAdapters.put(Long.class, new LongAdapter());
-      typeAdapters.put(Float.class, new FloatAdapter());
-      typeAdapters.put(Double.class, new DoubleAdapter());
-      typeAdapters.put(Character.class, new CharacterAdapter());
-      typeAdapters.put(Boolean.class, new BooleanAdapter());
+      typeAdapters.put(Byte.class, ByteAdapter.INSTANCE);
+      typeAdapters.put(Short.class, ShortAdapter.INSTANCE);
+      typeAdapters.put(Integer.class, IntegerAdapter.INSTANCE);
+      typeAdapters.put(Long.class, LongAdapter.INSTANCE);
+      typeAdapters.put(Float.class, FloatAdapter.INSTANCE);
+      typeAdapters.put(Double.class, DoubleAdapter.INSTANCE);
+      typeAdapters.put(Character.class, CharacterAdapter.INSTANCE);
+      typeAdapters.put(Boolean.class, BooleanAdapter.INSTANCE);
 
-      typeAdapters.put(byte.class, new ByteAdapter());
-      typeAdapters.put(short.class, new ShortAdapter());
-      typeAdapters.put(int.class, new IntegerAdapter());
-      typeAdapters.put(long.class, new LongAdapter());
-      typeAdapters.put(float.class, new FloatAdapter());
-      typeAdapters.put(double.class, new DoubleAdapter());
-      typeAdapters.put(char.class, new CharacterAdapter());
-      typeAdapters.put(boolean.class, new BooleanAdapter());
+      typeAdapters.put(byte.class, ByteAdapter.INSTANCE);
+      typeAdapters.put(short.class, ShortAdapter.INSTANCE);
+      typeAdapters.put(int.class, IntegerAdapter.INSTANCE);
+      typeAdapters.put(long.class, LongAdapter.INSTANCE);
+      typeAdapters.put(float.class, FloatAdapter.INSTANCE);
+      typeAdapters.put(double.class, DoubleAdapter.INSTANCE);
+      typeAdapters.put(char.class, CharacterAdapter.INSTANCE);
+      typeAdapters.put(boolean.class, BooleanAdapter.INSTANCE);
 
-      typeAdapters.put(String.class, new StringAdapter());
-      typeAdapters.put(Dictionary.class, new DictionaryAdapter());
-      typeAdapters.put(Iterable.class, new IterableAdapter());
-      typeAdapters.put(List.class, new IterableAdapter());
-      typeAdapters.put(Set.class, new IterableAdapter());
-      typeAdapters.put(Map.class, new MapAdapter());
-      typeAdapters.put(Enum.class, new EnumAdapter());
-      typeAdapters.put(UUID.class, new UuidAdapter());
-      typeAdapters.put(URL.class, new UrlAdapter());
-      typeAdapters.put(URI.class, new UriAdapter());
+      typeAdapters.put(String.class, StringAdapter.INSTANCE);
+      typeAdapters.put(Dictionary.class, DictionaryAdapter.INSTANCE);
+      typeAdapters.put(Iterable.class, IterableAdapter.INSTANCE);
+      typeAdapters.put(List.class, IterableAdapter.INSTANCE);
+      typeAdapters.put(Set.class, IterableAdapter.INSTANCE);
+      typeAdapters.put(Map.class, MapAdapter.INSTANCE);
+      typeAdapters.put(Enum.class, EnumAdapter.INSTANCE);
+      typeAdapters.put(UUID.class, UuidAdapter.INSTANCE);
+      typeAdapters.put(URL.class, UrlAdapter.INSTANCE);
+      typeAdapters.put(URI.class, UriAdapter.INSTANCE);
     }
 
     /**

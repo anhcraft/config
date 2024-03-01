@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CharacterAdapter implements TypeAnnotator<Character> {
+  public static final CharacterAdapter INSTANCE = new CharacterAdapter();
+
   @Override
   public @Nullable Character complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

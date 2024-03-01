@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ShortAdapter implements TypeAnnotator<Short> {
+  public static final ShortAdapter INSTANCE = new ShortAdapter();
+
   @Override
   public @Nullable Short complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

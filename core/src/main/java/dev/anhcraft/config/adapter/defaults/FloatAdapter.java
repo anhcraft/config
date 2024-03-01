@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FloatAdapter implements TypeAnnotator<Float> {
+  public static final FloatAdapter INSTANCE = new FloatAdapter();
+
   @Override
   public @Nullable Float complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DoubleAdapter implements TypeAnnotator<Double> {
+  public static final DoubleAdapter INSTANCE = new DoubleAdapter();
+
   @Override
   public @Nullable Double complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

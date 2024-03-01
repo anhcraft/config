@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class EnumAdapter implements TypeAdapter<Enum> {
+  public static final EnumAdapter INSTANCE = new EnumAdapter();
 
   @Override
   public @Nullable Object simplify(

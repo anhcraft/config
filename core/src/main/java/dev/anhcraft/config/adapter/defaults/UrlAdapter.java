@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class UrlAdapter implements TypeAdapter<URL> {
+  public static final UrlAdapter INSTANCE = new UrlAdapter();
+
   @Override
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends URL> sourceType, @NotNull URL value)

@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MapAdapter implements TypeAdapter<Map> {
+  public static final MapAdapter INSTANCE = new MapAdapter();
+
   @Override
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends Map> sourceType, @NotNull Map value)

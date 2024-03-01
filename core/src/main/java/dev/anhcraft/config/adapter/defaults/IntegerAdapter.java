@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class IntegerAdapter implements TypeAnnotator<Integer> {
+  public static final IntegerAdapter INSTANCE = new IntegerAdapter();
+
   @Override
   public @Nullable Integer complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

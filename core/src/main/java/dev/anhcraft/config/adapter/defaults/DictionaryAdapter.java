@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class DictionaryAdapter implements TypeAnnotator<Dictionary> {
+  public static final DictionaryAdapter INSTANCE = new DictionaryAdapter();
+
   @Override
   public @Nullable Dictionary complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {

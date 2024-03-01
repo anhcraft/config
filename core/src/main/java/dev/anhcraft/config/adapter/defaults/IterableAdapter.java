@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("rawtypes")
 public class IterableAdapter implements TypeAdapter<Iterable> {
+  public static final IterableAdapter INSTANCE = new IterableAdapter();
+
   @Override
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends Iterable> sourceType, @NotNull Iterable value)
