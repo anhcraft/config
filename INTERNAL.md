@@ -203,8 +203,6 @@ flowchart TD
 
 # Factory
 - The factory is the central instance containing built-in and custom-registered components.
-- The factory name prefixes with the platform name, e.g: `BukkitConfigFactory` for the `Bukkit` module.
-  - The core factory name does not have prefix
 - The factory is immutable to enforce consistency and thread-safety
 
 ### Normalizer
