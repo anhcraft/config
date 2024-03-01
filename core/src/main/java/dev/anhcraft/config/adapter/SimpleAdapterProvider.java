@@ -19,15 +19,12 @@ public class SimpleAdapterProvider implements AdapterProvider {
   @SuppressWarnings("unchecked")
   public @Nullable <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
     Class<?> clazz = type;
-    int i = 0;
     do {
-      i++;
       TypeAdapter<?> adapter = typeAdapters.get(clazz);
       if (adapter != null) {
         return (TypeAdapter<T>) adapter;
       }
       for (Class<?> inf : clazz.getInterfaces()) {
-        i++;
         adapter = typeAdapters.get(inf);
         if (adapter != null) {
           return (TypeAdapter<T>) adapter;
