@@ -140,14 +140,16 @@ public class Context implements TypeAdapter<Object> {
   /**
    * @see #simplify(Context, Class, Object)
    */
-  public @Nullable Object simplify(@NotNull Class<?> sourceType, @NotNull Object value) throws Exception {
+  public @Nullable Object simplify(@NotNull Class<?> sourceType, @NotNull Object value)
+      throws Exception {
     return simplify(this, sourceType, value);
   }
 
   /**
    * @see #complexify(Context, Object, Type)
    */
-  public @Nullable Object complexify(@NotNull Object value, @NotNull Type targetType) throws Exception {
+  public @Nullable Object complexify(@NotNull Object value, @NotNull Type targetType)
+      throws Exception {
     return complexify(this, value, targetType);
   }
 
