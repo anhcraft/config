@@ -16,9 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ConfigDeserializer extends ConfigHandler {
     private final List<Middleware> middlewares = new ArrayList<>();
@@ -67,23 +65,20 @@ public class ConfigDeserializer extends ConfigHandler {
                     return transformArray(Objects.requireNonNull(TypeUtil.getElementType(targetType)), simpleForm);
                 }
             }
-            Class<?> type = rawType;
-            while (true) {
+            Stack<Class<?>> stack = new Stack<>();
+            stack.add(rawType);
+            while (!stack.isEmpty()) {
+                Class<?> type = stack.pop();
+                if (type == null || type == Object.class)
+                    continue;
                 TypeAdapter<?> typeAdapter = getTypeAdapter(type);
                 if (typeAdapter != null) {
                     //noinspection unchecked
                     return (T) typeAdapter.complexify(this, targetType, simpleForm);
                 }
-                for (Class<?> clazz : type.getInterfaces()) {
-                    typeAdapter = getTypeAdapter(clazz);
-                    if (typeAdapter != null) {
-                        //noinspection unchecked
-                        return (T) typeAdapter.complexify(this, targetType, simpleForm);
-                    }
-                }
-                type = type.getSuperclass();
-                if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
-                    break;
+                stack.addAll(Arrays.asList(type.getInterfaces()));
+                if (shouldCallSuperAdapter()) {
+                    stack.add(type.getSuperclass());
                 }
             }
             //noinspection unchecked
