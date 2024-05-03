@@ -27,11 +27,11 @@ public class CollectionAdapter implements TypeAdapter<Collection<?>> {
         if (((Class<?>) type).isAssignableFrom(LinkedHashSet.class)) return new LinkedHashSet<>();
         if (((Class<?>) type).isAssignableFrom(TreeSet.class)) return new TreeSet<>();
         if (((Class<?>) type).isAssignableFrom(Set.class)) return new HashSet<>();
+        if (((Class<?>) type).isAssignableFrom(ArrayList.class)) return new ArrayList<>();
+        if (((Class<?>) type).isAssignableFrom(CopyOnWriteArrayList.class)) return new CopyOnWriteArrayList<>();
+        if (((Class<?>) type).isAssignableFrom(LinkedList.class)) return new LinkedList<>();
         if (((Class<?>) type).isAssignableFrom(Vector.class)) return new Vector<>();
         if (((Class<?>) type).isAssignableFrom(Stack.class)) return new Stack<>();
-        if (((Class<?>) type).isAssignableFrom(LinkedList.class)) return new LinkedList<>();
-        if (((Class<?>) type).isAssignableFrom(CopyOnWriteArrayList.class)) return new CopyOnWriteArrayList<>();
-        if (((Class<?>) type).isAssignableFrom(ArrayList.class)) return new ArrayList<>();
         try {
             Object o = ObjectUtil.newInstance((Class<?>) type);
             if (o instanceof Collection) {
