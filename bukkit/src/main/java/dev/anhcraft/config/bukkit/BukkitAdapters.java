@@ -12,6 +12,8 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
+
 public class BukkitAdapters {
     public static void registerFor(@NotNull ConfigHandler handler) {
         handler.registerTypeAdapter(Location.class, new LocationAdapter());
@@ -34,7 +36,9 @@ public class BukkitAdapters {
 
         try {
             // Prevent initialization exception when testing
-            if (Bukkit.class.getDeclaredField("server").get(null) != null) {
+            Field field = Bukkit.class.getDeclaredField("server");
+            field.setAccessible(true);
+            if (field.get(null) != null) {
                 handler.registerTypeAdapter(Enchantment.class, new EnchantmentAdapter());
 
                 if (NMSVersion.current().atLeast(NMSVersion.v1_20_R1)) {
