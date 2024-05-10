@@ -13,10 +13,10 @@ A Java object-mapping library for configuration.
 
 ## Features
 - Lightweight and simple
-- Built-in: support common data types
-- Adaptable: support various configuration formats
-- Extendable: type adapter, processor
-- Official platform-dependent package built on top of the core:
+- Support common Java data types
+- Adaptable _via_ various configuration formats
+- Extendable _using_ type adapter, processor
+- Official platform-dependent package with battery included:
   - Bukkit: Minecraft server-side
   - Bungeecord: Minecraft proxy-side
 - ConfigDoc: config documentation generator
