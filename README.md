@@ -1,6 +1,6 @@
 # config
 
-[![Release](https://github.com/anhcraft/config/actions/workflows/maven.yml/badge.svg)](https://travis-ci.com/anhcraft/config)
+![Release](https://github.com/anhcraft/config/actions/workflows/maven.yml/badge.svg)
 [![](https://jitpack.io/v/anhcraft/config.svg)](https://jitpack.io/#anhcraft/config)<br>
 
 A Java object-mapping library for configuration.
