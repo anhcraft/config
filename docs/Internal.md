@@ -1,12 +1,15 @@
 # Internal
 
 ## Introduction
-- Following example codes are pseudo. Actual implementation maybe slightly different.
-- See wiki: https://github.com/anhcraft/config/wiki
+- Following examples are pseudo code. Actual implementation maybe slightly different
+- Based on the content in [Overview.md](Overview.md)
 
 ## Goals
-- Lightweight and simple
-- Loosely-couped modularity and extendability
+Simple, lightweight, adaptable and extendable:
+- Simple: the library should be kept as simple as possible allowing future additions, ease of use and long-term maintainability
+- Lightweight: the library should be lightweight to keep the size as low as possible and consume a minimal amount of CPU and memory usage
+- Adaptable: the library can be used independently or integrate with other libraries as needed
+- Extendable: loosely-couped modularity and extendability
 
 ## Reference
 - [Gson Design Document](https://github.com/google/gson/blob/main/GsonDesignDocument.md)
@@ -14,22 +17,42 @@
 
 # Architecture
 
+## Terminologies
+1. `Object` denotes an instance of a reference type `T`
+2. `Configutation` (or `Config`) denotes a human-readable text expressing an arrangement to the system
+3. `Configuration format` is a specific representation that defines the syntax and structure of configuration
+4. `Schema` (or `model`) depicts the structure of a configuration without being fixed into any particular `Configuration format`
+5. `Serialization` is the process of turning an `Object` into a `Configuration text` by `mapping` it in respect of the representation (JSON/XML/YAML/etc)
+6. `Deserialization` (or `Parsing`) is the process of turning a `Configuration text` into an `Object` by `mapping` it in respect of the `schema`
+7. `Mapping` implies a deterministic one-to-many or many-to-one transformation
+8. `Conversion` implies a deterministic one-to-one transformation
+9. `Simple type` denotes widely-supported data types by all `configuration format` including string, number, boolean, array of `Simple type` and configuration sections of string-key and `Simple typed`-value
+10. `Complex type` denotes any Java data type including `Simple type`
+11. `Normalization` (or `Simplification`) is the process of turning a `Complex type` into a `Simple type`
+12. `Denormalization` (or `Complexification`) is the process of turning a `Simple type` into a `Complex type` with the help of `type inference`
+13. `Type inference` is the process of infer an appropriate `Complex type` to turn a `Simple object` into a `Complex object`
+14. `Simple object` denotes  `Simple typed` `Object`
+15. `Complex object` denotes  `Complex typed` `Object`
+16. `Dictionary` is the reserved `Simple typed` `Object` representing a configuration section
+
 ## Modules
 - `core`: contains the framework, built-in type adapters, built-in processor and common utilities
-- `bukkit`: target the Bukkit platform (Minecraft server-side)
-  - depends `core`
-  - contains platform-dependent type adapters and processors
-- `bungee`: target the Bungeecord platform (Minecraft proxy-side)
-  - depends `core`
-  - contains platform-dependent type adapters and processors
 - `configdoc`: configuration documentation generator
 
+## Flows
+- Normalize and denormalize objects
 ```mermaid
 flowchart LR
-    POJO -->|Normalize| Dictionary -->|Serialize| Raw-config
-    Raw-config -->|Deserialize| Dictionary -->|Denormalize| POJO
+    ComplexObject -->|Normalize| SimpleObject
+    SimpleObject -->|Denormalize| ComplexObject
 ```
-
+- A three-stages process, two endpoints are `Object` and `Configuration` and an intermediary layer `Dictionary` 
+```mermaid
+flowchart LR
+    Object -->|Normalize| Dictionary -->|Serialize| Configuration
+    Configuration -->|Deserialize| Dictionary -->|Denormalize| Object
+```
+- A top-down overview of normalization/denormalization
 ```mermaid
 flowchart TD
   subgraph ConfigFactory
@@ -41,7 +64,7 @@ flowchart TD
   subgraph Mapping
     subgraph Normalization
       Schema1(Schema) -->|Provide| Normalizer
-      Instance1(Instance) -->|Provide| Normalizer
+      Object1(Object) -->|Provide| Normalizer
       Normalizer --->|Normalize| Dictionary1(Dictionary)
     end
     Factory --->|Construct| Normalizer
@@ -49,52 +72,109 @@ flowchart TD
     subgraph Denormalization
       Dictionary4(Dictionary) -->|Provide| Denormalizer
       Schema2(Schema) -->|Provide| Denormalizer
-      Denormalizer --->|Denormalize| Instance2(Instance)
+      Denormalizer --->|Denormalize| Object2(Object)
     end
   end
 ```
+- Serialize/Deserialize between `Dictionary` and `Configuration`
 ```mermaid
 flowchart TD
-  ConfigFormat --->|Provide| Deserializer
+  ConfigFormat --->|Define| Deserializer
   subgraph Deserialization
-    Raw-config2(Raw Config) -->|Provide| Deserializer
+    Config2(Config) -->|Provide| Deserializer
     Deserializer --->|Deserialize| Dictionary3(Dictionary)
   end
   subgraph Serialization
     Dictionary2(Dictionary) -->|Provide| Serializer
-    Serializer --->|Serialize| Raw-config1(Raw Config)
+    Serializer --->|Serialize| Config1(Config)
   end
-  ConfigFormat --->|Provide| Serializer
+  ConfigFormat --->|Define| Serializer
 ```
+
+## Official platform packages
+- `bukkit`: target the Bukkit platform (Minecraft server-side)
+  - depends `core`
+  - contains platform-dependent type adapters and processors
+- `bungee`: target the Bungeecord platform (Minecraft proxy-side)
+  - depends `core`
+  - contains platform-dependent type adapters and processors
 
 # Structure
 
-| Java           | Blueprint | Configuration |
-|----------------|-----------|---------------|
-| Class          | Schema    | Schema        |
-| Instance, POJO | -         | Dictionary    |
-| Field          | Property  | Setting       |
-| Value          | -         | Value         |
+| Instance of `T` | Object     | Dictionary                       |
+|-----------------|------------|----------------------------------|
+| Data type       | `Class<T>` | Dictionary                       |
+| Model           | Schema     | Schemaless<br/>Dictionary schema |
+| Field           | Property   | Setting                          |
 
 ## Schema
-- The schema represents the structure of a class
+- The schema (or model) is an immutable top-down view of the structure of a configuration at runtime
 - The schema contains none, one or many properties
 - The schema is factory-dependent (see ConfigFactory below)
 
+### Class schema
+- The schema inferred from a respective class in a _declarative_ manner
+- Depicts the **exposed** structure of a class
+- Provides the view of a class available at runtime
+- All classes have their own class schemas lazily generated using reflection
+
+### Dictionary schema
+- The schema is built dynamically in an _imperative_ manner
+- Provides the view of a _virtual_ class which does not exist at runtime
+
+### Schema construction
+
+|               | Description                                                                                    | Class Schema | Dictionary Schema |
+|---------------|------------------------------------------------------------------------------------------------|--------------|-------------------|
+| Builder       | Step-by-step build a freestyle schema                                                          |              | ✔                 |
+| Reflection    | Using Reflection API to generate schema based on a class available at runtime                  | ✔            |                   |
+| Code scanning | Using static code analysis to generate schema without running or including the code at runtime |              | ✔                 |
+
+- A class schema can be converted into a dictionary schema but not vice versa
+
 ## Property
-- A property represents a field in the associated class
-  - Transient fields, synthetic fields, native fields are excluded
-  - `@Exclude` to explicitly exclude a field
-  - A **final** field may be a property if it does not violate rules above
-- The property may contain value restrictions
-- The property can be any of Java data types
-- By default, the property name is derived from the field name
-  - Property name conversion is customizable (see Naming Policy below)
-  - Property name can be customized (see Primary Strategy)
+- A property belongs to a schema and represents an individual configuration setting
+- The type of property is the data type of the value it holds
 - The property is factory-dependent (see ConfigFactory below)
 
-### Property annotations
-- Annotations is the main approach to provide property metadata
+### Property in a class schema
+- Each property maps into exactly one field in the respective class
+- Each field in the class maps into one or _none_ property
+- Transient fields, synthetic fields, native fields are excluded
+  - `@Exclude` to explicitly exclude a field
+  - A **final** field may be a property if it does not violate rules above
+- By default, the property name is derived from the field name
+  - Property name conversion is customizable (see Naming Policy)
+  - Property name can be customized (see Naming Strategy)
+- The property type equals to the type of the corresponding field
+
+#### Naming Policy
+- When `@Name` is absent, the field name is also the property name. It is possible to change the styling, for example, enforce property name to be kebab-case.
+- Field name is assumed to be **camelCase** (Java convention)
+- Built-in: default, PascalCase, snake_case, kebab-case
+- Naming policy can be manually-defined when constructing ConfigFactory
+- Custom naming policy must follow a bijective function, otherwise an exception is raised during schema creation (see: Naming Strategy)
+
+#### Naming Strategy
+- First, each property is named as its corresponding field's name after applying Naming Policy. If naming collision happens, e.g. for two distinct properties, a custom naming policy outputs the same name, an exception throws.
+- It is initially guaranteed that at this time naming follows a bijective function:
+  - Every name in a schema is unique
+  - Two distinct properties must have two distinct names
+  - Two distinct names are mapped into two distinct properties
+  - The initial name of each property is called primary name
+- The blueprint scanner inspects every property for `@Name` and `@Alias` in order:
+  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be used later.
+  - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
+  - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
+- To conclude, naming in a schema must follow the following rules:
+  - Every name in a schema is unique
+  - Two distinct properties must have two set of unique names
+  - Two distinct names may be mapped to the same property
+  - Each property must have a primary name and an optional set of aliases
+  - Naming in a schema follows an onto function `Name → Property`
+
+#### Annotations
+- Annotations is the main approach to provide **class properties**
 - `@Name`: set the property primary name and aliases
   - `value` to define a list of possible names
   - See: Naming Strategy
@@ -102,12 +182,12 @@ flowchart TD
   - `value` to define a list of possible aliases
   - See: Naming Strategy
 - `@Exclude`: exclude the field / let it no longer be a property
-  - A static field or transient field is also ignored
-  - Use `@Exclude` to avoid conflict, since other serialization library (such as Gson) ignore transient fields
+  - Transient fields, synthetic fields, native fields are always excluded by default
+  - Prefer `@Exclude` over `transient` to avoid conflict since other serialization libraries (such as Gson, Jackson, etc.) ignore transient fields
 - `@Describe`: describe the property
 - `@Optional`: the optional only works for reference data types (including primitive wrappers) during denormalization
   - When `@Optional` is absent, the field value is `null` when the corresponding setting is absent from the Dictionary
-  - When it is present, the field value will be kept as it is when the corresponding setting is absent from the Dictionary
+  - When `@Optional` is present, keep the value as it is when the corresponding setting is absent from the Dictionary
 - `@Validate`: validate the setting value
   - The difference between using `@Validate` and a separate validation is that `@Validate` integrates well with the ConfigDoc
   - When validation fails, the setting is skipped (see also: `@Optional`)
@@ -115,14 +195,17 @@ flowchart TD
 - `@Transient`: strictly avoid normalization
   - **Note:** A transient field is ignored from the schema. However, using `@Transisent` includes the field and only avoid normalization
 - `@Constant`: strictly avoid denormalization
-  - **Note:** A constant/final field is included in the schema and denormalizable by default. However, using `@Constant` explicitly avoid denormalization
-- `@Payload`: specify the payload type (see: Generic resolution)
+  - **Note:** A constant/final field maybe included in the schema and denormalizable. Using `@Constant` explicitly avoid denormalization
+
+### Property in a dictionary schema
+- The dictionary schema is generated imperatively, so as its property
+- Name and Type is defined when building the property
 
 ### Validation
 - Provides simple value validation
   + For example: `@Validate("not-null, not-empty")`
-  + Multiple parameters are separated by comma
-  + Space in-between is optional
+  + Checks are separated by comma
+  + Space in-between is skipped
   + Applies to **denormalization** only
 - Not-null:
   - Enforces an object to be non-null
@@ -144,40 +227,35 @@ flowchart TD
   - Upper bound: `size=|3`
   - Two-sided bound: `size=2|7`
 
-### Naming Policy
-- When `@Name` is absent, the field name is also the property name. It is possible to change the styling, for example, enforce property name to be kebab-case.
-- Field name is assumed to be **camelCase** (Java convention)
-- Built-in: default, PascalCase, snake_case, kebab-case
-- Naming policy can be manually-defined when constructing ConfigFactory
-- Custom naming policy must follow a bijective function, otherwise an exception is raised during schema creation (see: Naming Strategy)
-
-### Naming Strategy
-- First, each property is named as its corresponding field's name after applying Naming Policy. If naming collision happens, e.g. for two distinct properties, a custom naming policy outputs the same name, an exception throws.
-- It is initially guaranteed that at this time naming follows a bijective function:
-  - Every name in a schema is unique
-  - Two distinct properties must have two distinct names
-  - Two distinct names are mapped into two distinct properties
-  - The initial name of each property is called primary name
-- The blueprint scanner inspects every property for `@Name` and `@Alias` in order:
-  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be used later.
-  - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
-  - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
-- To conclude, naming in a schema must follow the following rules:
-  - Every name in a schema is unique
-  - Two distinct properties must have two set of unique names
-  - Two distinct names may be mapped to the same property
-  - Each property must have a primary name and an optional set of aliases
-  - Naming in a schema follows an onto function `Name → Property`
-
 ## Dictionary
-- The dictionary is the intermediate representation of configuration
-- The dictionary is also called "the wrapper"
-- The dictionary is independent of the schema
+- The dictionary is a K-V container of simple objects
+  + The key must be string
+  + The value can be any of simple types unless the dictionary is constrained by a schema which defines the setting type
 - The dictionary includes none, one or many settings
 
-### Setting
-- The setting has no value restrictions
-- The setting must have **simple data types**
+### Schemaless dictionary
+- The dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects
+```
+Dictionary = {
+  name = "Bob"
+  age = 7
+  emails = ["test@gmail.com"]
+}
+```
+
+### Constrained dictionary
+- The dictionary is constrained by a dictionary schema which restricts the type of values
+```
+Dictionary: {
+  name: string
+  age: int
+  emails: string[]
+} = {
+  name = "Bob"
+  age = 7
+  emails = ["test@gmail.com"]
+}
+```
 
 # Data types
 ## Simple data types
@@ -188,59 +266,56 @@ flowchart TD
     - String
   - Compound type:
     - Dynamic-typed, ordered array
-    - Container of ordered K-V entries (K must be string)
-- The term _simple_ is used to distinct from _primitive_ data types which does not include string. String is a reference type in Java, however, it is a scalar type (simple type) in terms of configuration.
+    - Container of ordered K-V entries (K must be string, V must be simple typed)
 
 ## Complex data types
 - Beyond the context of Dictionary, a data type is said to be complex which includes:
   - Java primitives
   - Reference types such as primitive wrappers, String, Collection, etc
 
-## Conversion
-- The process of converting a complex data type into a simple data type is called normalization.
-- The process of converting a simple data type into a complex data type is called denormalization.
-- Conversion does not guarantee consistency. It depends on type-adapting and value processing.
+## Mapping
+- The process of mapping a complex data type into a simple data type is called normalization
+- The process of mapping a simple data type into a complex data type is called denormalization
 
 # Factory
-- The factory is the central instance containing built-in and custom-registered components.
-- The factory name prefixes with the platform name, e.g: `BukkitConfigFactory` for the `Bukkit` module.
-  - The core factory name does not have prefix
+- The factory is the central instance containing built-in and custom-registered components
 - The factory is immutable to enforce consistency and thread-safety
 
 ### Normalizer
 - The normalizer is constructed from a factory
-- The purpose of the normalizer is to map a complex type into a simple type, so it can be put into a Dictionary
+- The purpose of the normalizer is to map a complex type into a simple type so it can be put into a Dictionary
 
 ### Denormalizer
 - The denormalizer is also constructed from a factory
 - The purpose of the denormalizer is to map a simple Java data type into the target complex type
 
 ### Schema Storage
-Schema(s) of classes resides in the schema. The option `schemaCacheCapacity` limits the number of schemas in the cache.
+- Schema(s) of classes resides in the schema
+- The option `schemaCacheCapacity` limits the number of schemas in the cache
 
 ## Type Adapters
-- The type adapter of complex type `T` works around complex objects of type `T` and simple objects
+- The type adapter of complex type `T` works around complex objects of type `T` or subtypes of `T` and simple objects
 - It is possible to register custom adapters or override existing adapter(s) including the built-in
 - By default, Config does automatic type-adapting by using the schema to normalize an instance into a container, and vice versa. However, that process does not always work (see below). Using type adapter, it is possible to control the process, e.g: do complex logic, scalarize the object, etc
-- Type adapter is meant provide the final result. For example, when an object of class `T` is normalized into a Dictionary, only one type adapter that is compatible to `T` will be called. Type adapting is not pipeline. Even though, it is allowed to manually call another type-adapting.
+- Type adapter must provide the final result. For example, when an object of class `T` is normalized into a Dictionary, only one type adapter that is compatible to `T` will be called. Type adapting is not pipelined. Nevertheless, it is allowed to manually call another type-adapting
 - The adapter has two main method:
   - Simplify a complex object into a simple object
   - Complexify a simple object into a complex object
 
 ### Special type adapters
 - Type inferencer: the only purpose is to simplify a complex object
-  - The denormalizer does not use this type adapter, instead fallback to automatic type-adapting
+  - The denormalizer skips this type adapter and fallbacks to use automatic type-adapting
 - Type annotator: the only purpose is to complexify a simple object
-  - The normalizer does not use this type adapter, instead fallback to automatic type-adapting
+  - The normalizer skips this type adapter and fallbacks to use automatic type-adapting
 
 ### Type adapter searching
-To find the type adapter compatible to type `T`, the factory starts searching from `T` up to the root of class hierarchy. Searching ends when the type adapter at a level exists. If none is found, the normalizer/denormalizer does automatic type-adapting.
+- To find the type adapter compatible to an object of type `T`, the factory starts searching from `T` up to the root of class hierarchy. Searching ends when the type adapter at a level exists. If none is found, the normalizer/denormalizer does automatic type-adapting
 
 ### Type covariance
 - For a custom adapter of type `T`, It can work with instance of type `T` or type `T' extends T`
 - Normalization: It must be able to normalize type `T`. As a result, any `T' extends T` can be upcasted to type `T` and be normalized with loss of information
 - Denormalization: A wrapper can be normalized into type `S` which `S` is `T` or downcast to `T' extends T`. `S` is found using type resolution.
-- As the type adapter of type `T` can process any type `T' extends T`, information from subclass may be lost during normalization. To avoid, it is possible to define type adapter `T'` so that:
+- As the type adapter of type `T` can process any type `T' extends T`, information from subclass maybe lost during normalization. To mitigate, it is possible to define type adapter `T'` so that:
   - Type adapter `T'` processes type `T'` and any ` extends T'`
   - Type adapter `T` only processes type `T` and any type ` super T'`
   - Note that: `T' extends T` which mean they are under the same hierarchy
@@ -282,8 +357,8 @@ To find the type adapter compatible to type `T`, the factory starts searching fr
 ## Denormalization
 - The denormalization is much complexer than the normalization:
   - Relies on the given type which may be an interface (abstract class), not an implementation class, which means it is required to correctly find out the appropriate implementation class and instantiate it
-  - Due to type erasure, it is impossible to know the exact type of generic fields
-  - Dynamic value resolution due to end-user convenience: cast string to a scalar value and vice versa, wrap a scalar value in compound type, etc
+  - Due to type erasure, it is impossible to know the exact type of generic-typed fields
+  - Dynamic typing workarounds: cast string to a scalar value and vice versa, wrap a scalar value in compound type, etc
 
 ### Scalar Type
 - To denormalize scalar values, the library uses type annotator. A type annotator is a special type adapter that serves denormalization only.
@@ -383,7 +458,7 @@ Type adapter lookup relies on the raw type
 | `AbstractList`         | AbstractList |
 
 ### Normalization
-For container types such as ones in the Collections API, normalization relies on the actual type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no restriction on the value type (except that the key must be a string)
+For container types such as ones in the Collections API, normalization relies on the actual type of each element in the container. This may result in variance of simple objects. Therefore, for simple types, an array is dynamically-typed, and a K-V container has no fixed restriction on the value type (the key must be a string and the value must be simple typed)
 
 ### Denormalization
 - Classes use generics to take advantage of type variables, for example, a `List<String>` means to store `String` only. At compile-time, type erasure happens, and there is no restriction of parameter types at runtime. Without knowing the actual type, it is impossible to denormalize into a container because there is no way to know its payload type. For example:
@@ -406,7 +481,7 @@ public Person createPerson() {
     return new Person();
 }
 ```
-- However, when there is type variable bound to the class, and there is a field relying on that variable, we have to look up the actual type of the field using the actual type of the class. However, it is impossible to know the actual type because Reflection does not support retrieving type information from local variables, method parameters, etc
+- However, when there is type variable bound to the class, it is impossible to know the actual type because Reflection does not support retrieving type information from local variables, method parameters, etc
 ```java
 public class Person<T extends Job> {
   public List<T> jobs;
@@ -440,7 +515,7 @@ public static void main(String[] args) {
     Type actualType = ((ParameterizedType) superclass).getActualTypeArguments()[0];
 }
 ```
-- Not all classes are extendable, especially when developers want to work with external classes. So, some library introduces a type resolver (e.g in Gson, it is called TypeToken). The type resolver can capture type using Super Type Tokens trick.
+- Not all classes are extendable, especially when developers want to work with external classes. So, some library introduces a type resolver (e.g in Gson, it is called TypeToken). The type resolver can capture type using Super Type Tokens trick
 ```java
 public abstract class TypeResolver<T> {
     public final Type capture() {
@@ -457,12 +532,12 @@ public static void main(String[] args) {
 ```
 
 ### Complex use cases
-For complex use cases, it is required to handle manually using type adapter.
+For complex use cases, it is required to handle manually using type adapter
 
 ## Processors
 - In certain use cases, it is unnecessary to create type adapter for a certain type because of following reasons:
-  + Minimize code duplication. For example, there is a validation in the constructor, what if that can be used together with denormalization.
-  + Encapsulate the logic in that class and prevent inheritance. Remember: type adapter works for subtype.
+  + Minimize code duplication. For example, there is a validation in the constructor, what if that can also be used in denormalization
+  + Encapsulate the logic in that class and prevent inheritance. On the other hand, type adapter lookup works for subtype.
   + Validate the value (without using `@Validate`). Using type adapter means to transform the value, so validation is not a suitable use case here.
   + Access to private, package-private class members
 - Processors are annotated instance methods that can process values

@@ -1,5 +1,5 @@
 # Contribution
-- Read [INTERNAL.md](INTERNAL.md) to know the internal working.
+- Read [docs/Internal.md](./docs/Internal.md) to know the internal working.
 - For PR, ensure there is associated issue(s) created, if not, please make one.
 - Feature PR must include:
   - Successfully-tested code
