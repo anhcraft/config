@@ -11,6 +11,9 @@ import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -270,7 +273,7 @@ public class ReflectBlueprintScannerTest {
       assertNotNull(processor);
       assertEquals(Normalizer.Strategy.REPLACE, processor.strategy());
       assertEquals(
-          "Thu Jan 01 07:00:00 ICT 1970",
+          "1970-01-01T00:00Z",
           ((Processor.NormalizationInvoker) processor.invoker()).invoke(null, new Log()));
     }
 
@@ -283,7 +286,7 @@ public class ReflectBlueprintScannerTest {
       assertNotNull(processor1);
       assertEquals(Normalizer.Strategy.REPLACE, processor1.strategy());
       assertEquals(
-          "Thu Jan 01 07:00:00 ICT 1970",
+          "1970-01-01T00:00Z",
           ((Processor.NormalizationInvoker) processor1.invoker()).invoke(null, new Log()));
 
       Processor processor2 = schema.property("details").normalizer();
@@ -300,7 +303,7 @@ public class ReflectBlueprintScannerTest {
 
       @Normalizer("timestamp")
       private String processTimestamp() {
-        return new Date(timestamp).toString();
+        return Instant.ofEpochMilli(timestamp).atOffset(ZoneOffset.UTC).toString();
       }
 
       @Normalizer(value = "details", strategy = Normalizer.Strategy.BEFORE)
