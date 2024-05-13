@@ -12,6 +12,17 @@ public final class PropertyNaming {
   private final LinkedHashSet<String> aliases;
 
   public PropertyNaming(@NotNull String primary, @NotNull LinkedHashSet<String> aliases) {
+    if (primary.isEmpty()) throw new IllegalArgumentException("Primary name cannot be empty");
+    for (String alias : aliases) {
+      if (alias.isEmpty()) throw new IllegalArgumentException("Alias cannot be empty");
+      if (alias.equals(primary))
+        throw new IllegalArgumentException("Alias must be different from primary name");
+    }
+    this.primary = primary;
+    this.aliases = aliases;
+  }
+
+  PropertyNaming(LinkedHashSet<String> aliases, String primary) { // faster construction
     this.primary = primary;
     this.aliases = aliases;
   }

@@ -255,7 +255,7 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
       }
     }
 
-    return new PropertyNaming(primary == null ? originalPrimaryName : primary, aliases);
+    return new PropertyNaming(aliases, primary == null ? originalPrimaryName : primary);
   }
 
   private List<String> scanDescription(Field field) {
