@@ -172,6 +172,27 @@ public class ReflectSchemaScannerTest {
       @Name("cold")
       public int[] coldStorage;
     }
+
+    @Test
+    public void testAliasDuplicateCustomPrimaryName() {
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+      ClassSchema schema = custom.scanSchema(HelloGreet.class);
+      assertEquals(Set.of("greet", "hiya"), schema.propertyNames());
+      assertEquals("hello", schema.property("greet").field().getName());
+      assertTrue(schema.property("greet").aliases().isEmpty());
+      assertEquals("welcome", schema.property("hiya").field().getName());
+      assertTrue(schema.property("hiya").aliases().isEmpty());
+    }
+
+    public class HelloGreet {
+      @Name({"greet", "greet"})
+      public String hello;
+
+      @Name("hiya")
+      @Alias("hiya")
+      public String welcome;
+    }
   }
 
   @Nested

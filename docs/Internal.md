@@ -157,13 +157,13 @@ flowchart TD
 
 #### Naming Strategy
 - First, each property is named as its corresponding field's name after applying Naming Policy. If naming collision happens, e.g. for two distinct properties, a custom naming policy outputs the same name, an exception throws.
-- It is initially guaranteed that at this time naming follows a bijective function:
-  - Every name in a schema is unique
+- It is initially guaranteed that at this stage naming follows a bijective function:
+  - Every property name in a schema is unique
   - Two distinct properties must have two distinct names
   - Two distinct names are mapped into two distinct properties
   - The initial name of each property is called primary name
-- The schema scanner inspects every property for `@Name` and `@Alias` in order:
-  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be used later.
+- The schema scanner inspects `@Name` and `@Alias` attached to each property by source-code order:
+  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be claimed later.
   - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
   - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
 - To conclude, naming in a schema must follow the following rules:

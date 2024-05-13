@@ -36,7 +36,6 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
 
     Map<String, Processor> normalizers = scanNormalizers(type);
     Map<String, Processor> denormalizers = scanDenormalizers(type);
-
     Map<String, Field> fields = new LinkedHashMap<>();
 
     for (Field field : type.getDeclaredFields()) {
@@ -57,17 +56,25 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
             String.format(
                 "Schema '%s' contains naming conflicts due to naming policy", type.getName()));
       fields.put(primaryName, field);
+      // It is guaranteed that naming policy generates unique names at this point
     }
 
+    // names claimed at a point in time; initially, they are names after naming policy applied
+    Set<String> nameClaimed = new HashSet<>(fields.keySet());
+
+    // a map of primary name and alias maps to ClassProperty
+    // we do not initialize the map at this point because there is a possibility that a different
+    // primary
+    // name will replace the original one
     Map<String, ClassProperty> lookup = new LinkedHashMap<>();
-    Set<String> nameClaimed = new HashSet<>(fields.keySet()); // initially, "lookup" cannot be used
+
     List<ClassProperty> properties = new ArrayList<>();
 
     for (Map.Entry<String, Field> entry : fields.entrySet()) {
-      String primaryName = entry.getKey();
+      String originalPrimaryName = entry.getKey();
       Field field = entry.getValue();
 
-      PropertyNaming name = scanName(field, primaryName, nameClaimed);
+      PropertyNaming name = scanName(field, originalPrimaryName, nameClaimed);
       List<String> description = scanDescription(field);
       byte modifier = scanModifier(field);
       Validator validator = scanValidation(field);
@@ -77,9 +84,14 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
       ClassProperty property =
           new ClassProperty(
               name, description, modifier, validator, normalizer, denormalizer, field);
+
       lookup.put(name.primary(), property);
-      nameClaimed.remove(primaryName);
+
+      // discards the original primary name and uses the new one after scanned
+      // the new one could be similar to the original one if no new primary name was provided
+      nameClaimed.remove(originalPrimaryName);
       nameClaimed.add(name.primary());
+
       for (String alias : name.aliases()) {
         lookup.put(alias, property);
         nameClaimed.add(alias);
@@ -208,7 +220,21 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
     if (nameMeta != null) {
       for (String name : nameMeta.value()) {
         name = name.trim();
-        if (name.isEmpty() || existing.contains(name) || aliases.contains(name)) continue;
+        /*
+          To be the new primary name:
+          - It must not be empty
+          - It must not collide with existing names
+
+          To be an alias:
+          - It must not be empty
+          - It must not collide with existing names
+          - It must not collide with to-be-added aliases
+          - It must not collide with the new primary name
+        */
+        if (name.isEmpty()
+            || existing.contains(name)
+            || aliases.contains(name)
+            || name.equals(primary)) continue;
         if (primary == null) {
           primary = name;
         } else {
@@ -221,7 +247,10 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
     if (aliasMeta != null) {
       for (String alias : aliasMeta.value()) {
         alias = alias.trim();
-        if (alias.isEmpty() || existing.contains(alias) || aliases.contains(alias)) continue;
+        if (alias.isEmpty()
+            || existing.contains(alias)
+            || aliases.contains(alias)
+            || alias.equals(primary)) continue;
         aliases.add(alias);
       }
     }
