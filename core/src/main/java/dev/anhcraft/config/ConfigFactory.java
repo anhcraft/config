@@ -5,7 +5,7 @@ import dev.anhcraft.config.adapter.SimpleAdapterProvider;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.defaults.*;
 import dev.anhcraft.config.blueprint.ClassSchema;
-import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
+import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
  * The config factory centralizes facilities for normalization and denormalization.
  */
 public final class ConfigFactory {
-  private final ReflectBlueprintScanner blueprintScanner;
+  private final ReflectSchemaScanner schemaScanner;
   private final ConfigNormalizer normalizer;
   private final ConfigDenormalizer denormalizer;
   private final Map<Class<?>, Schema<?>> classSchemas;
@@ -32,8 +32,8 @@ public final class ConfigFactory {
   private final AdapterProvider adapterProvider;
 
   ConfigFactory(Builder builder) {
-    this.blueprintScanner =
-        new ReflectBlueprintScanner(builder.namingPolicy, builder.validationRegistry);
+    this.schemaScanner =
+        new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.classSchemas = builder.schemaCacheProvider.get();
@@ -81,7 +81,7 @@ public final class ConfigFactory {
   @NotNull public ClassSchema getSchema(@NotNull Class<?> type) {
     ClassSchema schema = (ClassSchema) classSchemas.get(type);
     if (schema != null) return schema;
-    schema = blueprintScanner.scanSchema(type);
+    schema = schemaScanner.scanSchema(type);
     classSchemas.put(type, schema);
     return schema;
   }

@@ -16,13 +16,13 @@ import java.util.function.UnaryOperator;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Reflection-based {@link BlueprintScanner} that generates {@link ClassSchema}.
+ * A Reflection-based {@link SchemaScanner} that generates {@link ClassSchema}.
  */
-public class ReflectBlueprintScanner implements BlueprintScanner<ClassSchema> {
+public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
 
-  public ReflectBlueprintScanner(
+  public ReflectSchemaScanner(
       @NotNull UnaryOperator<String> namingPolicy, @NotNull ValidationRegistry validationRegistry) {
     this.namingPolicy = namingPolicy;
     this.validationRegistry = validationRegistry;

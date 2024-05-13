@@ -6,10 +6,10 @@ import dev.anhcraft.config.type.ComplexTypes;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A blueprint scanner.
+ * A schema scanner.
  * @param <T> the schema type
  */
-public interface BlueprintScanner<T extends Schema> {
+public interface SchemaScanner<T extends Schema<?>> {
   /**
    * Scans the schema of the specified class.<br>
    * The schema is tested against {@link ComplexTypes#isNormalClassOrAbstract(Class)}. If fails, this method

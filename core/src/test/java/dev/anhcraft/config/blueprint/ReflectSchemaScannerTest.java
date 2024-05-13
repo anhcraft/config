@@ -12,19 +12,18 @@ import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class ReflectBlueprintScannerTest {
-  private static ReflectBlueprintScanner scanner;
+public class ReflectSchemaScannerTest {
+  private static ReflectSchemaScanner scanner;
 
   @BeforeAll
   public static void setUp() {
-    scanner = new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+    scanner = new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
   }
 
   @Test
@@ -43,8 +42,8 @@ public class ReflectBlueprintScannerTest {
   public class ConflictNamingPolicyTest {
     @Test
     public void testConflictNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT);
       assertThrows(UnsupportedSchemaException.class, () -> custom.scanSchema(FooBar.class));
     }
 
@@ -58,8 +57,8 @@ public class ReflectBlueprintScannerTest {
   public class ValidNamingPolicyTest {
     @Test
     public void testDefaultNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("fooBar", "barFoo"), schema.propertyNames());
       assertNotNull(schema.property("fooBar"));
@@ -70,8 +69,8 @@ public class ReflectBlueprintScannerTest {
 
     @Test
     public void testKebabCaseNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo-bar", "bar-foo"), schema.propertyNames());
       assertNotNull(schema.property("foo-bar"));
@@ -82,8 +81,8 @@ public class ReflectBlueprintScannerTest {
 
     @Test
     public void testSnakeCaseNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo_bar", "bar_foo"), schema.propertyNames());
       assertNotNull(schema.property("foo_bar"));
@@ -94,8 +93,8 @@ public class ReflectBlueprintScannerTest {
 
     @Test
     public void testPascalCaseNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("FooBar", "BarFoo"), schema.propertyNames());
       assertNotNull(schema.property("FooBar"));
@@ -114,8 +113,8 @@ public class ReflectBlueprintScannerTest {
   public class NamingResolutionTest {
     @Test
     public void testDefaultNamingPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
           Set.of(
@@ -142,8 +141,8 @@ public class ReflectBlueprintScannerTest {
 
     @Test
     public void testDefaultCustomPolicy() {
-      ReflectBlueprintScanner custom =
-          new ReflectBlueprintScanner(
+      ReflectSchemaScanner custom =
+          new ReflectSchemaScanner(
               s -> s.length() > 2 ? s.substring(0, 2) : s, ValidationRegistry.DEFAULT);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(

@@ -162,7 +162,7 @@ flowchart TD
   - Two distinct properties must have two distinct names
   - Two distinct names are mapped into two distinct properties
   - The initial name of each property is called primary name
-- The blueprint scanner inspects every property for `@Name` and `@Alias` in order:
+- The schema scanner inspects every property for `@Name` and `@Alias` in order:
   - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be used later.
   - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
   - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
