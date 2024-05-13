@@ -200,6 +200,14 @@ flowchart TD
 ### Property in a dictionary schema
 - The dictionary schema is generated imperatively, so as its property
 - Name and Type is defined when building the property
+- If a property type is not defined, the property can hold any simple value
+- If the property type is Dictionary, it is optional to supply a dictionary schema to constrain the value
+
+#### Naming Strategy
+- Dictionary properties have significant flexibility in naming compared to class properties
+- Dictionary properties may have duplicates in naming. When a dictionary schema is constructed, they are added **in bulk** and naming arrangement happens as follows:
+  + For each property, its primary name is added to the lookup map. If a naming collision occurs, the schema construction fails
+  + For each property, any alias that does not conflict with existing names so far is added to the lookup map.
 
 ### Validation
 - Provides simple value validation
