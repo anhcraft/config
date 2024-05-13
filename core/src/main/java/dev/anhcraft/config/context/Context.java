@@ -2,10 +2,9 @@ package dev.anhcraft.config.context;
 
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.adapter.TypeAdapter;
+import dev.anhcraft.config.blueprint.ClassProperty;
 import java.lang.reflect.Type;
 import java.util.*;
-
-import dev.anhcraft.config.blueprint.ClassProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

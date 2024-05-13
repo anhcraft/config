@@ -4,7 +4,6 @@ import static dev.anhcraft.config.type.ComplexTypes.describe;
 
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.blueprint.ClassSchema;
-import dev.anhcraft.config.blueprint.Schema;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;

@@ -16,8 +16,7 @@ public interface Schema<T extends Property> {
    * of {@link Property} because a property may have more than one name.
    * @return all property names
    */
-  @NotNull
-  Set<String> propertyNames();
+  @NotNull Set<String> propertyNames();
 
   /**
    * Returns all properties in the schema.
@@ -30,6 +29,5 @@ public interface Schema<T extends Property> {
    * @param name property name
    * @return property
    */
-  @Nullable
-  T property(@Nullable String name);
+  @Nullable T property(@Nullable String name);
 }

@@ -32,8 +32,7 @@ public final class ConfigFactory {
   private final AdapterProvider adapterProvider;
 
   ConfigFactory(Builder builder) {
-    this.schemaScanner =
-        new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry);
+    this.schemaScanner = new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.classSchemas = builder.schemaCacheProvider.get();

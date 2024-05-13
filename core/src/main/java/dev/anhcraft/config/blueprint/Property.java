@@ -4,13 +4,11 @@ import dev.anhcraft.config.meta.Constant;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.Transient;
 import dev.anhcraft.config.validate.Validator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a property in a {@link Schema}.<br>
@@ -28,24 +26,21 @@ public interface Property {
    *
    * @return the primary name
    */
-  @NotNull
-  String name();
+  @NotNull String name();
 
   /**
    * Gets all aliases of this property.
    *
    * @return the aliases
    */
-  @NotNull
-  LinkedHashSet<String> aliases();
+  @NotNull LinkedHashSet<String> aliases();
 
   /**
    * Gets the description of this property.
    *
    * @return the description
    */
-  @NotNull
-  List<String> description();
+  @NotNull List<String> description();
 
   /**
    * Gets the modifier of this property.
@@ -82,22 +77,19 @@ public interface Property {
    *
    * @return the validator
    */
-  @NotNull
-  Validator validator();
+  @NotNull Validator validator();
 
   /**
    * Gets the normalization processor.
    *
    * @return the processor
    */
-  @Nullable
-  Processor normalizer();
+  @Nullable Processor normalizer();
 
   /**
    * Gets the denormalization processor.
    *
    * @return the processor
    */
-  @Nullable
-  Processor denormalizer();
+  @Nullable Processor denormalizer();
 }

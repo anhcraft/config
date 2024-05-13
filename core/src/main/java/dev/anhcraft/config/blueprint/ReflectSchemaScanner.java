@@ -75,7 +75,8 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
       Processor denormalizer = denormalizers.get(field.getName());
 
       ClassProperty property =
-          new ClassProperty(name, description, modifier, validator, normalizer, denormalizer, field);
+          new ClassProperty(
+              name, description, modifier, validator, normalizer, denormalizer, field);
       lookup.put(name.primary(), property);
       nameClaimed.remove(primaryName);
       nameClaimed.add(name.primary());

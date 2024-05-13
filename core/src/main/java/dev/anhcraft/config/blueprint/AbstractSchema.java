@@ -1,9 +1,8 @@
 package dev.anhcraft.config.blueprint;
 
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 /**
  * A generic implementation of {@link Schema}.
@@ -12,16 +11,13 @@ public abstract class AbstractSchema<T extends Property> implements Schema<T> {
   private final List<T> properties;
   private final Map<String, T> lookup;
 
-  protected AbstractSchema(
-    @NotNull List<T> properties,
-    @NotNull Map<String, T> lookup) {
+  protected AbstractSchema(@NotNull List<T> properties, @NotNull Map<String, T> lookup) {
     this.properties = Collections.unmodifiableList(properties);
     this.lookup = Collections.unmodifiableMap(lookup);
   }
 
   @Override
-  @NotNull
-  public Set<String> propertyNames() {
+  @NotNull public Set<String> propertyNames() {
     return lookup.keySet();
   }
 
@@ -31,8 +27,7 @@ public abstract class AbstractSchema<T extends Property> implements Schema<T> {
   }
 
   @Override
-  @Nullable
-  public T property(@Nullable String name) {
+  @Nullable public T property(@Nullable String name) {
     return lookup.get(name);
   }
 }

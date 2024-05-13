@@ -2,8 +2,6 @@ package dev.anhcraft.config.configdoc;
 
 import dev.anhcraft.config.blueprint.ClassProperty;
 import dev.anhcraft.config.blueprint.ClassSchema;
-import dev.anhcraft.config.blueprint.Property;
-import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.internal.ResourceLoader;
 import dev.anhcraft.config.configdoc.internal.TextReplacer;
 import dev.anhcraft.config.validate.AggregatedValidator;

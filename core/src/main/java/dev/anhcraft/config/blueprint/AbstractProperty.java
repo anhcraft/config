@@ -4,12 +4,11 @@ import dev.anhcraft.config.meta.Constant;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.Transient;
 import dev.anhcraft.config.validate.Validator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A generic implementation of {@link Property}.
@@ -23,12 +22,12 @@ public class AbstractProperty implements Property {
   private final Processor denormalizer;
 
   protected AbstractProperty(
-    @NotNull PropertyNaming naming,
-    @NotNull List<String> description,
-    byte modifier,
-    @NotNull Validator validator,
-    @Nullable Processor normalizer,
-    @Nullable Processor denormalizer) {
+      @NotNull PropertyNaming naming,
+      @NotNull List<String> description,
+      byte modifier,
+      @NotNull Validator validator,
+      @Nullable Processor normalizer,
+      @Nullable Processor denormalizer) {
     this.naming = naming;
     this.description = Collections.unmodifiableList(description);
     this.modifier = modifier;
