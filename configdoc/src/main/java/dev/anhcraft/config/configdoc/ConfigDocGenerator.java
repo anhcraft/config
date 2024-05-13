@@ -1,5 +1,7 @@
 package dev.anhcraft.config.configdoc;
 
+import dev.anhcraft.config.blueprint.ClassProperty;
+import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.internal.ResourceLoader;
@@ -17,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ConfigDocGenerator {
   private static final ResourceLoader resourceLoader = new ResourceLoader();
-  private final Map<Class<?>, Schema> schemas = new LinkedHashMap<>();
+  private final Map<Class<?>, ClassSchema> schemas = new LinkedHashMap<>();
   private final Map<Pattern, String> javaDocs = new HashMap<>();
   private boolean showFooter = true;
 
@@ -28,7 +30,7 @@ public class ConfigDocGenerator {
   }
 
   @Contract("_ -> this")
-  public ConfigDocGenerator withSchema(@NotNull Schema schema) {
+  public ConfigDocGenerator withSchema(@NotNull ClassSchema schema) {
     schemas.put(schema.type(), schema);
     return this;
   }
@@ -55,7 +57,7 @@ public class ConfigDocGenerator {
     return new TextReplacer(s -> String.join("\n", e));
   }
 
-  private TextReplacer handleText(Property entry) {
+  private TextReplacer handleText(ClassProperty entry) {
     return new TextReplacer(
         s -> {
           switch (s) {
@@ -112,7 +114,7 @@ public class ConfigDocGenerator {
         });
   }
 
-  private UnaryOperator<String> handleText(Schema schema) {
+  private UnaryOperator<String> handleText(ClassSchema schema) {
     return s -> {
       if (s.equals("name")) {
         return schema.type().getSimpleName();
@@ -124,7 +126,7 @@ public class ConfigDocGenerator {
         String file = s.substring("entries?".length()).trim();
         String content = resourceLoader.get(file);
         StringBuilder sb = new StringBuilder();
-        for (Property entry : schema.properties()) {
+        for (ClassProperty entry : schema.properties()) {
           if (entry.isTransient() || entry.isConstant()) continue;
           sb.append(handleText(entry).replace(content));
         }
@@ -140,7 +142,7 @@ public class ConfigDocGenerator {
         String file = s.substring("schemas?".length()).trim();
         String content = resourceLoader.get(file);
         StringBuilder sb = new StringBuilder();
-        for (Schema schema : schemas.values()) {
+        for (ClassSchema schema : schemas.values()) {
           sb.append(new TextReplacer(handleText(schema)).replace(content));
         }
         return sb.toString();
@@ -157,7 +159,7 @@ public class ConfigDocGenerator {
 
     String schemHtml = resourceLoader.get("schema.html");
 
-    for (Schema schem : schemas.values()) {
+    for (ClassSchema schem : schemas.values()) {
       FileUtil.write(
           new File(output, schem.type().getSimpleName() + ".schema.html"),
           new TextReplacer(handleText(schem)).replace(schemHtml));
