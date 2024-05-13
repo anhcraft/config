@@ -3,6 +3,7 @@ package dev.anhcraft.config.type;
 import static dev.anhcraft.config.type.ComplexTypes.describe;
 
 import dev.anhcraft.config.ConfigFactory;
+import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.Schema;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -24,8 +25,8 @@ public class TypeResolverTest {
 
   @Nested
   public class TestResolve {
-    private final TypeToken resolved = new TypeToken<Container<String, Integer>>() {};
-    private final Schema schema = ConfigFactory.create().build().getSchema(Container.class);
+    private final TypeToken<?> resolved = new TypeToken<Container<String, Integer>>() {};
+    private final ClassSchema schema = ConfigFactory.create().build().getSchema(Container.class);
 
     @Test
     public void testResolveFirstItem() {

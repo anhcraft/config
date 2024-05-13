@@ -7,8 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A blueprint scanner.
+ * @param <T> the schema type
  */
-public interface BlueprintScanner {
+public interface BlueprintScanner<T extends Schema> {
   /**
    * Scans the schema of the specified class.<br>
    * The schema is tested against {@link ComplexTypes#isNormalClassOrAbstract(Class)}. If fails, this method
@@ -19,5 +20,5 @@ public interface BlueprintScanner {
    * @return the schema
    * @see Schema
    */
-  @NotNull Schema scanSchema(@NotNull Class<?> type);
+  @NotNull T scanSchema(@NotNull Class<?> type);
 }

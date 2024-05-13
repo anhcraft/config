@@ -4,6 +4,7 @@ import dev.anhcraft.config.adapter.AdapterProvider;
 import dev.anhcraft.config.adapter.SimpleAdapterProvider;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.defaults.*;
+import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.ReflectBlueprintScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
@@ -26,7 +27,7 @@ public final class ConfigFactory {
   private final ReflectBlueprintScanner blueprintScanner;
   private final ConfigNormalizer normalizer;
   private final ConfigDenormalizer denormalizer;
-  private final Map<Class<?>, Schema> schemas;
+  private final Map<Class<?>, Schema<?>> classSchemas;
   private final ContextProvider contextProvider;
   private final AdapterProvider adapterProvider;
 
@@ -35,7 +36,7 @@ public final class ConfigFactory {
         new ReflectBlueprintScanner(builder.namingPolicy, builder.validationRegistry);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
-    this.schemas = builder.schemaCacheProvider.get();
+    this.classSchemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
     try {
       this.adapterProvider =
@@ -77,11 +78,11 @@ public final class ConfigFactory {
    * @param type the type
    * @return the schema
    */
-  @NotNull public Schema getSchema(@NotNull Class<?> type) {
-    Schema schema = schemas.get(type);
+  @NotNull public ClassSchema getSchema(@NotNull Class<?> type) {
+    ClassSchema schema = (ClassSchema) classSchemas.get(type);
     if (schema != null) return schema;
     schema = blueprintScanner.scanSchema(type);
-    schemas.put(type, schema);
+    classSchemas.put(type, schema);
     return schema;
   }
 
@@ -106,7 +107,7 @@ public final class ConfigFactory {
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = Context::new;
-    private Supplier<Map<Class<?>, Schema>> schemaCacheProvider =
+    private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
             new LinkedHashMap<>() {
               @Override
@@ -316,5 +317,5 @@ public final class ConfigFactory {
   /**
    * Returns the schema cache.
    */
-  public interface SchemaCacheProvider extends Supplier<Map<Class<?>, Schema>> {}
+  public interface SchemaCacheProvider extends Supplier<Map<Class<?>, Schema<?>>> {}
 }

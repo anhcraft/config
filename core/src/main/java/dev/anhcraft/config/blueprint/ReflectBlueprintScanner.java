@@ -16,9 +16,9 @@ import java.util.function.UnaryOperator;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Reflection-based {@link BlueprintScanner}
+ * A Reflection-based {@link BlueprintScanner} that generates {@link ClassSchema}.
  */
-public class ReflectBlueprintScanner implements BlueprintScanner {
+public class ReflectBlueprintScanner implements BlueprintScanner<ClassSchema> {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
 
@@ -29,7 +29,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
   }
 
   @Override
-  public @NotNull Schema scanSchema(@NotNull Class<?> type) {
+  public @NotNull ClassSchema scanSchema(@NotNull Class<?> type) {
     if (!ComplexTypes.isNormalClassOrAbstract(type))
       throw new UnsupportedSchemaException(
           String.format("Cannot create schema for '%s'", type.getName()));
@@ -59,9 +59,9 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       fields.put(primaryName, field);
     }
 
-    Map<String, Property> lookup = new LinkedHashMap<>();
+    Map<String, ClassProperty> lookup = new LinkedHashMap<>();
     Set<String> nameClaimed = new HashSet<>(fields.keySet()); // initially, "lookup" cannot be used
-    List<Property> properties = new ArrayList<>();
+    List<ClassProperty> properties = new ArrayList<>();
 
     for (Map.Entry<String, Field> entry : fields.entrySet()) {
       String primaryName = entry.getKey();
@@ -74,8 +74,8 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       Processor normalizer = normalizers.get(field.getName());
       Processor denormalizer = denormalizers.get(field.getName());
 
-      Property property =
-          new Property(name, description, modifier, validator, field, normalizer, denormalizer);
+      ClassProperty property =
+          new ClassProperty(name, description, modifier, validator, normalizer, denormalizer, field);
       lookup.put(name.primary(), property);
       nameClaimed.remove(primaryName);
       nameClaimed.add(name.primary());
@@ -86,7 +86,7 @@ public class ReflectBlueprintScanner implements BlueprintScanner {
       properties.add(property);
     }
 
-    return new Schema(type, properties, lookup);
+    return new ClassSchema(type, properties, lookup);
   }
 
   private Map<String, Processor> scanNormalizers(Class<?> type) {

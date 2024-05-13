@@ -60,7 +60,7 @@ public class ReflectBlueprintScannerTest {
     public void testDefaultNamingPolicy() {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(FooBar.class);
+      ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("fooBar", "barFoo"), schema.propertyNames());
       assertNotNull(schema.property("fooBar"));
       assertEquals("fooBar", schema.property("fooBar").field().getName());
@@ -72,7 +72,7 @@ public class ReflectBlueprintScannerTest {
     public void testKebabCaseNamingPolicy() {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(FooBar.class);
+      ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo-bar", "bar-foo"), schema.propertyNames());
       assertNotNull(schema.property("foo-bar"));
       assertEquals("fooBar", schema.property("foo-bar").field().getName());
@@ -84,7 +84,7 @@ public class ReflectBlueprintScannerTest {
     public void testSnakeCaseNamingPolicy() {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(FooBar.class);
+      ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo_bar", "bar_foo"), schema.propertyNames());
       assertNotNull(schema.property("foo_bar"));
       assertEquals("fooBar", schema.property("foo_bar").field().getName());
@@ -96,7 +96,7 @@ public class ReflectBlueprintScannerTest {
     public void testPascalCaseNamingPolicy() {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(FooBar.class);
+      ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("FooBar", "BarFoo"), schema.propertyNames());
       assertNotNull(schema.property("FooBar"));
       assertEquals("fooBar", schema.property("FooBar").field().getName());
@@ -116,7 +116,7 @@ public class ReflectBlueprintScannerTest {
     public void testDefaultNamingPolicy() {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(Container.class);
+      ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
           Set.of(
               "cold",
@@ -145,7 +145,7 @@ public class ReflectBlueprintScannerTest {
       ReflectBlueprintScanner custom =
           new ReflectBlueprintScanner(
               s -> s.length() > 2 ? s.substring(0, 2) : s, ValidationRegistry.DEFAULT);
-      Schema schema = custom.scanSchema(Container.class);
+      ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
           Set.of("up", "lo", "lowerStorage", "co", "upper", "lower", "backup", "cold"),
           schema.propertyNames());
@@ -177,7 +177,7 @@ public class ReflectBlueprintScannerTest {
 
   @Nested
   public class SimpleModelTest {
-    private final Schema schema = scanner.scanSchema(Profile.class);
+    private final ClassSchema schema = scanner.scanSchema(Profile.class);
 
     @Test
     public void testInit() {
@@ -265,7 +265,7 @@ public class ReflectBlueprintScannerTest {
   public class NormalizerProcessorTest {
     @Test
     public void testNormalizerReplaceStrategy() throws Exception {
-      Schema schema = scanner.scanSchema(Log.class);
+      ClassSchema schema = scanner.scanSchema(Log.class);
       assertEquals(2, schema.properties().size());
       assertEquals("timestamp", schema.property("timestamp").field().getName());
 
@@ -318,7 +318,7 @@ public class ReflectBlueprintScannerTest {
   public class DenormalizerProcessorTest {
     @Test
     public void testDenormalizerAfterStrategy() throws Exception {
-      Schema schema = scanner.scanSchema(Package.class);
+      ClassSchema schema = scanner.scanSchema(Package.class);
       assertEquals(2, schema.properties().size());
       assertEquals("items", schema.property("items").field().getName());
       assertEquals("worth", schema.property("worth").field().getName());
@@ -336,7 +336,7 @@ public class ReflectBlueprintScannerTest {
 
     @Test
     public void testDenormalizerReplaceStrategy() throws Exception {
-      Schema schema = scanner.scanSchema(Item.class);
+      ClassSchema schema = scanner.scanSchema(Item.class);
       assertEquals(2, schema.properties().size());
       assertEquals("id", schema.property("id").field().getName());
       assertEquals("worth", schema.property("worth").field().getName());

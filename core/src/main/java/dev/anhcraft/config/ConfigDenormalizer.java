@@ -2,9 +2,7 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeInferencer;
-import dev.anhcraft.config.blueprint.Processor;
-import dev.anhcraft.config.blueprint.Property;
-import dev.anhcraft.config.blueprint.Schema;
+import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
@@ -192,9 +190,9 @@ public class ConfigDenormalizer {
   private void _denormalizeToInstance(
       Context ctx, Dictionary simple, Type targetType, Object instance) throws Exception {
     TypeResolver resolver = TypeResolver.of(targetType);
-    Schema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
+    ClassSchema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
 
-    for (Property property : schema.properties()) {
+    for (ClassProperty property : schema.properties()) {
       if (property.isConstant()) continue;
 
       Map.Entry<String, Object> entry = simple.search(property.name(), property.aliases());

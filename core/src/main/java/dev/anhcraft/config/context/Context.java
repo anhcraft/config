@@ -4,6 +4,8 @@ import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import java.lang.reflect.Type;
 import java.util.*;
+
+import dev.anhcraft.config.blueprint.ClassProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,7 +120,8 @@ public class Context implements TypeAdapter<Object> {
         PropertyScope ps = (PropertyScope) scope;
         switch (type) {
           case FIELD:
-            sb.append(ps.getProperty().field().getName());
+            if (ps.getProperty() instanceof ClassProperty)
+              sb.append(((ClassProperty) ps.getProperty()).field().getName());
             break;
           case PRIMARY:
             sb.append(ps.getProperty().name());

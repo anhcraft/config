@@ -2,9 +2,7 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.TypeAnnotator;
-import dev.anhcraft.config.blueprint.Processor;
-import dev.anhcraft.config.blueprint.Property;
-import dev.anhcraft.config.blueprint.Schema;
+import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
@@ -216,8 +214,8 @@ public final class ConfigNormalizer {
       return;
     }
 
-    Schema schema = ctx.getFactory().getSchema(type);
-    for (Property property : schema.properties()) {
+    ClassSchema schema = ctx.getFactory().getSchema(type);
+    for (ClassProperty property : schema.properties()) {
       if (property.isTransient()) continue;
 
       ctx.enterScope(new PropertyScope(property, property.name()));
