@@ -135,8 +135,6 @@ public class MapAdapterTest {
     assertInstanceOf(
         LinkedHashMap.class,
         adapter.complexify(
-            context,
-            Dictionary.of(Map.of("foo", "bar")),
-            new TypeToken<Map<String, String>>() {}));
+            context, Dictionary.of(Map.of("foo", "bar")), new TypeToken<Map<String, String>>() {}));
   }
 }

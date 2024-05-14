@@ -120,8 +120,7 @@ public class SimpleTypesTest {
     assertEquals(1, SimpleTypes.getContainerElement(1, 0));
     assertEquals(0, SimpleTypes.getContainerElement(new Integer[] {0}, 0));
     assertEquals(0, SimpleTypes.getContainerElement(new int[] {0}, 0));
-    assertEquals(
-        "bar", SimpleTypes.getContainerElement(Dictionary.of(Map.of("foo", "bar")), 0));
+    assertEquals("bar", SimpleTypes.getContainerElement(Dictionary.of(Map.of("foo", "bar")), 0));
   }
 
   @Test

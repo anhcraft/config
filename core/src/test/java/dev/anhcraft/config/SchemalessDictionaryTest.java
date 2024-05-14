@@ -2,10 +2,9 @@ package dev.anhcraft.config;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.anhcraft.config.blueprint.DictionarySchema;
 import java.util.List;
 import java.util.Map;
-
-import dev.anhcraft.config.blueprint.DictionarySchema;
 import org.junit.jupiter.api.Test;
 
 public class SchemalessDictionaryTest {
@@ -137,44 +136,56 @@ public class SchemalessDictionaryTest {
     dict.put("4", new String[0]);
     dict.put("5", new SchemalessDictionary());
     assertTrue(dict.isCompatibleWith(DictionarySchema.create().build()));
-    assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("1", (p) -> p.withType(String.class))
-      .addProperty("2", (p) -> p.withType(Boolean.class))
-      .addProperty("3", (p) -> p.withType(Float.class))
-      .addProperty("4", (p) -> p.withType(String[].class))
-      .addProperty("5", (p) -> p.withType(Dictionary.class))
-      .build()));
-    assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("2", (p) -> p.withType(boolean.class))
-      .addProperty("4", (p) -> p.withType(String[].class))
-      .build()));
-    assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("1", (p) -> p.withType(String.class))
-      .addProperty("2", (p) -> p.withType(Boolean.class))
-      .addProperty("3", (p) -> p.withType(Float.class))
-      .addProperty("5", (p) -> p.withType(Dictionary.class))
-      .build()));
-    assertFalse(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("1", (p) -> p.withType(String.class))
-      .addProperty("2", (p) -> p.withType(Boolean.class))
-      .addProperty("3", (p) -> p.withType(Float.class))
-      .addProperty("4", (p) -> p.withType(String[].class))
-      .addProperty("5", (p) -> p.withType(ConstrainedDictionary.class))
-      .build()));
-    assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("1", (p) -> p.withType(String.class))
-      .addProperty("2", (p) -> p.withType(Boolean.class))
-      .addProperty("3", (p) -> p.withType(Float.class))
-      .addProperty("4", (p) -> p.withType(String[].class))
-      .addProperty("5", (p) -> p.withType(SchemalessDictionary.class))
-      .build()));
-    assertFalse(dict.isCompatibleWith(DictionarySchema.create()
-      .addProperty("1", (p) -> p.withType(String.class))
-      .addProperty("2", (p) -> p.withType(Boolean.class))
-      .addProperty("3", (p) -> p.withType(Double.class))
-      .addProperty("4", (p) -> p.withType(String[].class))
-      .addProperty("5", (p) -> p.withType(Dictionary.class))
-      .build()));
+    assertTrue(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("1", (p) -> p.withType(String.class))
+                .addProperty("2", (p) -> p.withType(Boolean.class))
+                .addProperty("3", (p) -> p.withType(Float.class))
+                .addProperty("4", (p) -> p.withType(String[].class))
+                .addProperty("5", (p) -> p.withType(Dictionary.class))
+                .build()));
+    assertTrue(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("2", (p) -> p.withType(boolean.class))
+                .addProperty("4", (p) -> p.withType(String[].class))
+                .build()));
+    assertTrue(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("1", (p) -> p.withType(String.class))
+                .addProperty("2", (p) -> p.withType(Boolean.class))
+                .addProperty("3", (p) -> p.withType(Float.class))
+                .addProperty("5", (p) -> p.withType(Dictionary.class))
+                .build()));
+    assertFalse(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("1", (p) -> p.withType(String.class))
+                .addProperty("2", (p) -> p.withType(Boolean.class))
+                .addProperty("3", (p) -> p.withType(Float.class))
+                .addProperty("4", (p) -> p.withType(String[].class))
+                .addProperty("5", (p) -> p.withType(ConstrainedDictionary.class))
+                .build()));
+    assertTrue(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("1", (p) -> p.withType(String.class))
+                .addProperty("2", (p) -> p.withType(Boolean.class))
+                .addProperty("3", (p) -> p.withType(Float.class))
+                .addProperty("4", (p) -> p.withType(String[].class))
+                .addProperty("5", (p) -> p.withType(SchemalessDictionary.class))
+                .build()));
+    assertFalse(
+        dict.isCompatibleWith(
+            DictionarySchema.create()
+                .addProperty("1", (p) -> p.withType(String.class))
+                .addProperty("2", (p) -> p.withType(Boolean.class))
+                .addProperty("3", (p) -> p.withType(Double.class))
+                .addProperty("4", (p) -> p.withType(String[].class))
+                .addProperty("5", (p) -> p.withType(Dictionary.class))
+                .build()));
   }
 
   @Test
@@ -189,7 +200,8 @@ public class SchemalessDictionaryTest {
     assertThrows(UnsupportedOperationException.class, () -> dict.replace("1", "a"));
     assertThrows(UnsupportedOperationException.class, () -> dict.replaceAll((k, v) -> v));
     assertThrows(UnsupportedOperationException.class, () -> dict.compute("1", (k, v) -> v));
-    assertThrows(UnsupportedOperationException.class, () -> dict.computeIfPresent("1", (k, v) -> v));
+    assertThrows(
+        UnsupportedOperationException.class, () -> dict.computeIfPresent("1", (k, v) -> v));
     assertThrows(UnsupportedOperationException.class, () -> dict.computeIfAbsent("1", k -> "a"));
     assertThrows(UnsupportedOperationException.class, () -> dict.merge("1", "a", (v1, v2) -> v1));
   }

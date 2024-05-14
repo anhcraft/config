@@ -1,14 +1,13 @@
 package dev.anhcraft.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import dev.anhcraft.config.blueprint.DictionarySchema;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ConstrainedDictionaryTest {
   @Nested
@@ -142,44 +141,56 @@ public class ConstrainedDictionaryTest {
       dict.put("5", new ConstrainedDictionary(null));
       assertTrue(dict.isCompatibleWith(DictionarySchema.create().build()));
       assertTrue(dict.isCompatibleWith(null));
-      assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("1", (p) -> p.withType(String.class))
-        .addProperty("2", (p) -> p.withType(Boolean.class))
-        .addProperty("3", (p) -> p.withType(Float.class))
-        .addProperty("4", (p) -> p.withType(String[].class))
-        .addProperty("5", (p) -> p.withType(Dictionary.class))
-        .build()));
-      assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("2", (p) -> p.withType(boolean.class))
-        .addProperty("4", (p) -> p.withType(String[].class))
-        .build()));
-      assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("1", (p) -> p.withType(String.class))
-        .addProperty("2", (p) -> p.withType(Boolean.class))
-        .addProperty("3", (p) -> p.withType(Float.class))
-        .addProperty("5", (p) -> p.withType(Dictionary.class))
-        .build()));
-      assertFalse(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("1", (p) -> p.withType(String.class))
-        .addProperty("2", (p) -> p.withType(Boolean.class))
-        .addProperty("3", (p) -> p.withType(Float.class))
-        .addProperty("4", (p) -> p.withType(String[].class))
-        .addProperty("5", (p) -> p.withType(SchemalessDictionary.class))
-        .build()));
-      assertTrue(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("1", (p) -> p.withType(String.class))
-        .addProperty("2", (p) -> p.withType(Boolean.class))
-        .addProperty("3", (p) -> p.withType(Float.class))
-        .addProperty("4", (p) -> p.withType(String[].class))
-        .addProperty("5", (p) -> p.withType(ConstrainedDictionary.class))
-        .build()));
-      assertFalse(dict.isCompatibleWith(DictionarySchema.create()
-        .addProperty("1", (p) -> p.withType(String.class))
-        .addProperty("2", (p) -> p.withType(Boolean.class))
-        .addProperty("3", (p) -> p.withType(Double.class))
-        .addProperty("4", (p) -> p.withType(String[].class))
-        .addProperty("5", (p) -> p.withType(Dictionary.class))
-        .build()));
+      assertTrue(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("1", (p) -> p.withType(String.class))
+                  .addProperty("2", (p) -> p.withType(Boolean.class))
+                  .addProperty("3", (p) -> p.withType(Float.class))
+                  .addProperty("4", (p) -> p.withType(String[].class))
+                  .addProperty("5", (p) -> p.withType(Dictionary.class))
+                  .build()));
+      assertTrue(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("2", (p) -> p.withType(boolean.class))
+                  .addProperty("4", (p) -> p.withType(String[].class))
+                  .build()));
+      assertTrue(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("1", (p) -> p.withType(String.class))
+                  .addProperty("2", (p) -> p.withType(Boolean.class))
+                  .addProperty("3", (p) -> p.withType(Float.class))
+                  .addProperty("5", (p) -> p.withType(Dictionary.class))
+                  .build()));
+      assertFalse(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("1", (p) -> p.withType(String.class))
+                  .addProperty("2", (p) -> p.withType(Boolean.class))
+                  .addProperty("3", (p) -> p.withType(Float.class))
+                  .addProperty("4", (p) -> p.withType(String[].class))
+                  .addProperty("5", (p) -> p.withType(SchemalessDictionary.class))
+                  .build()));
+      assertTrue(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("1", (p) -> p.withType(String.class))
+                  .addProperty("2", (p) -> p.withType(Boolean.class))
+                  .addProperty("3", (p) -> p.withType(Float.class))
+                  .addProperty("4", (p) -> p.withType(String[].class))
+                  .addProperty("5", (p) -> p.withType(ConstrainedDictionary.class))
+                  .build()));
+      assertFalse(
+          dict.isCompatibleWith(
+              DictionarySchema.create()
+                  .addProperty("1", (p) -> p.withType(String.class))
+                  .addProperty("2", (p) -> p.withType(Boolean.class))
+                  .addProperty("3", (p) -> p.withType(Double.class))
+                  .addProperty("4", (p) -> p.withType(String[].class))
+                  .addProperty("5", (p) -> p.withType(Dictionary.class))
+                  .build()));
     }
 
     @Test
@@ -194,7 +205,8 @@ public class ConstrainedDictionaryTest {
       assertThrows(UnsupportedOperationException.class, () -> dict.replace("1", "a"));
       assertThrows(UnsupportedOperationException.class, () -> dict.replaceAll((k, v) -> v));
       assertThrows(UnsupportedOperationException.class, () -> dict.compute("1", (k, v) -> v));
-      assertThrows(UnsupportedOperationException.class, () -> dict.computeIfPresent("1", (k, v) -> v));
+      assertThrows(
+          UnsupportedOperationException.class, () -> dict.computeIfPresent("1", (k, v) -> v));
       assertThrows(UnsupportedOperationException.class, () -> dict.computeIfAbsent("1", k -> "a"));
       assertThrows(UnsupportedOperationException.class, () -> dict.merge("1", "a", (v1, v2) -> v1));
     }
@@ -205,62 +217,78 @@ public class ConstrainedDictionaryTest {
   @BeforeAll
   public static void beforeAll() {
     characterSchema =
-      DictionarySchema.create()
-        .addProperty("name", p -> p.withType(String.class))
-        .addProperty("level", p -> p.withType(int.class))
-        .addProperty("health", p -> p.withType(double.class))
-        .addProperty("inventory", p -> p.isDictionaryArray(
-          DictionarySchema.create()
-            .addProperty("item", bp -> bp.withType(String.class))
-            .addProperty("amount", bp -> bp.withType(int.class))
-            .build()
-        ))
-        .build();
+        DictionarySchema.create()
+            .addProperty("name", p -> p.withType(String.class))
+            .addProperty("level", p -> p.withType(int.class))
+            .addProperty("health", p -> p.withType(double.class))
+            .addProperty(
+                "inventory",
+                p ->
+                    p.isDictionaryArray(
+                        DictionarySchema.create()
+                            .addProperty("item", bp -> bp.withType(String.class))
+                            .addProperty("amount", bp -> bp.withType(int.class))
+                            .build()))
+            .build();
   }
 
   @Nested
   class Schema {
     @Test
     public void testPut() {
-      assertDoesNotThrow(() -> {
-        Dictionary dict = new ConstrainedDictionary(characterSchema);
-        dict.put("name", "Bob");
-        dict.put("level", 3);
-        dict.put("health", 100.0);
-        dict.put("inventory", new Dictionary[]{
-          Dictionary.of(Map.of("item", "sword", "amount", 10)),
-          Dictionary.of(Map.of("item", "shield", "amount", 5))
-        });
-      });
-      assertDoesNotThrow(() -> {
-        Dictionary dict = new ConstrainedDictionary(characterSchema);
-        dict.put("name", "Bob");
-        dict.put("level", 3);
-        dict.put("inventory", new Dictionary[]{
-          Dictionary.of(Map.of("item", "sword", "amount", 10)),
-          Dictionary.of(Map.of("item", "shield", "amount", 5))
-        });
-      });
-      assertThrows(IllegalArgumentException.class, () -> {
-        Dictionary dict = new ConstrainedDictionary(characterSchema);
-        dict.put("name", "Bob");
-        dict.put("level", 3.0);
-        dict.put("health", 100.0);
-        dict.put("inventory", new Dictionary[]{
-          Dictionary.of(Map.of("item", "sword", "amount", 10)),
-          Dictionary.of(Map.of("item", "shield", "amount", 5))
-        });
-      });
-      assertThrows(IllegalArgumentException.class, () -> {
-        Dictionary dict = new ConstrainedDictionary(characterSchema);
-        dict.put("name", "Bob");
-        dict.put("level", 3);
-        dict.put("health", 100.0);
-        dict.put("inventory", new Dictionary[]{
-          Dictionary.of(Map.of("item", "sword", "amount", 10.0)),
-          Dictionary.of(Map.of("item", "shield", "amount", 5.0))
-        });
-      });
+      assertDoesNotThrow(
+          () -> {
+            Dictionary dict = new ConstrainedDictionary(characterSchema);
+            dict.put("name", "Bob");
+            dict.put("level", 3);
+            dict.put("health", 100.0);
+            dict.put(
+                "inventory",
+                new Dictionary[] {
+                  Dictionary.of(Map.of("item", "sword", "amount", 10)),
+                  Dictionary.of(Map.of("item", "shield", "amount", 5))
+                });
+          });
+      assertDoesNotThrow(
+          () -> {
+            Dictionary dict = new ConstrainedDictionary(characterSchema);
+            dict.put("name", "Bob");
+            dict.put("level", 3);
+            dict.put(
+                "inventory",
+                new Dictionary[] {
+                  Dictionary.of(Map.of("item", "sword", "amount", 10)),
+                  Dictionary.of(Map.of("item", "shield", "amount", 5))
+                });
+          });
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            Dictionary dict = new ConstrainedDictionary(characterSchema);
+            dict.put("name", "Bob");
+            dict.put("level", 3.0);
+            dict.put("health", 100.0);
+            dict.put(
+                "inventory",
+                new Dictionary[] {
+                  Dictionary.of(Map.of("item", "sword", "amount", 10)),
+                  Dictionary.of(Map.of("item", "shield", "amount", 5))
+                });
+          });
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> {
+            Dictionary dict = new ConstrainedDictionary(characterSchema);
+            dict.put("name", "Bob");
+            dict.put("level", 3);
+            dict.put("health", 100.0);
+            dict.put(
+                "inventory",
+                new Dictionary[] {
+                  Dictionary.of(Map.of("item", "sword", "amount", 10.0)),
+                  Dictionary.of(Map.of("item", "shield", "amount", 5.0))
+                });
+          });
     }
   }
 }

@@ -3,14 +3,13 @@ package dev.anhcraft.config;
 import dev.anhcraft.config.blueprint.DictionaryProperty;
 import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.type.SimpleTypes;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractDictionary extends AbstractMap<String, Object> implements Dictionary {
   private final LinkedHashMap<String, Object> backend;
@@ -22,8 +21,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
   }
 
   // ======== Overrides ========
-  @NotNull
-  @Override
+  @NotNull @Override
   public Set<Entry<String, Object>> entrySet() {
     if (entryView == null) entryView = new LinkedEntrySet();
     return entryView;
@@ -33,7 +31,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
   public @Nullable Object put(@NotNull String key, @Nullable Object value) {
     if (!SimpleTypes.test(value))
       throw new IllegalArgumentException(
-        String.format("Object of type %s is not a simple type", value.getClass().getName()));
+          String.format("Object of type %s is not a simple type", value.getClass().getName()));
     // TODO deep clone array since the element can be mutated to be a non-simple type
     Object previous = backend.get(key);
     if ((previous == null && value != null) || (previous != null && value == null))
@@ -51,8 +49,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
   protected abstract void onPut(String name, Object value);
 
   @Override
-  @Nullable
-  public Map.Entry<String, Object> search(@NotNull String name, @NotNull Iterable<String> aliases) {
+  @Nullable public Map.Entry<String, Object> search(@NotNull String name, @NotNull Iterable<String> aliases) {
     Object value = get(name);
     if (value != null) {
       return Map.entry(name, value);
@@ -84,8 +81,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
   }
 
   @Override
-  @NotNull
-  public LinkedHashMap<String, Object> unwrap() {
+  @NotNull public LinkedHashMap<String, Object> unwrap() {
     return new LinkedHashMap<>(backend);
   }
 
@@ -96,8 +92,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
       DictionaryProperty property = schema.property(key);
       if (property == null) continue;
       Object value = backend.get(key);
-      if (!property.isCompatible(value))
-        return false;
+      if (!property.isCompatible(value)) return false;
     }
     return true;
   }
@@ -175,7 +170,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
 
     @Override
     public @Nullable Map.Entry<String, Object> search(
-      @NotNull String name, @NotNull Iterable<String> aliases) {
+        @NotNull String name, @NotNull Iterable<String> aliases) {
       return delegate.search(name, aliases);
     }
 
@@ -245,8 +240,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
       return delegate.getOrDefault(key, defaultValue);
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public Object put(String key, Object value) {
       throw new UnsupportedOperationException();
     }
@@ -266,22 +260,19 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
       throw new UnsupportedOperationException();
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<String> keySet() {
       if (keySet == null) keySet = Collections.unmodifiableSet(delegate.keySet());
       return keySet;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Collection<Object> values() {
       if (values == null) values = Collections.unmodifiableCollection(delegate.values());
       return values;
     }
 
-    @NotNull
-    @Override
+    @NotNull @Override
     public Set<Entry<String, Object>> entrySet() {
       if (entrySet == null) entrySet = new UnmodifiableEntrySet(delegate.entrySet());
       return entrySet;
@@ -307,8 +298,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
       delegate.forEach(action);
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public Object putIfAbsent(String key, Object value) {
       throw new UnsupportedOperationException();
     }
@@ -318,8 +308,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
       throw new UnsupportedOperationException();
     }
 
-    @Nullable
-    @Override
+    @Nullable @Override
     public Object replace(String key, Object value) {
       throw new UnsupportedOperationException();
     }
@@ -335,22 +324,28 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
     }
 
     @Override
-    public Object compute(String key, @NotNull BiFunction<? super String, ? super Object, ?> remappingFunction) {
+    public Object compute(
+        String key, @NotNull BiFunction<? super String, ? super Object, ?> remappingFunction) {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object computeIfPresent(String key, @NotNull BiFunction<? super String, ? super Object, ?> remappingFunction) {
+    public Object computeIfPresent(
+        String key, @NotNull BiFunction<? super String, ? super Object, ?> remappingFunction) {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object computeIfAbsent(String key, @NotNull Function<? super String, ?> mappingFunction) {
+    public Object computeIfAbsent(
+        String key, @NotNull Function<? super String, ?> mappingFunction) {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object merge(String key, @NotNull Object value, @NotNull BiFunction<? super Object, ? super Object, ?> remappingFunction) {
+    public Object merge(
+        String key,
+        @NotNull Object value,
+        @NotNull BiFunction<? super Object, ? super Object, ?> remappingFunction) {
       throw new UnsupportedOperationException();
     }
 

@@ -27,45 +27,69 @@ public class DictionaryPropertyTest {
   @ValueSource(classes = {ArrayList.class, Map.class})
   public void testIllegalTypeDetect(Class<?> type) {
     assertThrows(
-      IllegalArgumentException.class,
-      () ->
-        DictionaryProperty.create().withNames("foo").withType(type).build());
+        IllegalArgumentException.class,
+        () -> DictionaryProperty.create().withNames("foo").withType(type).build());
   }
 
   @ParameterizedTest
-  @ValueSource(classes = {
-    String.class, int.class, Integer.class, double.class, Double.class, boolean.class, Boolean.class,
-    String[].class, int[].class, Integer[].class, double[].class, Double[].class, boolean[].class, Boolean[].class,
-    String[][].class, int[][].class, Integer[][].class, double[][].class, Double[][].class, boolean[][].class, Boolean[][].class,
-  })
+  @ValueSource(
+      classes = {
+        String.class, int.class, Integer.class, double.class, Double.class, boolean.class,
+            Boolean.class,
+        String[].class, int[].class, Integer[].class, double[].class, Double[].class,
+            boolean[].class, Boolean[].class,
+        String[][].class, int[][].class, Integer[][].class, double[][].class, Double[][].class,
+            boolean[][].class, Boolean[][].class,
+      })
   public void testValidTypeDetect(Class<?> type) {
-    assertDoesNotThrow(
-      () ->
-        DictionaryProperty.create().withNames("foo").withType(type).build());
+    assertDoesNotThrow(() -> DictionaryProperty.create().withNames("foo").withType(type).build());
   }
 
   @ParameterizedTest
-  @ValueSource(classes = {
-    ArrayList.class, Map.class,
-    String.class, int.class, Integer.class, double.class, Double.class, boolean.class, Boolean.class,
-    String[].class, int[].class, Integer[].class, double[].class, Double[].class, boolean[].class, Boolean[].class
-  })
+  @ValueSource(
+      classes = {
+        ArrayList.class,
+        Map.class,
+        String.class,
+        int.class,
+        Integer.class,
+        double.class,
+        Double.class,
+        boolean.class,
+        Boolean.class,
+        String[].class,
+        int[].class,
+        Integer[].class,
+        double[].class,
+        Double[].class,
+        boolean[].class,
+        Boolean[].class
+      })
   public void testSchemaWithIllegalType(Class<?> type) {
     assertThrows(
-      IllegalArgumentException.class,
-      () ->
-        DictionaryProperty.create().withNames("foo").withType(type).withSchema(new DictionarySchema(List.of(), Map.of())).build());
+        IllegalArgumentException.class,
+        () ->
+            DictionaryProperty.create()
+                .withNames("foo")
+                .withType(type)
+                .withSchema(new DictionarySchema(List.of(), Map.of()))
+                .build());
   }
 
   @ParameterizedTest
-  @ValueSource(classes = {
-    Dictionary.class, SchemalessDictionary.class, ConstrainedDictionary.class,
-    Dictionary[].class, SchemalessDictionary[].class, ConstrainedDictionary[].class
-  })
+  @ValueSource(
+      classes = {
+        Dictionary.class, SchemalessDictionary.class, ConstrainedDictionary.class,
+        Dictionary[].class, SchemalessDictionary[].class, ConstrainedDictionary[].class
+      })
   public void testSchemaWithValidType(Class<?> type) {
     assertDoesNotThrow(
-      () ->
-        DictionaryProperty.create().withNames("foo").withType(type).withSchema(new DictionarySchema(List.of(), Map.of())).build());
+        () ->
+            DictionaryProperty.create()
+                .withNames("foo")
+                .withType(type)
+                .withSchema(new DictionarySchema(List.of(), Map.of()))
+                .build());
   }
 
   @Test
@@ -84,25 +108,16 @@ public class DictionaryPropertyTest {
                 .addProperty("level", p -> p.withType(double.class))
                 .addProperty("health", p -> p.withType(double.class))
                 .build());
-    assertTrue(
-      foo.isCompatible(null));
+    assertTrue(foo.isCompatible(null));
+    assertFalse(foo.isCompatible(""));
+    assertFalse(foo.isCompatible(true));
+    assertTrue(foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1.0, "health", 2.0))));
+    assertFalse(foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1, "health", 2.0))));
+    assertFalse(foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1, "health", true))));
+    assertFalse(foo.isCompatible(Dictionary.of(Map.of("name", 'a', "level", 1.0, "health", 2.0))));
+    assertFalse(foo.isCompatible(Dictionary.of(Map.of("name", 'a', "level", 1.0, "health", 2.0f))));
     assertFalse(
-      foo.isCompatible(""));
-    assertFalse(
-      foo.isCompatible(true));
-    assertTrue(
-      foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1.0, "health", 2.0))));
-    assertFalse(
-      foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1, "health", 2.0))));
-    assertFalse(
-      foo.isCompatible(Dictionary.of(Map.of("name", "foo", "level", 1, "health", true))));
-    assertFalse(
-      foo.isCompatible(Dictionary.of(Map.of("name", 'a', "level", 1.0, "health", 2.0))));
-    assertFalse(
-      foo.isCompatible(Dictionary.of(Map.of("name", 'a', "level", 1.0, "health", 2.0f))));
-    assertFalse(
-      foo.isCompatible(new Dictionary[]{
-        Dictionary.of(Map.of("name", "foo", "level", 1.0, "health", 2.0))
-      }));
+        foo.isCompatible(
+            new Dictionary[] {Dictionary.of(Map.of("name", "foo", "level", 1.0, "health", 2.0))}));
   }
 }

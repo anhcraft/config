@@ -4,7 +4,6 @@ import dev.anhcraft.config.blueprint.DictionaryProperty;
 import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
-
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -46,18 +45,20 @@ public class ConstrainedDictionary extends AbstractDictionary {
           "Property '" + name + "' is not of type " + ComplexTypes.describe(type));
     DictionarySchema subSchema = property.schema();
     if (subSchema != null) {
-      if (
-        value instanceof Dictionary
-          && !((Dictionary) value).isCompatibleWith(subSchema))
-        throw new IllegalArgumentException("Property '" + name + "' does not have compatible schema");
+      if (value instanceof Dictionary && !((Dictionary) value).isCompatibleWith(subSchema))
+        throw new IllegalArgumentException(
+            "Property '" + name + "' does not have compatible schema");
       else if (value.getClass().isArray()) {
         int length = Array.getLength(value);
         for (int i = 0; i < length; i++) {
           Object elem = Array.get(value, i);
-          if (elem instanceof Dictionary
-              && !((Dictionary) elem).isCompatibleWith(subSchema))
+          if (elem instanceof Dictionary && !((Dictionary) elem).isCompatibleWith(subSchema))
             throw new IllegalArgumentException(
-                "Property '" + name + "' has an element at index " + i + " not have compatible schema");
+                "Property '"
+                    + name
+                    + "' has an element at index "
+                    + i
+                    + " not have compatible schema");
         }
       }
     }
