@@ -1,7 +1,7 @@
 # config
 
 ![Release](https://github.com/anhcraft/config/actions/workflows/maven.yml/badge.svg)
-[![](https://jitpack.io/v/anhcraft/config.svg)](https://jitpack.io/#anhcraft/config)<br>
+[![](https://jitpack.io/v/anhcraft/config.svg)](https://jitpack.io/#anhcraft/config) [![codecov](https://codecov.io/github/anhcraft/config/graph/badge.svg?token=DJJX0BNFNU)](https://codecov.io/github/anhcraft/config)<br>
 
 A Java library for working with configuration.
 
