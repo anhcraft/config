@@ -83,8 +83,8 @@ public class ComplexTypes {
    */
   @NotNull public static Class<?> getArrayType(@NotNull Class<?> componentType)
       throws ClassNotFoundException {
-    if (componentType.isPrimitive() || componentType.isArray()) // TODO optimize?
-    return Array.newInstance(componentType, 0).getClass();
+    if (componentType.isPrimitive() || componentType.isArray())
+      return Array.newInstance(componentType, 0).getClass(); // TODO optimize?
     return Class.forName("[L" + componentType.getCanonicalName() + ";");
   }
 
@@ -155,5 +155,24 @@ public class ComplexTypes {
       return getActualTypeArgument(((TypeResolver) container).provideType(), i);
     }
     return null;
+  }
+
+  /**
+   * Checks if a class is compatible with the given target class.
+   * @param valueClass the class to check for compatibility
+   * @param targetClass the target class
+   * @return {@code true} if compatible
+   */
+  public static boolean isCompatible(@NotNull Class<?> valueClass, @NotNull Class<?> targetClass) {
+    if (targetClass.isArray()) {
+      if (!valueClass.isArray()) return false;
+      Class<?> targetComponentType = targetClass.getComponentType();
+      Class<?> valueComponentType = valueClass.getComponentType();
+      return isCompatible(valueComponentType, targetComponentType);
+    } else {
+      Class<?> wrappedValueClass = wrapPrimitive(valueClass);
+      Class<?> wrappedTargetClass = wrapPrimitive(targetClass);
+      return wrappedTargetClass.isAssignableFrom(wrappedValueClass);
+    }
   }
 }

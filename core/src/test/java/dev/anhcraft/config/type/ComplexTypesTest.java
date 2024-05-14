@@ -136,4 +136,51 @@ public class ComplexTypesTest {
         ComplexTypes.getActualTypeArgument(new TypeToken<List<?>>() {}.capture(), 0));
     assertNull(ComplexTypes.getActualTypeArgument(new TypeToken<int[]>() {}.capture(), 0));
   }
+
+  @Test
+  public void testIsCompatible() {
+    assertTrue(ComplexTypes.isCompatible(int.class, Integer.class));
+    assertTrue(ComplexTypes.isCompatible(Integer.class, int.class));
+    assertTrue(ComplexTypes.isCompatible(double.class, Double.class));
+    assertTrue(ComplexTypes.isCompatible(Double.class, double.class));
+    assertTrue(ComplexTypes.isCompatible(boolean.class, Boolean.class));
+    assertTrue(ComplexTypes.isCompatible(Boolean.class, boolean.class));
+    assertTrue(ComplexTypes.isCompatible(byte.class, Byte.class));
+    assertTrue(ComplexTypes.isCompatible(Byte.class, byte.class));
+    assertTrue(ComplexTypes.isCompatible(char.class, Character.class));
+    assertTrue(ComplexTypes.isCompatible(Character.class, char.class));
+    assertTrue(ComplexTypes.isCompatible(short.class, Short.class));
+    assertTrue(ComplexTypes.isCompatible(Short.class, short.class));
+    assertTrue(ComplexTypes.isCompatible(long.class, Long.class));
+    assertTrue(ComplexTypes.isCompatible(Long.class, long.class));
+    assertTrue(ComplexTypes.isCompatible(float.class, Float.class));
+    assertTrue(ComplexTypes.isCompatible(Float.class, float.class));
+
+    assertFalse(ComplexTypes.isCompatible(int.class, Double.class));
+    assertFalse(ComplexTypes.isCompatible(Integer.class, double.class));
+    assertFalse(ComplexTypes.isCompatible(boolean.class, Byte.class));
+    assertFalse(ComplexTypes.isCompatible(Character.class, short.class));
+
+    assertTrue(ComplexTypes.isCompatible(String.class, String.class));
+    assertFalse(ComplexTypes.isCompatible(Integer.class, String.class));
+
+    assertTrue(ComplexTypes.isCompatible(int[].class, int[].class));
+    assertTrue(ComplexTypes.isCompatible(Integer[].class, Integer[].class));
+    assertTrue(ComplexTypes.isCompatible(String[].class, String[].class));
+    assertTrue(ComplexTypes.isCompatible(int[].class, Integer[].class));
+    assertFalse(ComplexTypes.isCompatible(String[].class, Integer[].class));
+
+    assertTrue(ComplexTypes.isCompatible(int[][].class, int[][].class));
+    assertTrue(ComplexTypes.isCompatible(Integer[][][].class, Integer[][][].class));
+    assertTrue(ComplexTypes.isCompatible(String[][][][][].class, String[][][][][].class));
+    assertTrue(ComplexTypes.isCompatible(int[][].class, Integer[][].class));
+    assertFalse(ComplexTypes.isCompatible(String[][][].class, Integer[][][].class));
+
+    assertFalse(ComplexTypes.isCompatible(int.class, int[].class));
+    assertFalse(ComplexTypes.isCompatible(Integer.class, Integer[].class));
+    assertFalse(ComplexTypes.isCompatible(String.class, String[].class));
+    assertFalse(ComplexTypes.isCompatible(double.class, double[].class));
+    assertFalse(ComplexTypes.isCompatible(Boolean.class, Boolean[].class));
+    assertFalse(ComplexTypes.isCompatible(char.class, char[].class));
+  }
 }

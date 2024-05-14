@@ -183,7 +183,7 @@ public final class ConfigNormalizer {
       }
       return result;
     }
-    Dictionary container = new Dictionary();
+    Dictionary container = new SchemalessDictionary();
     _dynamicNormalize(ctx, type, complex, container);
     return container;
   }

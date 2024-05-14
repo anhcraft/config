@@ -2,8 +2,6 @@ package dev.anhcraft.config.type;
 
 import dev.anhcraft.config.Dictionary;
 import java.lang.reflect.Array;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,11 +121,7 @@ public final class SimpleTypes {
         || value instanceof Boolean
         || value instanceof Character) return value; // immutable
     else if (value instanceof Dictionary) {
-      LinkedHashMap<String, Object> backend = ((Dictionary) value).unwrap();
-      for (Map.Entry<String, Object> entry : backend.entrySet()) {
-        entry.setValue(deepClone(entry.getValue()));
-      }
-      return (T) Dictionary.copyOf(backend);
+      return (T) ((Dictionary) value).duplicate(true);
     } else if (value.getClass().isArray()) {
       Class<?> componentType = value.getClass().getComponentType();
       int n = Array.getLength(value);

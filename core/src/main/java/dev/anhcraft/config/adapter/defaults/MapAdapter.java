@@ -1,6 +1,7 @@
 package dev.anhcraft.config.adapter.defaults;
 
 import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.SchemalessDictionary;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.type.ComplexTypes;
@@ -18,7 +19,7 @@ public class MapAdapter implements TypeAdapter<Map> {
   public @Nullable Object simplify(
       @NotNull Context ctx, @NotNull Class<? extends Map> sourceType, @NotNull Map value)
       throws Exception {
-    Dictionary dict = new Dictionary();
+    Dictionary dict = new SchemalessDictionary();
     Set<Map.Entry> entries = value.entrySet();
     for (Map.Entry object : entries) {
       Object key = ctx.simplify(ctx, object.getKey().getClass(), object.getKey());

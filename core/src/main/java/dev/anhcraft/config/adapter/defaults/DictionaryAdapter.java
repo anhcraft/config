@@ -17,7 +17,7 @@ public class DictionaryAdapter implements TypeAnnotator<Dictionary> {
     if (value instanceof Dictionary) {
       if (SettingFlag.has(
           ctx.getFactory().getDenormalizer().getSettings(), SettingFlag.Denormalizer.DEEP_CLONE))
-        return Dictionary.copyOf((Dictionary) value, true);
+        return ((Dictionary) value).duplicate(true);
       return (Dictionary) value;
     }
     return null;

@@ -86,7 +86,7 @@ public class ConfigDenormalizerTest {
             .build()
             .getDenormalizer();
     assertInstanceOf(
-        DummyYummy.class, denormalizer.denormalize(new Dictionary(), DummyYummy.class));
+        DummyYummy.class, denormalizer.denormalize(new SchemalessDictionary(), DummyYummy.class));
   }
 
   @Test
@@ -127,7 +127,7 @@ public class ConfigDenormalizerTest {
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   public class TestDenormalizeDictionaryUsingSchema {
-    private final Dictionary dict = new Dictionary();
+    private final Dictionary dict = new SchemalessDictionary();
     private ConfigFactory factory;
 
     @BeforeAll
@@ -136,9 +136,9 @@ public class ConfigDenormalizerTest {
       dict.put(
           "items",
           new Dictionary[] {
-            Dictionary.copyOf(Map.of("id", "item1")),
-            Dictionary.copyOf(Map.of("id", "item2")),
-            Dictionary.copyOf(Map.of("id", "item3"))
+            Dictionary.of(Map.of("id", "item1")),
+            Dictionary.of(Map.of("id", "item2")),
+            Dictionary.of(Map.of("id", "item3"))
           });
       dict.put("worth", "100.0001");
       factory = ConfigFactory.create().build();
@@ -177,9 +177,9 @@ public class ConfigDenormalizerTest {
       dict.put(
           "items",
           new Dictionary[] {
-            Dictionary.copyOf(Map.of("id", "f")),
-            Dictionary.copyOf(Map.of("id", "fo")),
-            Dictionary.copyOf(Map.of("id", "foo"))
+            Dictionary.of(Map.of("id", "f")),
+            Dictionary.of(Map.of("id", "fo")),
+            Dictionary.of(Map.of("id", "foo"))
           });
       assertThrows(
           InvalidValueException.class,
@@ -211,15 +211,15 @@ public class ConfigDenormalizerTest {
               .ignoreEmptyArray(true)
               .ignoreEmptyDictionary(true)
               .build();
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       dict.put(
           "reports",
           new Dictionary[] {
-            Dictionary.copyOf(Map.of("service", "auth", "ping", 1, "status", 1)),
-            Dictionary.copyOf(Map.of("service", "logging", "ping", 2, "status", 0)),
-            Dictionary.copyOf(Map.of("service", "noti", "ping", 1, "status", 1)),
-            Dictionary.copyOf(Map.of("service", "mail", "ping", 3, "status", 0)),
-            Dictionary.copyOf(Map.of("ping", 2, "status", 0)),
+            Dictionary.of(Map.of("service", "auth", "ping", 1, "status", 1)),
+            Dictionary.of(Map.of("service", "logging", "ping", 2, "status", 0)),
+            Dictionary.of(Map.of("service", "noti", "ping", 1, "status", 1)),
+            Dictionary.of(Map.of("service", "mail", "ping", 3, "status", 0)),
+            Dictionary.of(Map.of("ping", 2, "status", 0)),
           });
       ServiceCenter serviceCenter = new ServiceCenter();
       factory.getDenormalizer().denormalizeToInstance(dict, ServiceCenter.class, serviceCenter);

@@ -2,6 +2,7 @@ package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.type.ComplexTypes;
+import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.validate.DisabledValidator;
 import dev.anhcraft.config.validate.Validator;
 import java.util.*;
@@ -26,6 +27,9 @@ public class DictionaryProperty extends AbstractProperty {
       @Nullable Class<?> type,
       @Nullable DictionarySchema schema) {
     super(naming, description, modifier, validator, normalizer, denormalizer);
+    if (type != null && !SimpleTypes.validate(type))
+      throw new IllegalArgumentException(
+          "The type must be a simple type (got " + ComplexTypes.describe(type) + ")");
     if (schema != null
         && (type == null
             || (!type.isArray() && !Dictionary.class.isAssignableFrom(type))
@@ -53,6 +57,14 @@ public class DictionaryProperty extends AbstractProperty {
    */
   @Nullable public DictionarySchema schema() {
     return schema;
+  }
+
+  public boolean isCompatible(@Nullable Object value) {
+    if (value == null || type == null) return true;
+    boolean b = ComplexTypes.isCompatible(value.getClass(), type);
+    if (b && value instanceof Dictionary && !((Dictionary) value).isCompatibleWith(schema))
+      b = false;
+    return b;
   }
 
   /**

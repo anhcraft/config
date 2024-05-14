@@ -1,8 +1,8 @@
 package dev.anhcraft.config;
 
-import dev.anhcraft.config.type.SimpleTypes;
-import java.util.*;
-import java.util.function.Consumer;
+import dev.anhcraft.config.blueprint.DictionarySchema;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,171 +10,104 @@ import org.jetbrains.annotations.Nullable;
  * Represents a dictionary containing simple objects only.<br>
  * The dictionary does not allow {@code null} keys and values.
  */
-public class Dictionary extends AbstractMap<String, Object> {
-  private final LinkedHashMap<String, Object> backend;
-  private List<String> sortedKeys;
-  private Set<Map.Entry<String, Object>> entryView;
+public interface Dictionary extends Map<String, Object> {
+  // ======== Helpers ========
 
   /**
-   * Makes a copy of the given map as a {@link Dictionary}.<br>
-   * The map is shallow-copied. Changes to the dictionary does not reflect in the original map, however, changes
-   * made to their values does reflect.<br>
-   * The given map must contain simple values only, otherwise, {@link IllegalArgumentException} throws.
+   * Creates a mutable dictionary from the given map.<br>
+   * If the schema is provided, a {@link ConstrainedDictionary} will be created, otherwise a
+   * {@link SchemalessDictionary} will be created.
    * @param map the map
+   * @param schema the schema
    * @return the dictionary
    */
-  public static @NotNull Dictionary copyOf(@NotNull Map<String, Object> map) {
-    Dictionary container = new Dictionary();
-    container.putAll(map);
-    return container;
+  static @NotNull Dictionary of(
+      @NotNull Map<String, Object> map, @Nullable DictionarySchema schema) {
+    return schema == null
+        ? SchemalessDictionary.copyOf(map)
+        : ConstrainedDictionary.copyOf(map, schema);
   }
 
   /**
-   * Makes a copy of the given map as a {@link Dictionary}.<br>
-   * If {@code deep} is true, the map will be deep-copied. Otherwise, it will be shallow-copied.
-   * @param dict the dictionary
-   * @param deep if true, the dictionary will be deep-copied
-   * @return the copied dictionary
+   * @see Dictionary#of(Map)
    */
-  public static @NotNull Dictionary copyOf(@NotNull Dictionary dict, boolean deep) {
-    return deep ? Objects.requireNonNull(SimpleTypes.deepClone(dict)) : copyOf(dict.backend);
+  static @NotNull Dictionary of(@NotNull Map<String, Object> map) {
+    return of(map, null);
   }
 
-  public Dictionary() {
-    backend = new LinkedHashMap<>();
-  }
-
-  // ======== Overrides ========
-  @NotNull @Override
-  public Set<Entry<String, Object>> entrySet() {
-    if (entryView == null) entryView = new LinkedEntrySet();
-    return entryView;
-  }
-
-  @Override
-  public @Nullable Object put(@NotNull String key, @Nullable Object value) {
-    if (!SimpleTypes.test(value))
-      throw new IllegalArgumentException(
-          String.format("Object of type %s is not a simple type", value.getClass().getName()));
-    // TODO deep clone array since the element can be mutated to be a non-simple type
-    Object previous = backend.get(key);
-    if ((previous == null && value != null) || (previous != null && value == null))
-      sortedKeys = null; // invalidate the cache only when add/remove (not modify)
-    if (value == null) backend.remove(key); // do not store null
-    else backend.put(key, value);
-    return previous;
-  }
-
-  // ======== Extra implementations ========
+  // ======== Extra interfaces ========
 
   /**
    * Searches for an entry with the given name and aliases.
-   * @param name the name
+   *
+   * @param name    the name
    * @param aliases the aliases
    * @return the entry or {@code null}
    */
-  @Nullable public Map.Entry<String, Object> search(@NotNull String name, @NotNull Iterable<String> aliases) {
-    Object value = get(name);
-    if (value != null) {
-      return Map.entry(name, value);
-    }
-    for (String alias : aliases) {
-      value = get(alias);
-      if (value != null) {
-        return Map.entry(alias, value);
-      }
-    }
-    return null;
-  }
+  @Nullable Map.Entry<String, Object> search(@NotNull String name, @NotNull Iterable<String> aliases);
 
   /**
    * Gets the key at the given index.
+   *
    * @param pos the index
    * @return the key
    */
-  public @Nullable String getKeyAt(int pos) {
-    if (sortedKeys == null) sortedKeys = List.copyOf(keySet());
-    return sortedKeys.get(pos);
-  }
+  @Nullable String getKeyAt(int pos);
 
   /**
    * Gets the value at the given index.
+   *
    * @param pos the index
    * @return the value
    */
-  public @Nullable Object getValueAt(int pos) {
-    String key = getKeyAt(pos);
-    return key == null ? null : get(key);
-  }
+  @Nullable Object getValueAt(int pos);
 
   /**
    * Renames an entry with a new key.<br>
    * Using the new key may override another existing entry.
+   *
    * @param from the current key
-   * @param to the new key
+   * @param to   the new key
    * @return the old value previously at the new key or {@code null}
    */
-  public @Nullable Object rename(@NotNull String from, @NotNull String to) {
-    return put(to, remove(from));
-  }
+  @Nullable Object rename(@NotNull String from, @NotNull String to);
 
   /**
    * Unwraps the dictionary into a map.
+   *
    * @return shallow-copied, mutable map
    */
-  @NotNull public LinkedHashMap<String, Object> unwrap() {
-    return new LinkedHashMap<>(backend);
-  }
+  @NotNull LinkedHashMap<String, Object> unwrap();
 
-  final class LinkedEntrySet extends AbstractSet<Map.Entry<String, Object>> {
-    public int size() {
-      return backend.entrySet().size();
-    }
+  /**
+   * Checks if this dictionary is compatible with the given dictionary schema.<br>
+   * The check is performed recursively.
+   * @param schema the dictionary schema
+   * @return true if compatible
+   */
+  boolean isCompatibleWith(@Nullable DictionarySchema schema);
 
-    public void clear() {
-      backend.entrySet().clear();
-      sortedKeys = null;
-    }
+  /**
+   * Creates an immutable view of this dictionary.<br>
+   * If the dictionary is already immutable, it will return itself.
+   * @return shallow-immutable dictionary
+   */
+  @NotNull Dictionary immutable();
 
-    public Iterator<Map.Entry<String, Object>> iterator() {
-      return new Dictionary.EntryIterator();
-    }
+  /**
+   * Duplicates this dictionary.<br>
+   * If the dictionary is immutable, it will return itself in shallow-copy mode.
+   * Otherwise, a new immutable, deep copy dictionary will be created.
+   * @param deepCopy if true, the dictionary will be deep-copied
+   * @return duplicated dictionary
+   */
+  @NotNull Dictionary duplicate(boolean deepCopy);
 
-    public boolean contains(Object o) {
-      return backend.entrySet().contains(o);
-    }
-
-    public boolean remove(Object o) {
-      if (backend.entrySet().remove(o)) {
-        sortedKeys = null;
-        return true;
-      }
-      return false;
-    }
-
-    public Spliterator<Map.Entry<String, Object>> spliterator() {
-      throw new UnsupportedOperationException();
-    }
-
-    public void forEach(Consumer<? super Map.Entry<String, Object>> action) {
-      backend.entrySet().forEach(action);
-    }
-  }
-
-  private class EntryIterator implements Iterator<Entry<String, Object>> {
-    Iterator<Map.Entry<String, Object>> it = backend.entrySet().iterator();
-
-    public boolean hasNext() {
-      return it.hasNext();
-    }
-
-    public Entry<String, Object> next() {
-      return it.next();
-    }
-
-    public void remove() {
-      it.remove();
-      sortedKeys = null;
-    }
+  /**
+   * Duplicates this dictionary.
+   * @return shallow-copied dictionary
+   */
+  @NotNull default Dictionary duplicate() {
+    return duplicate(false);
   }
 }

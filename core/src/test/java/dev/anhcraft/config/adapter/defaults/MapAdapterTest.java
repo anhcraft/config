@@ -32,7 +32,7 @@ public class MapAdapterTest {
     Object simplified = adapter.simplify(context, Map.class, vehicle);
     assertInstanceOf(Dictionary.class, simplified);
     assertEquals(
-        Dictionary.copyOf(
+        Dictionary.of(
             Map.of(
                 "0", "Car",
                 "1", "Truck",
@@ -57,15 +57,15 @@ public class MapAdapterTest {
     Object simplified = adapter.simplify(context, Map.class, stock);
     assertInstanceOf(Dictionary.class, simplified);
     assertEquals(
-        Dictionary.copyOf(
+        Dictionary.of(
             Map.of(
                 "Bob",
-                    Dictionary.copyOf(
+                    Dictionary.of(
                         Map.of(
                             "Apple", 10,
                             "Banana", 20)),
                 "Alice",
-                    Dictionary.copyOf(
+                    Dictionary.of(
                         Map.of(
                             "Apple", 5,
                             "Banana", 15)))),
@@ -76,7 +76,7 @@ public class MapAdapterTest {
   @Test
   public void testComplexify() throws Exception {
     Dictionary dict =
-        Dictionary.copyOf(
+        Dictionary.of(
             Map.of(
                 "0", "Car",
                 "1", "Truck",
@@ -93,14 +93,14 @@ public class MapAdapterTest {
   @Test
   public void testComplexify2D() throws Exception {
     Dictionary dict =
-        Dictionary.copyOf(
+        Dictionary.of(
             Map.of(
                 "Bob",
-                    Dictionary.copyOf(
+                    Dictionary.of(
                         Map.of(
                             "Apple", "10",
                             "Banana", "20")),
-                "Alice", Dictionary.copyOf(Map.of("Apple", 5, "Banana", "15.0001"))));
+                "Alice", Dictionary.of(Map.of("Apple", 5, "Banana", "15.0001"))));
     Map<String, Map<String, Integer>> stock =
         adapter.complexify(context, dict, new TypeToken<Map<String, Map<String, Integer>>>() {});
     assertInstanceOf(LinkedHashMap.class, stock);
@@ -116,7 +116,7 @@ public class MapAdapterTest {
         HashMap.class,
         adapter.complexify(
             context,
-            Dictionary.copyOf(Map.of("foo", "bar")),
+            Dictionary.of(Map.of("foo", "bar")),
             new TypeToken<HashMap<String, String>>() {}));
   }
 
@@ -126,7 +126,7 @@ public class MapAdapterTest {
         TreeMap.class,
         adapter.complexify(
             context,
-            Dictionary.copyOf(Map.of("foo", "bar")),
+            Dictionary.of(Map.of("foo", "bar")),
             new TypeToken<TreeMap<String, String>>() {}));
   }
 
@@ -136,7 +136,7 @@ public class MapAdapterTest {
         LinkedHashMap.class,
         adapter.complexify(
             context,
-            Dictionary.copyOf(Map.of("foo", "bar")),
+            Dictionary.of(Map.of("foo", "bar")),
             new TypeToken<Map<String, String>>() {}));
   }
 }

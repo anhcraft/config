@@ -26,6 +26,9 @@ public class DictionarySchemaBuilderTest {
                 .addProperty(
                     "foo",
                     p -> p.withType(int.class).withSchema(DictionarySchema.create().build())));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> DictionarySchema.create().addProperty("foo", p -> p.withType(Set.class)));
   }
 
   @Test

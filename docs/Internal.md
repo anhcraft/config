@@ -285,6 +285,14 @@ Dictionary: {
 - The process of mapping a complex data type into a simple data type is called normalization
 - The process of mapping a simple data type into a complex data type is called denormalization
 
+## Dictionary compatibility
+- A schemaless dictionary `T` is compatible to a dictionary schema `S` if every setting in `T` meets the respective requirement from `S`
+  - `null` value is skipped
+  - Scalar types
+  - Array: its component type is used
+  - Dictionary: recursive check
+- A constrained dictionary `T` is compatible to a dictionary schema `S` if the schema of `T` is the schema of `S`, or every setting in `T` meets the respective requirement from `S`
+
 # Factory
 - The factory is the central instance containing built-in and custom-registered components
 - The factory is immutable to enforce consistency and thread-safety

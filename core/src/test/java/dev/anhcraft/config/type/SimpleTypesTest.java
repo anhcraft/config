@@ -3,6 +3,7 @@ package dev.anhcraft.config.type;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.SchemalessDictionary;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class SimpleTypesTest {
     assertTrue(SimpleTypes.test(0));
     assertTrue(SimpleTypes.test(true));
     assertTrue(SimpleTypes.test('0'));
-    assertTrue(SimpleTypes.test(new Dictionary()));
+    assertTrue(SimpleTypes.test(new SchemalessDictionary()));
     assertTrue(SimpleTypes.test(new Object[] {1, "1", true, null}));
     assertFalse(SimpleTypes.test(new Object[] {List.class, "1", true}));
     assertTrue(SimpleTypes.test(new int[] {}));
@@ -110,8 +111,8 @@ public class SimpleTypesTest {
     assertEquals(1, SimpleTypes.getContainerSize(new Integer[] {0}));
     assertEquals(0, SimpleTypes.getContainerSize(new int[] {}));
     assertEquals(1, SimpleTypes.getContainerSize(new int[] {0}));
-    assertEquals(0, SimpleTypes.getContainerSize(new Dictionary()));
-    assertEquals(1, SimpleTypes.getContainerSize(Dictionary.copyOf(Map.of("foo", "bar"))));
+    assertEquals(0, SimpleTypes.getContainerSize(new SchemalessDictionary()));
+    assertEquals(1, SimpleTypes.getContainerSize(Dictionary.of(Map.of("foo", "bar"))));
   }
 
   @Test
@@ -120,7 +121,7 @@ public class SimpleTypesTest {
     assertEquals(0, SimpleTypes.getContainerElement(new Integer[] {0}, 0));
     assertEquals(0, SimpleTypes.getContainerElement(new int[] {0}, 0));
     assertEquals(
-        "bar", SimpleTypes.getContainerElement(Dictionary.copyOf(Map.of("foo", "bar")), 0));
+        "bar", SimpleTypes.getContainerElement(Dictionary.of(Map.of("foo", "bar")), 0));
   }
 
   @Test
@@ -130,7 +131,7 @@ public class SimpleTypesTest {
     assertEquals('a', SimpleTypes.deepClone('a'));
     assertEquals(0, SimpleTypes.deepClone(0));
 
-    Dictionary dict = new Dictionary();
+    Dictionary dict = new SchemalessDictionary();
     assertNotSame(dict, SimpleTypes.deepClone(dict));
 
     int[] arr = new int[0];

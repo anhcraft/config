@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.SchemalessDictionary;
 import dev.anhcraft.config.context.Context;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,13 +24,13 @@ public class DictionaryAdapterTest {
     assertThrowsExactly(
         UnsupportedOperationException.class,
         () -> {
-          adapter.simplify(context, Dictionary.class, new Dictionary());
+          adapter.simplify(context, Dictionary.class, new SchemalessDictionary());
         });
   }
 
   @Test
   public void testShallowComplexify() throws Exception {
-    Dictionary dict = new Dictionary();
+    Dictionary dict = new SchemalessDictionary();
     dict.put("foo", "bar");
     assertSame(dict, adapter.complexify(context, dict, Dictionary.class));
   }
@@ -37,7 +38,7 @@ public class DictionaryAdapterTest {
   @Test
   public void testDeepComplexify() throws Exception {
     Context deepContext = ConfigFactory.create().deepClone(true).build().createContext();
-    Dictionary dict = new Dictionary();
+    Dictionary dict = new SchemalessDictionary();
     dict.put("foo", "bar");
     assertNotSame(dict, adapter.complexify(deepContext, dict, Dictionary.class));
     assertEquals("bar", adapter.complexify(deepContext, dict, Dictionary.class).get("foo"));

@@ -3,7 +3,7 @@ package dev.anhcraft.config.adapter.defaults;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.ConfigFactory;
-import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.SchemalessDictionary;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.type.TypeToken;
 import java.util.*;
@@ -47,7 +47,7 @@ public class IterableAdapterTest {
 
   @Test
   public void testComplexifyNotArray() throws Exception {
-    assertNull(adapter.complexify(context, new Dictionary(), List.class));
+    assertNull(adapter.complexify(context, new SchemalessDictionary(), List.class));
   }
 
   @Test

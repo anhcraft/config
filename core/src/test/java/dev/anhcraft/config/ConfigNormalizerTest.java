@@ -31,7 +31,7 @@ public class ConfigNormalizerTest {
     String[][] bar = new String[0][0];
     assertSame(bar, normalizer.normalize(bar));
 
-    Dictionary buz = new Dictionary();
+    Dictionary buz = new SchemalessDictionary();
     assertSame(buz, normalizer.normalize(buz));
   }
 
@@ -46,7 +46,7 @@ public class ConfigNormalizerTest {
     String[][] bar = new String[0][0];
     assertNotSame(bar, normalizer.normalize(bar));
 
-    Dictionary buz = new Dictionary();
+    Dictionary buz = new SchemalessDictionary();
     assertNotSame(buz, normalizer.normalize(buz));
   }
 
@@ -117,9 +117,9 @@ public class ConfigNormalizerTest {
     public void testShallowCopyDictionary() throws Exception {
       ConfigFactory factory = ConfigFactory.create().build();
       String[] pet = new String[] {"dog"};
-      Dictionary foo = new Dictionary();
+      Dictionary foo = new SchemalessDictionary();
       foo.put("pet", pet);
-      Dictionary bar = new Dictionary();
+      Dictionary bar = new SchemalessDictionary();
       factory
           .getNormalizer()
           .normalizeToDictionary(factory.createContext(), Dictionary.class, foo, bar);
@@ -132,9 +132,9 @@ public class ConfigNormalizerTest {
     public void testDeepCloneDictionary() throws Exception {
       ConfigFactory factory = ConfigFactory.create().deepClone(true).build();
       String[] pet = new String[] {"dog"};
-      Dictionary foo = new Dictionary();
+      Dictionary foo = new SchemalessDictionary();
       foo.put("pet", pet);
-      Dictionary bar = new Dictionary();
+      Dictionary bar = new SchemalessDictionary();
       factory
           .getNormalizer()
           .normalizeToDictionary(factory.createContext(), Dictionary.class, foo, bar);
@@ -152,7 +152,7 @@ public class ConfigNormalizerTest {
       ConfigFactory factory = ConfigFactory.create().build();
       Transaction transaction = new Transaction();
       transaction.id = UUID.randomUUID();
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
       assertNull(dict.get("id"));
     }
@@ -161,7 +161,7 @@ public class ConfigNormalizerTest {
     public void testIgnoreDefaultValue() throws Exception {
       ConfigFactory factory = ConfigFactory.create().ignoreDefaultValues(true).build();
       Transaction transaction = new Transaction();
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
       assertTrue(dict.isEmpty());
     }
@@ -172,7 +172,7 @@ public class ConfigNormalizerTest {
           ConfigFactory.create().ignoreDefaultValues(true).ignoreEmptyArray(true).build();
       Transaction transaction = new Transaction();
       transaction.note = new String[0];
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
       assertTrue(dict.isEmpty());
     }
@@ -187,7 +187,7 @@ public class ConfigNormalizerTest {
               .build();
       Transaction transaction = new Transaction();
       transaction.icon = new Transaction.Item();
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
       assertTrue(dict.isEmpty());
     }
@@ -202,7 +202,7 @@ public class ConfigNormalizerTest {
               .build();
       Transaction transaction = new Transaction();
       transaction.items = List.of(new Transaction.Item());
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
       assertInstanceOf(Dictionary.class, Array.get(dict.get("items"), 0));
     }
@@ -233,7 +233,7 @@ public class ConfigNormalizerTest {
       chatLog.sender = UUID.randomUUID();
       chatLog.message = "Hello";
       chatLog.timestamp = System.currentTimeMillis();
-      Dictionary dict = new Dictionary();
+      Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(chatLog, dict);
       assertNotEquals(chatLog.sender.toString(), dict.get("sender"));
       assertEquals("[message] Hello", dict.get("message"));
