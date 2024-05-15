@@ -6,7 +6,7 @@ import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.SchemalessDictionary;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SimpleTypesTest {
   @Test

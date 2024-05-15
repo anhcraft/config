@@ -8,7 +8,7 @@ import java.lang.reflect.WildcardType;
 import java.net.URL;
 import java.util.*;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ComplexTypesTest {
   @Test
