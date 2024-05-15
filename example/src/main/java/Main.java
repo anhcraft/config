@@ -59,6 +59,6 @@ public class Main {
         .withSchema(factory.getSchema(Item.class))
         .withSchema(factory.getSchema(Location.class))
         .withSchema(factory.getSchema(Storage.class))
-        .generate(new File("docs"));
+        .generate(new File("example/configdoc"));
     }
 }
