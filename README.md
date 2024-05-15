@@ -7,6 +7,8 @@ A Java library for working with configuration.
 
 > The library is currently **rewritten**. To view the latest stable code: see ver/1.2
 
+![logo](./assets/logo.svg)
+
 ## Branches
 - `main`: latest version (W.I.P, Java 11+)
 - `ver/1.2`: 1.2.x versions (legacy, Java 8+)
