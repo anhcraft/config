@@ -23,6 +23,39 @@ public class DictionaryPropertyTest {
     naming = new PropertyNaming("foo", new LinkedHashSet<>());
   }
 
+  @Test
+  public void testDescribeType() {
+    assertEquals("", DictionaryProperty.create().withNames("foo").build().describeType(false));
+    assertEquals(
+        "int",
+        DictionaryProperty.create()
+            .withNames("foo")
+            .withType(int.class)
+            .build()
+            .describeType(false));
+    assertEquals(
+        "int[]",
+        DictionaryProperty.create()
+            .withNames("foo")
+            .withType(int[].class)
+            .build()
+            .describeType(false));
+    assertEquals(
+        "int[][]",
+        DictionaryProperty.create()
+            .withNames("foo")
+            .withType(int[][].class)
+            .build()
+            .describeType(false));
+    assertEquals(
+        "java.lang.Integer",
+        DictionaryProperty.create()
+            .withNames("foo")
+            .withType(Integer.class)
+            .build()
+            .describeType(false));
+  }
+
   @ParameterizedTest
   @ValueSource(classes = {ArrayList.class, Map.class})
   public void testIllegalTypeDetect(Class<?> type) {

@@ -120,26 +120,40 @@ public class ComplexTypes {
    * @return the string
    */
   @NotNull public static String describe(@NotNull Type type) {
+    return describe(type, false);
+  }
+
+  /**
+   * Stringifies the given type.
+   * @param type the type
+   * @param simple if the type should be simplified
+   * @return the string
+   */
+  @NotNull public static String describe(@NotNull Type type, boolean simple) {
     if (type instanceof GenericArrayType) {
       GenericArrayType arrayType = (GenericArrayType) type;
-      return String.format("%s[]", describe(arrayType.getGenericComponentType()));
+      return String.format("%s[]", describe(arrayType.getGenericComponentType(), simple));
     } else if (type instanceof ParameterizedType) {
       ParameterizedType paramType = (ParameterizedType) type;
       String args =
           Arrays.stream(paramType.getActualTypeArguments())
-              .map(ComplexTypes::describe)
+              .map(a -> describe(a, simple))
               .collect(Collectors.joining(","));
       if (paramType.getOwnerType() != null)
         return String.format(
             "%s.%s<%s>",
-            describe(paramType.getOwnerType()), describe(paramType.getRawType()), args);
-      else return String.format("%s<%s>", describe(paramType.getRawType()), args);
+            describe(paramType.getOwnerType(), simple),
+            describe(paramType.getRawType(), simple),
+            args);
+      else return String.format("%s<%s>", describe(paramType.getRawType(), simple), args);
     } else if (type instanceof TypeVariable) {
       return ((TypeVariable<?>) type).getName();
     } else if (type instanceof TypeResolver) {
-      return describe(((TypeResolver) type).provideType());
+      return describe(((TypeResolver) type).provideType(), simple);
+    } else if (simple && type instanceof Class) {
+      return ((Class<?>) type).getSimpleName();
     } else {
-      return String.format("%s", type.getTypeName());
+      return type.getTypeName();
     }
   }
 

@@ -50,6 +50,11 @@ public class DictionaryProperty extends AbstractProperty {
     return type;
   }
 
+  @Override
+  public String describeType(boolean simple) {
+    return type == null ? "" : ComplexTypes.describe(type, simple);
+  }
+
   /**
    * Gets the schema of this property.<br>
    * The schema is optional and only available if the type is a {@link Dictionary}.

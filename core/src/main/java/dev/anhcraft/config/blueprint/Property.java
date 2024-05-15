@@ -40,6 +40,13 @@ public interface Property {
   @NotNull String name();
 
   /**
+   * Describes the type of this property.
+   * @param simple whether the type should be simplified
+   * @return the type
+   */
+  String describeType(boolean simple);
+
+  /**
    * Gets all aliases of this property.
    *
    * @return the aliases

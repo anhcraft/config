@@ -105,7 +105,7 @@ public class ComplexTypesTest {
   }
 
   @Test
-  public void testDescribe() {
+  public void testFullDescribe() {
     assertEquals("int", ComplexTypes.describe(int.class));
     assertEquals("int[]", ComplexTypes.describe(int[].class));
     assertEquals("int[][]", ComplexTypes.describe(int[][].class));
@@ -123,6 +123,25 @@ public class ComplexTypesTest {
 
     Class<?> anonymous = new Object() {}.getClass();
     assertEquals(anonymous.getName(), ComplexTypes.describe(anonymous));
+  }
+
+  @Test
+  public void testSimpleDescribe() {
+    assertEquals("int", ComplexTypes.describe(int.class, true));
+    assertEquals("int[]", ComplexTypes.describe(int[].class, true));
+    assertEquals("int[][]", ComplexTypes.describe(int[][].class, true));
+    assertEquals(
+        "List<Integer>", ComplexTypes.describe(new TypeToken<List<Integer>>() {}.capture(), true));
+    assertEquals(
+        "List<int[]>", ComplexTypes.describe(new TypeToken<List<int[]>>() {}.capture(), true));
+    assertEquals(
+        "List<Map<String[],Set<int[][]>[]>>",
+        ComplexTypes.describe(
+            new TypeToken<List<Map<String[], Set<int[][]>[]>>>() {}.capture(), true));
+    assertEquals("Normalizer", ComplexTypes.describe(SettingFlag.Normalizer.class, true));
+
+    Class<?> anonymous = new Object() {}.getClass();
+    assertEquals(anonymous.getSimpleName(), ComplexTypes.describe(anonymous, true));
   }
 
   @Test

@@ -1,5 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -31,6 +32,11 @@ public class ClassProperty extends AbstractProperty {
    */
   @NotNull public Type type() {
     return field.getGenericType();
+  }
+
+  @Override
+  public String describeType(boolean simple) {
+    return ComplexTypes.describe(type(), simple);
   }
 
   /**

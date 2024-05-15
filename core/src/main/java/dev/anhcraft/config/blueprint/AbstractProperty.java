@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A generic implementation of {@link Property}.
  */
-public class AbstractProperty implements Property {
+public abstract class AbstractProperty implements Property {
   private final PropertyNaming naming;
   private final List<String> description;
   private final byte modifier; // optional, transient, constant
@@ -44,6 +44,9 @@ public class AbstractProperty implements Property {
   @NotNull public String name() {
     return naming.primary();
   }
+
+  @Override
+  public abstract String describeType(boolean simple);
 
   /**
    * Gets all aliases of this property.

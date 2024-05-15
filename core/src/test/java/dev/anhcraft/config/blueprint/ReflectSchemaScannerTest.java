@@ -210,6 +210,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testUser() {
       assertEquals("id", schema.property("id").name());
+      assertEquals("java.lang.String", schema.property("id").describeType(false));
       assertEquals("user", schema.property("id").field().getName());
       assertTrue(schema.property("id").description().isEmpty());
       assertTrue(schema.property("id").aliases().isEmpty());
@@ -222,6 +223,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testEmail() {
       assertEquals("email", schema.property("email").field().getName());
+      assertEquals("java.lang.String", schema.property("email").describeType(false));
       assertTrue(schema.property("email").description().isEmpty());
       assertTrue(schema.property("email").aliases().isEmpty());
       assertFalse(schema.property("email").isConstant());
@@ -235,6 +237,7 @@ public class ReflectSchemaScannerTest {
     public void testAge() {
       assertEquals("age", schema.property("age").name());
       assertEquals("age", schema.property("age").field().getName());
+      assertEquals("int", schema.property("age").describeType(false));
       assertEquals(List.of("Age in years"), schema.property("age").description());
       assertEquals(Set.of("birth"), (schema.property("age").aliases()));
       assertFalse(schema.property("age").isConstant());
@@ -254,6 +257,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testBio() {
       assertEquals("bio", schema.property("bio").field().getName());
+      assertEquals("java.util.List<java.lang.String>", schema.property("bio").describeType(false));
       assertTrue(schema.property("bio").description().isEmpty());
       assertTrue(schema.property("bio").aliases().isEmpty());
       assertTrue(schema.property("bio").isTransient());
