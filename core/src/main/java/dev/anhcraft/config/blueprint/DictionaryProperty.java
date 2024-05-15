@@ -59,6 +59,15 @@ public class DictionaryProperty extends AbstractProperty {
     return schema;
   }
 
+  /**
+   * Checks whether the given value is compatible to this property.<br>
+   * If the property type is {@code null}, it can hold any kind of value.<br>
+   * <b>Note: </b> A {@code null} value is always compatible even if the property type is primitive, this
+   * is due to the restriction of Dictionary that only permits non-null values.<br>
+   * If the type and the value is Dictionary, the value must be compatible with the schema.
+   * @param value the value
+   * @return {@code true} if the value is compatible
+   */
   public boolean isCompatible(@Nullable Object value) {
     if (value == null || type == null) return true;
     boolean b = ComplexTypes.isCompatible(value.getClass(), type);

@@ -3,6 +3,9 @@ package dev.anhcraft.config;
 import dev.anhcraft.config.util.StringUtil;
 import java.util.function.UnaryOperator;
 
+/**
+ * Built-in naming policies.
+ */
 public final class NamingPolicy {
   /**
    * Default naming policy, does nothing.

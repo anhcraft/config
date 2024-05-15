@@ -1,5 +1,8 @@
 package dev.anhcraft.config.context;
 
+/**
+ * Built-in path types.
+ */
 public enum PathType {
   /**
    * The path is made of field names.

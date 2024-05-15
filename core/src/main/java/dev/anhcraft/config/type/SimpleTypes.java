@@ -5,6 +5,9 @@ import java.lang.reflect.Array;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Utilities for working with simple types.
+ */
 public final class SimpleTypes {
   /**
    * Checks whether the given class type is scalar.<br>

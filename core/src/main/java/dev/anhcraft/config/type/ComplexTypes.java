@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Utilities for working with complex types.
+ */
 public class ComplexTypes {
   public static final Map<Class<?>, Class<?>> map = new HashMap<>();
 

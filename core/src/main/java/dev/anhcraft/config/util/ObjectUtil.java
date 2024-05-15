@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
+/**
+ * Utilities to work with objects.
+ */
 public final class ObjectUtil {
   private static Unsafe unsafe;
 

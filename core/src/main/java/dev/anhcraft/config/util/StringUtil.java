@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Utilities to work with strings.
+ */
 public final class StringUtil {
   /**
    * Splits the given string into fragments. The difference of this compared to {@link String#split(String)} is:

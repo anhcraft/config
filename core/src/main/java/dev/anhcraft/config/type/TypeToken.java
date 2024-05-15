@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
  * A type token captures an arbitrary type using Super Type Token technique.<br>
  * For example: {@code new TypeToken<List<String>>(){}} creates an anonymous subclass of {@link TypeToken}. Since
  * type information retains when extending a generic superclass, the type can be captured using {@link #capture()}
- * @param <T>
+ * @param <T> the class and type arguments to be captured, e.g. {@code List<String>}
  * @see TypeResolver
  */
 public abstract class TypeToken<T> extends TypeResolver {

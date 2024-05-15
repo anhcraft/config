@@ -17,8 +17,19 @@ import org.jetbrains.annotations.Nullable;
  * to compare two {@link Property} by comparing their associated {@link Field}
  */
 public interface Property {
+  /**
+   * Modifier to mark optional properties.
+   */
   byte MODIFIER_OPTIONAL = 1;
+
+  /**
+   * Modifier to mark transient properties.
+   */
   byte MODIFIER_TRANSIENT = 2;
+
+  /**
+   * Modifier to mark constant properties.
+   */
   byte MODIFIER_CONSTANT = 4;
 
   /**

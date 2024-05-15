@@ -11,6 +11,9 @@ import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * A generic implementation of {@link Dictionary}.
+ */
 public abstract class AbstractDictionary extends AbstractMap<String, Object> implements Dictionary {
   private final LinkedHashMap<String, Object> backend;
   private List<String> sortedKeys;

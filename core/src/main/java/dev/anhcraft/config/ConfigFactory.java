@@ -101,6 +101,9 @@ public final class ConfigFactory {
     return denormalizer;
   }
 
+  /**
+   * A builder for {@link ConfigFactory}
+   */
   public static class Builder {
     private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;

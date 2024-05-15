@@ -63,7 +63,14 @@ public @interface Denormalizer {
    * @see Denormalizer
    */
   enum Strategy {
+    /**
+     * Replaces the automatic type-adapting
+     */
     REPLACE,
+
+    /**
+     * Executes after the automatic type-adapting
+     */
     AFTER
   }
 }

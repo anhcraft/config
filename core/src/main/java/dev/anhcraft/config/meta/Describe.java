@@ -11,5 +11,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Describe {
+  /**
+   * Returns the description
+   * @return the description
+   */
   String[] value();
 }

@@ -29,7 +29,10 @@ public interface Dictionary extends Map<String, Object> {
   }
 
   /**
-   * @see Dictionary#of(Map)
+   * Creates a mutable {@link SchemalessDictionary} from the given map.
+   * @param map the map
+   * @return the dictionary
+   * @see Dictionary#of(Map, DictionarySchema)
    */
   static @NotNull Dictionary of(@NotNull Map<String, Object> map) {
     return of(map, null);

@@ -32,16 +32,28 @@ public class Processor {
     return strategy;
   }
 
+  /**
+   * Represents the invoker of a processor.
+   */
   public interface Invoker {}
 
+  /**
+   * A normalization process invoker.
+   */
   public interface NormalizationInvoker extends Invoker {
     @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance) throws Exception;
   }
 
+  /**
+   * A denormalization process invoker.
+   */
   public interface DenormalizationInvoker extends Invoker {
     @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance, @Nullable Object simple)
         throws Exception;
   }
 
+  /**
+   * A denormalization process invoker without changing the original value.
+   */
   public interface VoidDenormalizationInvoker extends DenormalizationInvoker {}
 }

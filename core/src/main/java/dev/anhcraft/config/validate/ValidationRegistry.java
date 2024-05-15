@@ -7,6 +7,9 @@ import java.util.function.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The validation registry.
+ */
 public class ValidationRegistry {
   // Static validations
   public static final NotNullValidation NOT_NULL = new NotNullValidation();

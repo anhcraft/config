@@ -56,7 +56,14 @@ public @interface Normalizer {
    * @see Normalizer
    */
   enum Strategy {
+    /**
+     * Replaces the automatic type-adapting
+     */
     REPLACE,
+
+    /**
+     * Executes before the automatic type-adapting
+     */
     BEFORE
   }
 }

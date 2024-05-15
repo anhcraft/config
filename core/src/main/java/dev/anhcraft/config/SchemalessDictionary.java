@@ -5,6 +5,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A schemaless dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects.
+ * @see Dictionary
+ */
 public class SchemalessDictionary extends AbstractDictionary {
   /**
    * Makes a copy of the given map as a {@link SchemalessDictionary}.<br>
