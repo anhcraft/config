@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AggregatedValidator implements Validator {
   private final List<Validation> validations;
-  private String lastMessage = "";
+  private final ThreadLocal<String> lastMessage = new ThreadLocal<>();
   private final boolean silent;
 
   public AggregatedValidator(@NotNull Validation[] validators, boolean silent) {
@@ -30,24 +30,21 @@ public class AggregatedValidator implements Validator {
   public boolean check(@Nullable Object value) {
     for (Validation validation : validations) {
       if (!validation.check(value)) {
-        lastMessage = validation.message();
+        lastMessage.set(validation.message());
         return false;
       }
     }
     return true;
   }
 
-  /**
-   * Gets all validations used by this validator.
-   * @return list of validations
-   */
+  @Override
   public @NotNull List<Validation> validations() {
     return validations;
   }
 
   @Override
   public @NotNull String message() {
-    return lastMessage;
+    return lastMessage.get();
   }
 
   @Override

@@ -1,9 +1,8 @@
 package dev.anhcraft.config.validate;
 
 import dev.anhcraft.config.validate.check.Validation;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A disabled validator always let the value pass.
