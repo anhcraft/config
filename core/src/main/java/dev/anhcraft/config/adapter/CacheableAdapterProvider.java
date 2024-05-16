@@ -18,8 +18,10 @@ public class CacheableAdapterProvider extends IndexedAdapterProvider {
     if (typeAdapters.containsKey(type)) {
       return (TypeAdapter<T>) typeAdapters.get(type);
     }
-    TypeAdapter<T> adapter = super.getTypeAdapter(type);
-    typeAdapters.put(type, adapter);
-    return adapter;
+    synchronized (typeAdapters) {
+      TypeAdapter<T> adapter = super.getTypeAdapter(type);
+      typeAdapters.put(type, adapter);
+      return adapter;
+    }
   }
 }
