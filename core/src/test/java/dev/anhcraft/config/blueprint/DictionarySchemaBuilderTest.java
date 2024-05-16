@@ -90,9 +90,9 @@ public class DictionarySchemaBuilderTest {
         DictionarySchema.create()
             .addProperty("name", p -> p.withType(String.class))
             .addProperty("type", p -> p.withType(String.class))
-            .addProperty("color", p -> p.withType(String.class).isOptional())
+            .addProperty("color", p -> p.withType(String.class))
             .addProperty("legs", p -> p.withType(int.class))
-            .addProperty("endangered", p -> p.withType(boolean.class).isOptional())
+            .addProperty("endangered", p -> p.withType(boolean.class))
             .build();
 
     assertEquals(
@@ -109,7 +109,6 @@ public class DictionarySchemaBuilderTest {
     assertNull(animalSchema.property("color").schema());
     assertEquals(String.class, animalSchema.property("color").type());
     assertTrue(animalSchema.property("color").aliases().isEmpty());
-    assertTrue(animalSchema.property("color").isOptional());
 
     assertNull(animalSchema.property("legs").schema());
     assertEquals(int.class, animalSchema.property("legs").type());
@@ -118,7 +117,6 @@ public class DictionarySchemaBuilderTest {
     assertNull(animalSchema.property("endangered").schema());
     assertEquals(boolean.class, animalSchema.property("endangered").type());
     assertTrue(animalSchema.property("endangered").aliases().isEmpty());
-    assertTrue(animalSchema.property("endangered").isOptional());
   }
 
   @Test
@@ -126,10 +124,10 @@ public class DictionarySchemaBuilderTest {
     var characterSchema =
         DictionarySchema.create()
             .addProperty("name", p -> p.withType(String.class))
-            .addProperty("class", p -> p.withType(String.class).isConstant())
-            .addProperty("level", p -> p.withType(int.class).isTransient())
-            .addProperty("health", p -> p.withType(double.class).isOptional())
-            .addProperty("mana", p -> p.withType(double.class).isOptional())
+            .addProperty("class", p -> p.withType(String.class))
+            .addProperty("level", p -> p.withType(int.class))
+            .addProperty("health", p -> p.withType(double.class))
+            .addProperty("mana", p -> p.withType(double.class))
             .build();
 
     var inventorySchema =
@@ -149,7 +147,6 @@ public class DictionarySchemaBuilderTest {
                 "skills",
                 p ->
                     p.withType(Dictionary.class)
-                        .isConstant()
                         .withSchema(
                             DictionarySchema.create()
                                 .addProperty("name", bp -> bp.withType(String.class))
@@ -161,24 +158,18 @@ public class DictionarySchemaBuilderTest {
             .addProperty(
                 "quests",
                 p ->
-                    p.isTransient()
-                        .isDictionaryArray(
-                            DictionarySchema.create()
-                                .addProperty("name", bp -> bp.withType(String.class))
-                                .build()))
+                    p.isDictionaryArray(
+                        DictionarySchema.create()
+                            .addProperty("name", bp -> bp.withType(String.class))
+                            .build()))
             .build();
 
     assertEquals(
         Set.of("name", "class", "level", "health", "mana"), characterSchema.propertyNames());
     assertTrue(characterSchema.property("name").aliases().isEmpty());
     assertEquals(String.class, characterSchema.property("name").type());
-    assertFalse(characterSchema.property("class").isOptional());
-    assertTrue(characterSchema.property("class").isConstant());
-    assertTrue(characterSchema.property("level").isTransient());
     assertEquals(int.class, characterSchema.property("level").type());
-    assertTrue(characterSchema.property("health").isOptional());
     assertEquals(double.class, characterSchema.property("health").type());
-    assertTrue(characterSchema.property("mana").isOptional());
     assertEquals(double.class, characterSchema.property("mana").type());
 
     assertEquals(Set.of("items"), inventorySchema.propertyNames());
@@ -186,13 +177,10 @@ public class DictionarySchemaBuilderTest {
     assertEquals(String.class, inventorySchema.property("items").schema().property("name").type());
 
     assertEquals(Set.of("skills"), skillSchema.propertyNames());
-    assertFalse(skillSchema.property("skills").isOptional());
-    assertTrue(skillSchema.property("skills").isConstant());
     assertEquals(Dictionary.class, skillSchema.property("skills").type());
     assertEquals(String.class, skillSchema.property("skills").schema().property("name").type());
 
     assertEquals(Set.of("quests"), questSchema.propertyNames());
-    assertTrue(questSchema.property("quests").isTransient());
     assertEquals(Dictionary[].class, questSchema.property("quests").type());
     assertEquals(String.class, questSchema.property("quests").schema().property("name").type());
   }

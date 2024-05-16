@@ -83,7 +83,7 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
 
       ClassProperty property =
           new ClassProperty(
-              name, description, modifier, validator, normalizer, denormalizer, field);
+              name, description, validator, field, modifier, normalizer, denormalizer);
 
       lookup.put(name.primary(), property);
 

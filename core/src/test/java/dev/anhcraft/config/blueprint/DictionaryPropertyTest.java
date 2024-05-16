@@ -131,10 +131,7 @@ public class DictionaryPropertyTest {
         new DictionaryProperty(
             naming,
             List.of(),
-            (byte) 0,
             DisabledValidator.INSTANCE,
-            null,
-            null,
             Dictionary.class,
             DictionarySchema.create()
                 .addProperty("name", p -> p.withType(String.class))

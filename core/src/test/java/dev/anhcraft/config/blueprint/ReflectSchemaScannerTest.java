@@ -303,7 +303,7 @@ public class ReflectSchemaScannerTest {
 
     @Test
     public void testNormalizerBeforeStrategy() throws Exception {
-      Schema schema = scanner.scanSchema(Log.class);
+      ClassSchema schema = scanner.scanSchema(Log.class);
       assertEquals(2, schema.properties().size());
 
       Processor processor1 = schema.property("timestamp").normalizer();

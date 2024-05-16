@@ -1,16 +1,10 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.meta.Constant;
-import dev.anhcraft.config.meta.Optional;
-import dev.anhcraft.config.meta.Transient;
 import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a property in a {@link Schema}.<br>
@@ -53,8 +47,7 @@ public interface Property {
    *
    * @return the aliases
    */
-  @NotNull
-  Set<String> aliases();
+  @NotNull Set<String> aliases();
 
   /**
    * Gets the description of this property.
@@ -64,53 +57,9 @@ public interface Property {
   @NotNull List<String> description();
 
   /**
-   * Gets the modifier of this property.
-   *
-   * @return the modifier
-   */
-  byte modifier();
-
-  /**
-   * Checks if this property is annotated as {@link Optional}
-   *
-   * @return whether the property is optional
-   */
-  boolean isOptional();
-
-  /**
-   * Checks if this property is annotated as {@link Transient}.<br>
-   * Note: This is different from checking transient on the field.
-   *
-   * @return whether the property is transient
-   */
-  boolean isTransient();
-
-  /**
-   * Checks if this property is annotated as {@link Constant}
-   * Note: This is different from checking final on the field.
-   *
-   * @return whether the property is constant
-   */
-  boolean isConstant();
-
-  /**
    * Gets the validator of this property.
    *
    * @return the validator
    */
   @NotNull Validator validator();
-
-  /**
-   * Gets the normalization processor.
-   *
-   * @return the processor
-   */
-  @Nullable Processor normalizer();
-
-  /**
-   * Gets the denormalization processor.
-   *
-   * @return the processor
-   */
-  @Nullable Processor denormalizer();
 }

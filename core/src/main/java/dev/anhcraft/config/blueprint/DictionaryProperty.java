@@ -4,6 +4,7 @@ import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.validate.DisabledValidator;
+import dev.anhcraft.config.validate.ValidationRegistry;
 import dev.anhcraft.config.validate.Validator;
 import java.util.*;
 import org.jetbrains.annotations.Contract;
@@ -20,13 +21,10 @@ public class DictionaryProperty extends AbstractProperty {
   public DictionaryProperty(
       @NotNull PropertyNaming naming,
       @NotNull List<String> description,
-      byte modifier,
       @NotNull Validator validator,
-      @Nullable Processor normalizer,
-      @Nullable Processor denormalizer,
       @Nullable Class<?> type,
       @Nullable DictionarySchema schema) {
-    super(naming, description, modifier, validator, normalizer, denormalizer);
+    super(naming, description, validator);
     if (type != null && !SimpleTypes.validate(type))
       throw new IllegalArgumentException(
           "The type must be a simple type (got " + ComplexTypes.describe(type) + ")");
@@ -96,10 +94,7 @@ public class DictionaryProperty extends AbstractProperty {
     private String primaryName;
     private LinkedHashSet<String> aliases;
     private List<String> description;
-    private byte modifier;
     private Validator validator;
-    private Processor normalizer;
-    private Processor denormalizer;
     private Class<?> type;
     private DictionarySchema schema;
 
@@ -161,36 +156,6 @@ public class DictionaryProperty extends AbstractProperty {
     }
 
     /**
-     * Lets the property be optional.
-     * @return this
-     */
-    @Contract("-> this")
-    public Builder isOptional() {
-      this.modifier |= MODIFIER_OPTIONAL;
-      return this;
-    }
-
-    /**
-     * Lets the property be constant.
-     * @return this
-     */
-    @Contract("-> this")
-    public Builder isConstant() {
-      this.modifier |= MODIFIER_CONSTANT;
-      return this;
-    }
-
-    /**
-     * Lets the property be transient.
-     * @return this
-     */
-    @Contract("-> this")
-    public Builder isTransient() {
-      this.modifier |= MODIFIER_TRANSIENT;
-      return this;
-    }
-
-    /**
      * Sets the validator of this property.
      * @param validator the validator
      * @return this
@@ -202,24 +167,14 @@ public class DictionaryProperty extends AbstractProperty {
     }
 
     /**
-     * Sets the normalizer of this property.
-     * @param normalizer the normalizer
+     * Sets the validation of this property.
+     * @param validation the validation
      * @return this
+     * @see dev.anhcraft.config.meta.Validate
      */
     @Contract("_ -> this")
-    public Builder withNormalizer(@Nullable Processor normalizer) {
-      this.normalizer = normalizer;
-      return this;
-    }
-
-    /**
-     * Sets the denormalizer of this property.
-     * @param denormalizer the denormalizer
-     * @return this
-     */
-    @Contract("_ -> this")
-    public Builder withDenormalizer(@Nullable Processor denormalizer) {
-      this.denormalizer = denormalizer;
+    public Builder withValidator(@NotNull String validation) {
+      this.validator = ValidationRegistry.DEFAULT.parseString(validation, false);
       return this;
     }
 
@@ -275,10 +230,7 @@ public class DictionaryProperty extends AbstractProperty {
       return new DictionaryProperty(
           new PropertyNaming(primaryName, aliases == null ? new LinkedHashSet<>() : aliases),
           description == null ? Collections.emptyList() : description,
-          modifier,
           validator == null ? DisabledValidator.INSTANCE : validator,
-          normalizer,
-          denormalizer,
           type,
           schema);
     }
