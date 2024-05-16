@@ -6,7 +6,8 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A schemaless dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects.
+ * A schemaless dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects.<br>
+ * This implementation is not thread-safe.
  * @see Dictionary
  */
 public class SchemalessDictionary extends AbstractDictionary {

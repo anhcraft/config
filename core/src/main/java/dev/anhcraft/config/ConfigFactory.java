@@ -73,7 +73,8 @@ public final class ConfigFactory {
 
   /**
    * Gets the schema for the given type.<br>
-   * The result will be cached for future calls.
+   * The result will be cached for future calls.<br>
+   * This method is not thread-safe by default, unless the factory has a custom concurrent {@link SchemaCacheProvider}.
    * @param type the type
    * @return the schema
    */
@@ -215,7 +216,7 @@ public final class ConfigFactory {
 
     /**
      * Sets the schema cache provider.<br>
-     * By default, the schema cache is a linked hash map with a capacity of 100 classes.<br>
+     * By default, the schema cache is a {@link LinkedHashMap} with a capacity of 100 classes.<br>
      * It is possible to provide custom map implementation such as a map view from Guava Cache.
      * @param provider the schema cache
      * @return this
