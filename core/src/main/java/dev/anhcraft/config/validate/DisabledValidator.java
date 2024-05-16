@@ -1,6 +1,9 @@
 package dev.anhcraft.config.validate;
 
+import dev.anhcraft.config.validate.check.Validation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 /**
  * A disabled validator always let the value pass.
@@ -16,6 +19,11 @@ public class DisabledValidator implements Validator {
   @Override
   public @NotNull String message() {
     return "";
+  }
+
+  @Override
+  public @NotNull List<Validation> validations() {
+    return List.of();
   }
 
   @Override
