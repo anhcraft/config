@@ -1,7 +1,10 @@
 package dev.anhcraft.config.blueprint;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -9,22 +12,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class PropertyNaming {
   private final String primary;
-  private final LinkedHashSet<String> aliases;
+  private final Set<String> aliases;
 
   public PropertyNaming(@NotNull String primary, @NotNull LinkedHashSet<String> aliases) {
+    this(aliases, primary);
     if (primary.isEmpty()) throw new IllegalArgumentException("Primary name cannot be empty");
     for (String alias : aliases) {
       if (alias.isEmpty()) throw new IllegalArgumentException("Alias cannot be empty");
       if (alias.equals(primary))
         throw new IllegalArgumentException("Alias must be different from primary name");
     }
-    this.primary = primary;
-    this.aliases = aliases;
   }
 
   PropertyNaming(LinkedHashSet<String> aliases, String primary) { // faster construction
     this.primary = primary;
-    this.aliases = aliases;
+    this.aliases = Collections.unmodifiableSet(aliases);
   }
 
   /**
@@ -39,7 +41,7 @@ public final class PropertyNaming {
    * Gets all aliases.
    * @return the aliases
    */
-  @NotNull public LinkedHashSet<String> aliases() {
+  @NotNull public Set<String> aliases() {
     return aliases;
   }
 

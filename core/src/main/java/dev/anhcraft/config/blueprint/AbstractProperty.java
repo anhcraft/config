@@ -7,6 +7,8 @@ import dev.anhcraft.config.validate.Validator;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +55,7 @@ public abstract class AbstractProperty implements Property {
    * @return the aliases
    */
   @Override
-  @NotNull public LinkedHashSet<String> aliases() {
+  @NotNull public Set<String> aliases() {
     return naming.aliases();
   }
 

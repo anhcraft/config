@@ -7,6 +7,8 @@ import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +53,8 @@ public interface Property {
    *
    * @return the aliases
    */
-  @NotNull LinkedHashSet<String> aliases();
+  @NotNull
+  Set<String> aliases();
 
   /**
    * Gets the description of this property.
