@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title th:text="${title}"></title>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="none" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="main.css"/>
+</head>
+<body>
+<main id="page-layout">
+    <nav id="menu">
+        <div id="toolbar">
+            <div id="collapse-menu">
+                <svg class="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+                </svg>
+                <svg class="collapsed" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </div>
+        <div class="collapsable-content">
+            <div id="search">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <!--suppress HtmlFormInputWithoutLabel -->
+                <input id="search-input" type="text" placeholder="Find setting...">
+            </div>
+            <div id="menu-links">
+                <a th:each="entity : ${schemaEntities}" th:text="${entity.name}" th:href="${entity.getPageFileName()}"></a>
+            </div>
+        </div>
+    </nav>
+    <div id="main-view">
+        <div id="search-view" style="display: none">
+            <div>Showing <span id="search-results-count"></span> results for <span id="search-term"></span> </div>
+            <div>Matched keywords: <span id="search-keywords"></span></div>
+            <div id="search-results"></div>
+        </div>
+        <div id="schema">
+            <h1 th:text="${title}"></h1>
+            <div>
+                <div class="property" th:each="prop : ${schema.properties()}">
+                    <div class="property-header">
+                        <h2 th:text="${prop.name()}"></h2>
+                    </div>
+                    <div class="property-tab">
+                        <div class="property-tab-nav">
+                            <div class="active" data-tab-id="desc">Description</div>
+                            <div data-tab-id="metadata">Metadata</div>
+                            <div data-tab-id="restriction" th:if="${!prop.validator().validations().isEmpty()}">Restriction</div>
+                        </div>
+                        <div class="property-tab-content">
+                            <div data-tab-id="desc" class="active">
+                                <p class="property-desc" th:utext="${#strings.listJoin(prop.description(), '<br>')}"></p>
+                            </div>
+                            <div data-tab-id="metadata">
+                                <table>
+                                    <tr>
+                                        <td>Type</td>
+                                        <td th:text="${prop.describeType(true)}"></td>
+                                    </tr>
+                                    <tr th:if="${!prop.aliases().isEmpty()}">
+                                        <td>Alias</td>
+                                        <td th:text="${#strings.setJoin(prop.aliases(), ', ')}"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div data-tab-id="restriction" th:if="${!prop.validator().validations().isEmpty()}">
+                                <table>
+                                    <tr th:each="validation : ${prop.validator().validations()}">
+                                        <td>Restrict</td>
+                                        <td th:text="${validation.message()}"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer>Powered by <a href="https://github.com/anhcraft/config">ConfigDoc</a></footer>
+<script src="main.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

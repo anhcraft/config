@@ -1,4 +1,4 @@
-package dev.anhcraft.config.configdoc.internal;
+package dev.anhcraft.config.configdoc;
 
 import dev.anhcraft.jvmkit.utils.IOUtil;
 import java.io.IOException;
@@ -18,8 +18,7 @@ public class ResourceLoader {
           @Override
           public String apply(String s) {
             try {
-              return new String(
-                  IOUtil.readResource(getClass(), "/configdoc/" + s), StandardCharsets.UTF_8);
+              return new String(IOUtil.readResource(getClass(), "/" + s), StandardCharsets.UTF_8);
             } catch (IOException e) {
               e.printStackTrace();
             }
