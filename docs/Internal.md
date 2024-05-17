@@ -122,6 +122,10 @@ flowchart TD
 - The schema is built dynamically in an _imperative_ manner
 - Provides the view of a _virtual_ class which does not exist at runtime
 
+### Schema identity
+- Class schema is compared by its type
+- Dictionary schema is compared by its identifier if specified, otherwise, one has no identity
+
 ### Schema construction
 
 |               | Description                                                                                    | Class Schema | Dictionary Schema |
