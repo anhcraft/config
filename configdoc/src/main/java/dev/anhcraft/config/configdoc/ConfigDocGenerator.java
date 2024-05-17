@@ -4,6 +4,7 @@ import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
 import java.io.File;
@@ -91,6 +92,7 @@ public class ConfigDocGenerator {
     }
 
     FileUtil.write(new File(output, "main.css"), resourceLoader.get("main.css"));
+    FileUtil.write(new File(output, "tooltip.css"), resourceLoader.get("tooltip.css"));
     FileUtil.write(new File(output, "main.js"), resourceLoader.get("main.js"));
     FileUtil.write(new File(output, "search.js"), generateSearchModule());
     return this;
@@ -133,34 +135,40 @@ public class ConfigDocGenerator {
   public String generateInteractiveType(Type type, boolean simple) {
     if (type instanceof GenericArrayType) {
       GenericArrayType arrayType = (GenericArrayType) type;
-      return String.format("%s[]", generateInteractiveType(arrayType.getGenericComponentType(), simple));
+      return String.format(
+          "%s[]", generateInteractiveType(arrayType.getGenericComponentType(), simple));
     } else if (type instanceof ParameterizedType) {
       ParameterizedType paramType = (ParameterizedType) type;
       String args =
-        Arrays.stream(paramType.getActualTypeArguments())
-          .map(a -> generateInteractiveType(a, simple))
-          .collect(Collectors.joining(","));
+          Arrays.stream(paramType.getActualTypeArguments())
+              .map(a -> generateInteractiveType(a, simple))
+              .collect(Collectors.joining(","));
       if (paramType.getOwnerType() != null)
         return String.format(
-          "%s.%s<%s>",
-          generateInteractiveType(paramType.getOwnerType(), simple),
-          generateInteractiveType(paramType.getRawType(), simple),
-          args);
-      else return String.format("%s<%s>", generateInteractiveType(paramType.getRawType(), simple), args);
+            "%s.%s&lt;%s&gt;",
+            generateInteractiveType(paramType.getOwnerType(), simple),
+            generateInteractiveType(paramType.getRawType(), simple),
+            args);
+      else
+        return String.format(
+            "%s&lt;%s&gt;", generateInteractiveType(paramType.getRawType(), simple), args);
     } else if (type instanceof TypeVariable) {
       return ((TypeVariable<?>) type).getName();
     } else if (type instanceof TypeResolver) {
       return generateInteractiveType(((TypeResolver) type).provideType(), simple);
     } else if (type instanceof Class) {
       Class<?> clazz = (Class<?>) type;
+      if (clazz.isArray()) return generateInteractiveType(clazz.getComponentType(), simple) + "[]";
+
       String link = getJavadocLinkForClass(clazz);
-      String name = simple ? clazz.getSimpleName() : clazz.getName();
-      if (link == null)
-        return name;
-      return String.format("<a href=\"%s\" target=\"_blank\">%s</a>", link, name);
-    } else {
-      return type.getTypeName();
+      String full = clazz.getName();
+      String name = simple ? clazz.getSimpleName() : full;
+
+      if (link == null) return String.format("<span tooltip=\"%s\">%s</span>", full, name);
+      return String.format("<a href=\"%s\" target=\"_blank\" tooltip=\"%s\">%s</a>", link, full, name);
     }
+
+    return type.getTypeName();
   }
 
   private String getJavadocLinkForClass(Class<?> clazz) {
