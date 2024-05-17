@@ -26,14 +26,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>dev.anhcraft</groupId>
+            <artifactId>config.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.anhcraft</groupId>
             <artifactId>JvmKit</artifactId>
             <version>1.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>dev.anhcraft</groupId>
-            <artifactId>config.core</artifactId>
-            <version>1.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf</groupId>
