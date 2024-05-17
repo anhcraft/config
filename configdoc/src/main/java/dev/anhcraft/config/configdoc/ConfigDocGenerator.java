@@ -4,8 +4,13 @@ import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
+import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
 import java.io.File;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,9 +27,10 @@ public class ConfigDocGenerator {
   private int unnamedSchemaCounter = 1;
 
   public ConfigDocGenerator() {
-    addJavadoc("(org.bukkit*)|(org.spigotmc*)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(com.destroystokyo.paper*)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(io.papermc.paper*)", "https://jd.papermc.io/paper/1.20/");
+    addJavadoc("(org\\.bukkit.+)|(org\\.spigotmc.+)", "https://jd.papermc.io/paper/1.20/");
+    addJavadoc("(com\\.destroystokyo\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
+    addJavadoc("(io\\.papermc\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
+    addJavadoc("(java\\..+)", "https://docs.oracle.com/en/java/javase/22/docs/api/");
   }
 
   @Contract("_ -> this")
@@ -74,6 +80,7 @@ public class ConfigDocGenerator {
 
     Map<String, Object> globalVars = new HashMap<>();
     globalVars.put("schemaEntities", schemaEntities);
+    globalVars.put("generator", this);
 
     for (SchemaEntity entity : schemaEntities) {
       Context context = new Context(Locale.US, globalVars);
@@ -89,7 +96,7 @@ public class ConfigDocGenerator {
     return this;
   }
 
-  public String generateSearchModule() {
+  private String generateSearchModule() {
     Map<String, List<Integer>> keywordMap = new HashMap<>();
     for (int i = 0; i < schemaEntities.size(); i++) {
       SchemaEntity entity = schemaEntities.get(i);
@@ -120,5 +127,54 @@ public class ConfigDocGenerator {
         .get("search.js")
         .replace("/*__SCHEMA_INDEX__*/", schemaIndex)
         .replace("/*__KEYWORD_INDEX__*/", keywordJoiner.toString());
+  }
+
+  // Copy from ComplexTypes#describe
+  public String generateInteractiveType(Type type, boolean simple) {
+    if (type instanceof GenericArrayType) {
+      GenericArrayType arrayType = (GenericArrayType) type;
+      return String.format("%s[]", generateInteractiveType(arrayType.getGenericComponentType(), simple));
+    } else if (type instanceof ParameterizedType) {
+      ParameterizedType paramType = (ParameterizedType) type;
+      String args =
+        Arrays.stream(paramType.getActualTypeArguments())
+          .map(a -> generateInteractiveType(a, simple))
+          .collect(Collectors.joining(","));
+      if (paramType.getOwnerType() != null)
+        return String.format(
+          "%s.%s<%s>",
+          generateInteractiveType(paramType.getOwnerType(), simple),
+          generateInteractiveType(paramType.getRawType(), simple),
+          args);
+      else return String.format("%s<%s>", generateInteractiveType(paramType.getRawType(), simple), args);
+    } else if (type instanceof TypeVariable) {
+      return ((TypeVariable<?>) type).getName();
+    } else if (type instanceof TypeResolver) {
+      return generateInteractiveType(((TypeResolver) type).provideType(), simple);
+    } else if (type instanceof Class) {
+      Class<?> clazz = (Class<?>) type;
+      String link = getJavadocLinkForClass(clazz);
+      String name = simple ? clazz.getSimpleName() : clazz.getName();
+      if (link == null)
+        return name;
+      return String.format("<a href=\"%s\" target=\"_blank\">%s</a>", link, name);
+    } else {
+      return type.getTypeName();
+    }
+  }
+
+  private String getJavadocLinkForClass(Class<?> clazz) {
+    String path = clazz.getName();
+    String module = clazz.getModule().getName();
+    for (Map.Entry<Pattern, String> jd : javaDocs.entrySet()) {
+      if (jd.getKey().matcher(path).matches()) {
+        String link = jd.getValue();
+        link += module == null ? "" : module + "/";
+        link += path.replace('.', '/').replace('$', '.');
+        link += ".html";
+        return link;
+      }
+    }
+    return null;
   }
 }

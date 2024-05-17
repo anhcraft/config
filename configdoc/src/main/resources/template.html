@@ -60,7 +60,7 @@
                                 <table>
                                     <tr>
                                         <td>Type</td>
-                                        <td th:text="${prop.describeType(true)}"></td>
+                                        <td th:utext="${generator.generateInteractiveType(prop.type(), true)}"></td>
                                     </tr>
                                     <tr th:if="${!prop.aliases().isEmpty()}">
                                         <td>Alias</td>
