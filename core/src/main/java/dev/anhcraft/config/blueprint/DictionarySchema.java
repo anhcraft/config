@@ -5,15 +5,25 @@ import java.util.*;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a dictionary schema.
  */
 public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
+  private final String identifier;
+  private final String name;
+
   public DictionarySchema(
       @NotNull List<DictionaryProperty> properties,
-      @NotNull Map<String, DictionaryProperty> lookup) {
+      @NotNull Map<String, DictionaryProperty> lookup,
+      @Nullable String identifier,
+      @Nullable String name) {
     super(properties, lookup);
+    if (identifier != null && !identifier.matches("[A-Za-z0-9]+"))
+      throw new IllegalArgumentException("Invalid identifier: " + identifier);
+    this.identifier = identifier;
+    this.name = name;
   }
 
   /**
@@ -24,11 +34,57 @@ public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
     return new Builder();
   }
 
+  @Override
+  public @Nullable String getIdentifier() {
+    return identifier;
+  }
+
+  @Override
+  public @Nullable String getName() {
+    return name;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof DictionarySchema)) return false;
+    DictionarySchema that = (DictionarySchema) o;
+    if (identifier != null && that.identifier != null) return identifier.equals(that.identifier);
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(identifier);
+  }
+
   /**
    * A builder for {@link DictionarySchema}.
    */
   public static class Builder {
     private final List<DictionaryProperty> propertyList = new ArrayList<>();
+    private String identifier;
+    private String name;
+
+    /**
+     * Sets the identifier.
+     * @param identifier the identifier
+     * @return this
+     */
+    public @NotNull Builder withIdentifier(String identifier) {
+      this.identifier = identifier;
+      return this;
+    }
+
+    /**
+     * Sets the name.
+     * @param name the name
+     * @return this
+     */
+    public @NotNull Builder withName(String name) {
+      this.name = name;
+      return this;
+    }
 
     /**
      * Adds multiple properties.
@@ -87,7 +143,7 @@ public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
           lookup.putIfAbsent(alias, property);
         }
       }
-      return new DictionarySchema(properties, lookup);
+      return new DictionarySchema(properties, lookup, identifier, name);
     }
   }
 }

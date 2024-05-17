@@ -105,7 +105,7 @@ public class DictionaryPropertyTest {
             DictionaryProperty.create()
                 .withNames("foo")
                 .withType(type)
-                .withSchema(new DictionarySchema(List.of(), Map.of()))
+                .withSchema(new DictionarySchema(List.of(), Map.of(), null, null))
                 .build());
   }
 
@@ -121,7 +121,7 @@ public class DictionaryPropertyTest {
             DictionaryProperty.create()
                 .withNames("foo")
                 .withType(type)
-                .withSchema(new DictionarySchema(List.of(), Map.of()))
+                .withSchema(new DictionarySchema(List.of(), Map.of(), null, null))
                 .build());
   }
 

@@ -45,6 +45,27 @@ public class DictionarySchemaBuilderTest {
   }
 
   @Test
+  public void testSchemaName() {
+    assertEquals(
+        "foo", DictionarySchema.create().withName("foo").withIdentifier("bar").build().getName());
+  }
+
+  @Test
+  public void testSchemaWithSameIdentity() {
+    assertEquals(
+        DictionarySchema.create()
+            .withIdentifier("buzz")
+            .addProperty("foo", p -> p.withType(String.class))
+            .addProperty("bar", p -> p.withType(String.class))
+            .build(),
+        DictionarySchema.create()
+            .withIdentifier("buzz")
+            .addProperty("foo", p -> p.withType(String.class))
+            .addProperty("bar", p -> p.withType(String.class))
+            .build());
+  }
+
+  @Test
   public void testBuildFoodSchema() {
     var ingredient =
         DictionarySchema.create()
@@ -163,6 +184,12 @@ public class DictionarySchemaBuilderTest {
                             .addProperty("name", bp -> bp.withType(String.class))
                             .build()))
             .build();
+
+    assertNotEquals(questSchema, skillSchema);
+    assertNotEquals(questSchema, inventorySchema);
+    assertNotEquals(questSchema, characterSchema);
+    assertNotEquals(skillSchema, inventorySchema);
+    assertNotEquals(skillSchema, characterSchema);
 
     assertEquals(
         Set.of("name", "class", "level", "health", "mana"), characterSchema.propertyNames());
