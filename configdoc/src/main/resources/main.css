@@ -116,6 +116,7 @@ footer {
     color: var(--white);
 }
 
+#menu #menu-links > a.active,
 #menu #menu-links > a:hover {
     background-color: var(--light-dark);
     cursor: pointer;

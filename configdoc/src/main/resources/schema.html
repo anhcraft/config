@@ -30,7 +30,7 @@
                 <input id="search-input" type="text" placeholder="Find setting...">
             </div>
             <div id="menu-links">
-                <a th:each="entity : ${schemaEntities}" th:text="${entity.name}" th:href="${entity.getPageFileName()}"></a>
+                <a th:each="entity : ${schemaEntities}" th:text="${entity.name}" th:href="${entity.getPageFileName()}" th:classappend="${entity.getPageFileName() == fileName} ? 'active' : ''"></a>
             </div>
         </div>
     </nav>
