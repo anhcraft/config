@@ -28,11 +28,6 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   @Override
-  public String getIdentifier() {
-    return type.getName();
-  }
-
-  @Override
   public String getName() {
     return type.getSimpleName();
   }

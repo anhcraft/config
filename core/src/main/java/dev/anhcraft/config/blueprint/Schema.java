@@ -11,14 +11,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface Schema<T extends Property> {
   /**
-   * Gets the identifier of the schema.<br>
-   * The identifier must contain only alphanumeric characters.<br>
-   * The identifier is used to compare two schemas efficiently.
-   * @return the identifier
-   */
-  @Nullable String getIdentifier();
-
-  /**
    * Gets the name of the schema.
    * @return the name
    */

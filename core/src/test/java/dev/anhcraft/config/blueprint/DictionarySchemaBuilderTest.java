@@ -46,20 +46,17 @@ public class DictionarySchemaBuilderTest {
 
   @Test
   public void testSchemaName() {
-    assertEquals(
-        "foo", DictionarySchema.create().withName("foo").withIdentifier("bar").build().getName());
+    assertEquals("foo", DictionarySchema.create().withName("foo").build().getName());
   }
 
   @Test
-  public void testSchemaWithSameIdentity() {
-    assertEquals(
+  public void testSchemaIdentity() {
+    assertNotEquals(
         DictionarySchema.create()
-            .withIdentifier("buzz")
             .addProperty("foo", p -> p.withType(String.class))
             .addProperty("bar", p -> p.withType(String.class))
             .build(),
         DictionarySchema.create()
-            .withIdentifier("buzz")
             .addProperty("foo", p -> p.withType(String.class))
             .addProperty("bar", p -> p.withType(String.class))
             .build());
