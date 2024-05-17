@@ -66,12 +66,14 @@ public class ConfigDocGenerator {
       SchemaEntity entity = schemaEntities.get(i);
       Set<String> keywords = new HashSet<>(entity.getSchema().propertyNames());
       keywords.add(entity.getName());
+      keywords.addAll(tokenize(entity.getName()));
       Set<String> tokens = new HashSet<>();
       for (String keyword : keywords) {
+        tokens.add(keyword);
         tokens.addAll(tokenize(keyword));
       }
       for (String token : tokens) {
-        keywordMap.computeIfAbsent(token, key -> new ArrayList<>()).add(i);
+        keywordMap.computeIfAbsent(token.toLowerCase(), key -> new ArrayList<>()).add(i);
       }
     }
     StringJoiner keywordJoiner = new StringJoiner(",");
