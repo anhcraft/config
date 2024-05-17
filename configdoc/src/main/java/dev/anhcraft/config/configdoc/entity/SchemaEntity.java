@@ -22,6 +22,6 @@ public class SchemaEntity {
   }
 
   @NotNull public String getPageFileName() {
-    return "page." + name + ".html";
+    return "schema." + name + ".html";
   }
 }

@@ -87,7 +87,7 @@ public class ConfigDocGenerator {
       Context context = new Context(Locale.US, globalVars);
       context.setVariable("title", entity.getName());
       context.setVariable("schema", entity.getSchema());
-      String text = templateEngine.process("template", context);
+      String text = templateEngine.process("schema", context);
       FileUtil.write(new File(output, entity.getPageFileName()), text);
     }
 
