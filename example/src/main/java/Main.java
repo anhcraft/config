@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.NamingPolicy;
-import dev.anhcraft.config.configdoc.ConfigDocGenerator;
+import dev.anhcraft.config.configdoc.ConfigDocBuilder;
 import model.*;
 
 import java.io.File;
@@ -54,7 +54,7 @@ public class Main {
         Dictionary wrapper = (Dictionary) factory.getNormalizer().normalize(item);
         System.out.println(GSON.toJson(wrapper));
 
-      new ConfigDocGenerator()
+      new ConfigDocBuilder()
         .withSchema(factory.getSchema(Warehouse.class))
         .withSchema(factory.getSchema(Item.class))
         .withSchema(factory.getSchema(Location.class))

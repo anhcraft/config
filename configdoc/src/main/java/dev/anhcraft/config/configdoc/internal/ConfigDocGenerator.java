@@ -1,8 +1,5 @@
-package dev.anhcraft.config.configdoc;
+package dev.anhcraft.config.configdoc.internal;
 
-import dev.anhcraft.config.blueprint.ClassSchema;
-import dev.anhcraft.config.blueprint.DictionarySchema;
-import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
@@ -15,60 +12,24 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 public class ConfigDocGenerator {
   private static final ResourceLoader resourceLoader = new ResourceLoader();
-  private final List<SchemaEntity> schemaEntities = new ArrayList<>();
-  private final Map<Pattern, String> javaDocs = new HashMap<>();
-  private int unnamedSchemaCounter = 1;
+  private final List<SchemaEntity> schemaEntities;
+  private final Map<Pattern, String> javaDocs;
+  private final File output;
 
-  public ConfigDocGenerator() {
-    addJavadoc("(org\\.bukkit.+)|(org\\.spigotmc.+)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(com\\.destroystokyo\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(io\\.papermc\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(java\\..+)", "https://docs.oracle.com/en/java/javase/22/docs/api/");
+  public ConfigDocGenerator(
+      List<SchemaEntity> schemaEntities, Map<Pattern, String> javaDocs, File output) {
+    this.schemaEntities = schemaEntities;
+    this.javaDocs = javaDocs;
+    this.output = output;
   }
 
-  @Contract("_ -> this")
-  public ConfigDocGenerator withSchema(@NotNull ClassSchema schema) {
-    return withSchema(new SchemaEntity(schema.type().getSimpleName(), schema));
-  }
-
-  @Contract("_ -> this")
-  public ConfigDocGenerator withSchema(@NotNull DictionarySchema schema) {
-    return withSchema(new SchemaEntity("UnnamedSchema" + (unnamedSchemaCounter++), schema));
-  }
-
-  @Contract("_, _ -> this")
-  public ConfigDocGenerator withSchema(@NotNull String name, @NotNull Schema<?> schema) {
-    return withSchema(new SchemaEntity(name, schema));
-  }
-
-  @Contract("_ -> this")
-  public ConfigDocGenerator withSchema(@NotNull SchemaEntity schema) {
-    schemaEntities.add(schema);
-    return this;
-  }
-
-  @Contract("_, _ -> this")
-  public ConfigDocGenerator addJavadoc(@NotNull String classPattern, @NotNull String link) {
-    return addJavadoc(Pattern.compile(classPattern), link);
-  }
-
-  @Contract("_, _ -> this")
-  public ConfigDocGenerator addJavadoc(@NotNull Pattern classPattern, @NotNull String link) {
-    if (!link.endsWith("/")) link = link + '/';
-    javaDocs.put(classPattern, link);
-    return this;
-  }
-
-  @Contract("_ -> this")
-  public ConfigDocGenerator generate(@NotNull File output) {
+  public ConfigDocGenerator generate() {
     output.mkdirs();
 
     ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();

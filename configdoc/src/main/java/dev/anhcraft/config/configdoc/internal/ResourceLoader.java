@@ -1,4 +1,4 @@
-package dev.anhcraft.config.configdoc;
+package dev.anhcraft.config.configdoc.internal;
 
 import dev.anhcraft.jvmkit.utils.IOUtil;
 import java.io.IOException;
