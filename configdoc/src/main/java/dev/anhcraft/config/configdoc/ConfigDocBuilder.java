@@ -1,7 +1,5 @@
 package dev.anhcraft.config.configdoc;
 
-import dev.anhcraft.config.blueprint.ClassSchema;
-import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
 import dev.anhcraft.config.configdoc.internal.ConfigDocGenerator;
@@ -13,6 +11,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ConfigDocBuilder {
   private final List<SchemaEntity> schemaEntities = new ArrayList<>();
@@ -26,19 +25,17 @@ public class ConfigDocBuilder {
     addJavadoc("(java\\..+)", "https://docs.oracle.com/en/java/javase/22/docs/api/");
   }
 
-  @Contract("_ -> this")
-  public ConfigDocBuilder withSchema(@NotNull ClassSchema schema) {
-    return withSchema(new SchemaEntity(schema.type().getSimpleName(), schema));
-  }
-
-  @Contract("_ -> this")
-  public ConfigDocBuilder withSchema(@NotNull DictionarySchema schema) {
-    return withSchema(new SchemaEntity("UnnamedSchema" + (unnamedSchemaCounter++), schema));
-  }
-
   @Contract("_, _ -> this")
-  public ConfigDocBuilder withSchema(@NotNull String name, @NotNull Schema<?> schema) {
-    return withSchema(new SchemaEntity(name, schema));
+  public ConfigDocBuilder withSchema(@Nullable String name, @NotNull Schema<?> schema) {
+    String entityName = schema.getName();
+    if (entityName == null)
+      entityName = name != null ? name : "UnnamedSchema" + (unnamedSchemaCounter++);
+    return withSchema(new SchemaEntity(schema.getIdentifier(), entityName, schema));
+  }
+
+  @Contract("_ -> this")
+  public ConfigDocBuilder withSchema(@NotNull Schema<?> schema) {
+    return withSchema(null, schema);
   }
 
   @Contract("_ -> this")
