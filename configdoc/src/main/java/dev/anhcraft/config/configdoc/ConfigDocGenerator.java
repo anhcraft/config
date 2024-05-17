@@ -4,7 +4,6 @@ import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
-import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
 import java.io.File;
@@ -15,6 +14,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.thymeleaf.TemplateEngine;
@@ -103,9 +103,14 @@ public class ConfigDocGenerator {
     Map<String, List<Integer>> keywordMap = new HashMap<>();
     for (int i = 0; i < schemaEntities.size(); i++) {
       SchemaEntity entity = schemaEntities.get(i);
-      keywordMap.computeIfAbsent(entity.getName().toLowerCase(), key -> new ArrayList<>()).add(i);
-      for (String propertyName : entity.getSchema().propertyNames()) {
-        keywordMap.computeIfAbsent(propertyName.toLowerCase(), key -> new ArrayList<>()).add(i);
+      Set<String> keywords = new HashSet<>(entity.getSchema().propertyNames());
+      keywords.add(entity.getName());
+      Set<String> tokens = new HashSet<>();
+      for (String keyword : keywords) {
+        tokens.addAll(tokenize(keyword));
+      }
+      for (String token : tokens) {
+        keywordMap.computeIfAbsent(token, key -> new ArrayList<>()).add(i);
       }
     }
     StringJoiner keywordJoiner = new StringJoiner(",");
@@ -132,7 +137,43 @@ public class ConfigDocGenerator {
         .replace("/*__KEYWORD_INDEX__*/", keywordJoiner.toString());
   }
 
+  private List<String> tokenize(String str) {
+    List<String> tokens = new ArrayList<>();
+    StringBuilder buffer = new StringBuilder();
+    int consecutiveUppercase = 0;
+    char[] charArray = str.toCharArray();
+    for (int i = 0; i < charArray.length; i++) {
+      char ch = charArray[i];
+      if (Character.isLetterOrDigit(ch)) {
+        if (Character.isUpperCase(ch)) {
+          consecutiveUppercase++;
+        }
+        buffer.append(ch);
+        boolean hasNextWord =
+            i < charArray.length - 1
+                && Character.isLowerCase(charArray[i])
+                && Character.isUpperCase(charArray[i + 1]);
+        boolean endOfAbbr =
+            i < charArray.length - 1
+                && Character.isUpperCase(charArray[i])
+                && Character.isLowerCase(charArray[i + 1])
+                && consecutiveUppercase > 1;
+        if (!(hasNextWord || endOfAbbr)) continue;
+      }
+      if (buffer.length() > 0) {
+        tokens.add(buffer.toString().toLowerCase());
+        buffer.setLength(0);
+        consecutiveUppercase = 0;
+      }
+    }
+    if (buffer.length() > 0) tokens.add(buffer.toString().toLowerCase());
+    return tokens;
+  }
+
   // Copy from ComplexTypes#describe
+  // TO BE CALLED BY THYMELEAF
+  // TODO Isolate this method in a separate class only available to the Thymeleaf template
+  @ApiStatus.Internal
   public String generateInteractiveType(Type type, boolean simple) {
     if (type instanceof GenericArrayType) {
       GenericArrayType arrayType = (GenericArrayType) type;
@@ -166,7 +207,8 @@ public class ConfigDocGenerator {
       String name = simple ? clazz.getSimpleName() : full;
 
       if (link == null) return String.format("<span tooltip=\"%s\">%s</span>", full, name);
-      return String.format("<a href=\"%s\" target=\"_blank\" tooltip=\"%s\">%s</a>", link, full, name);
+      return String.format(
+          "<a href=\"%s\" target=\"_blank\" tooltip=\"%s\">%s</a>", link, full, name);
     }
 
     return type.getTypeName();
