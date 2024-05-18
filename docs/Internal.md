@@ -123,8 +123,13 @@ flowchart TD
 - Provides the view of a _virtual_ class which does not exist at runtime
 
 ### Schema identity
-- Class schema is compared by its type
-- Dictionary schema is compared by its identifier if specified, otherwise, one has no identity
+### Class schema
+- Identifier: The associated class
+- Name: The simple name of the associated class
+
+### Dictionary schema
+- Dictionary schema has no identity
+- Dictionary name is optional
 
 ### Schema construction
 
