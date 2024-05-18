@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:fragment="content(schema)">
+<div class="property" th:each="prop : ${schema.properties()}">
+    <div class="property-header">
+        <h2 th:text="${prop.name()}"></h2>
+        <div th:utext="${generator.describeTypeUserFriendly(prop.type())}" class="property-type"></div>
+    </div>
+    <div class="property-tab">
+        <div class="property-tab-nav">
+            <div class="active" data-tab-id="desc">Description</div>
+            <div data-tab-id="metadata">Metadata</div>
+            <div data-tab-id="restriction" th:if="${!prop.validator().validations().isEmpty()}">Restriction</div>
+        </div>
+        <div class="property-tab-content">
+            <div data-tab-id="desc" class="active">
+                <p class="property-desc" th:utext="${#strings.listJoin(prop.description(), '<br>')}"></p>
+            </div>
+            <div data-tab-id="metadata">
+                <table>
+                    <tr>
+                        <td>Type</td>
+                        <td th:utext="${generator.generateInteractiveType(prop.type(), true)}"></td>
+                    </tr>
+                    <tr th:if="${!prop.aliases().isEmpty()}">
+                        <td>Alias</td>
+                        <td th:text="${#strings.setJoin(prop.aliases(), ', ')}"></td>
+                    </tr>
+                </table>
+            </div>
+            <div data-tab-id="restriction" th:if="${!prop.validator().validations().isEmpty()}">
+                <table>
+                    <tr th:each="validation : ${prop.validator().validations()}">
+                        <td>Restrict</td>
+                        <td th:text="${validation.message()}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="property-schema" th:if="${generator.getSchemaOfProperty(prop) != null}">
+            <details>
+                <summary>View properties under this configuration section</summary>
+                <div th:replace="property-list :: content(${generator.getSchemaOfProperty(prop)})"></div>
+            </details>
+        </div>
+    </div>
+</div>
+</body>
+</html>

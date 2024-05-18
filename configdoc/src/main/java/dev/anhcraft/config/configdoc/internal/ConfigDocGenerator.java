@@ -1,6 +1,9 @@
 package dev.anhcraft.config.configdoc.internal;
 
 import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.blueprint.DictionaryProperty;
+import dev.anhcraft.config.blueprint.Property;
+import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
@@ -267,5 +270,10 @@ public class ConfigDocGenerator {
     }
 
     return type.getTypeName();
+  }
+
+  @SuppressWarnings("unused") // TO BE CALLED BY THYMELEAF
+  public Schema<?> getSchemaOfProperty(Property property) {
+    return property instanceof DictionaryProperty ? ((DictionaryProperty) property).schema() : null;
   }
 }

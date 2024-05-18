@@ -222,3 +222,20 @@ footer {
     border: 1px solid var(--gray);
     padding: 7px 10px;
 }
+
+.property-tab-content:has(+ .property-schema) {
+    border-bottom: 0;
+}
+
+.property-tab .property-schema {
+    padding: 10px 20px;
+    border: var(--gray) solid 1px;
+}
+
+.property-tab .property-schema:hover {
+    border: var(--dark) solid 1px;
+}
+
+.property-tab .property-schema summary {
+    cursor: pointer;
+}
