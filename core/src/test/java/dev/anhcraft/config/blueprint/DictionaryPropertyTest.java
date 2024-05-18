@@ -25,7 +25,9 @@ public class DictionaryPropertyTest {
 
   @Test
   public void testDescribeType() {
-    assertEquals("java.lang.Object", DictionaryProperty.create().withNames("foo").build().describeType(false));
+    assertEquals(
+        "java.lang.Object",
+        DictionaryProperty.create().withNames("foo").build().describeType(false));
     assertEquals(
         "int",
         DictionaryProperty.create()
