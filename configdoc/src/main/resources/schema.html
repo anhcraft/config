@@ -46,6 +46,7 @@
                 <div class="property" th:each="prop : ${schema.properties()}">
                     <div class="property-header">
                         <h2 th:text="${prop.name()}"></h2>
+                        <div th:utext="${generator.describeTypeUserFriendly(prop.type())}" class="property-type"></div>
                     </div>
                     <div class="property-tab">
                         <div class="property-tab-nav">

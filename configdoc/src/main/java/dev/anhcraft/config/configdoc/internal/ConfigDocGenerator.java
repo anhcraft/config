@@ -1,5 +1,6 @@
 package dev.anhcraft.config.configdoc.internal;
 
+import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.jvmkit.utils.FileUtil;
@@ -134,8 +135,7 @@ public class ConfigDocGenerator {
   }
 
   // Copy from ComplexTypes#describe
-  // TO BE CALLED BY THYMELEAF
-  // TODO Isolate this method in a separate class only available to the Thymeleaf template
+  @SuppressWarnings("unused") // TO BE CALLED BY THYMELEAF
   @ApiStatus.Internal
   public String generateInteractiveType(Type type, boolean simple) {
     if (type instanceof GenericArrayType) {
@@ -170,6 +170,7 @@ public class ConfigDocGenerator {
       String name = simple ? clazz.getSimpleName() : full;
 
       if (link == null) return String.format("<span tooltip=\"%s\">%s</span>", full, name);
+
       return String.format(
           "<a href=\"%s\" target=\"_blank\" tooltip=\"%s\">%s</a>", link, full, name);
     }
@@ -190,5 +191,81 @@ public class ConfigDocGenerator {
       }
     }
     return null;
+  }
+
+  @SuppressWarnings("unused") // TO BE CALLED BY THYMELEAF
+  public String describeTypeUserFriendly(Type type) {
+    if (type instanceof GenericArrayType) {
+      GenericArrayType arrayType = (GenericArrayType) type;
+      return String.format(
+          "%s<span tooltip=\"%s\">[]</span>",
+          describeTypeUserFriendly(arrayType.getGenericComponentType()), "An array");
+    } else if (type instanceof ParameterizedType) {
+      ParameterizedType paramType = (ParameterizedType) type;
+      String args =
+          Arrays.stream(paramType.getActualTypeArguments())
+              .map(this::describeTypeUserFriendly)
+              .collect(Collectors.joining(","));
+      if (paramType.getOwnerType() != null)
+        return String.format(
+            "%s.%s&lt;%s&gt;",
+            describeTypeUserFriendly(paramType.getOwnerType()),
+            describeTypeUserFriendly(paramType.getRawType()),
+            args);
+      else
+        return String.format(
+            "%s&lt;%s&gt;", describeTypeUserFriendly(paramType.getRawType()), args);
+    } else if (type instanceof TypeVariable) {
+      return ((TypeVariable<?>) type).getName();
+    } else if (type instanceof TypeResolver) {
+      return describeTypeUserFriendly(((TypeResolver) type).provideType());
+    } else if (type instanceof Class) {
+      Class<?> clazz = (Class<?>) type;
+      if (clazz.isArray()) {
+        return String.format(
+            "%s<span tooltip=\"%s\">[]</span>",
+            describeTypeUserFriendly(clazz.getComponentType()), "An array");
+      }
+
+      String name;
+      String tooltip;
+
+      if (clazz == byte.class
+          || clazz == Byte.class
+          || clazz == short.class
+          || clazz == Short.class
+          || clazz == int.class
+          || clazz == Integer.class
+          || clazz == long.class
+          || clazz == Long.class) {
+        name = "integer";
+        tooltip = "An integer number";
+      } else if (clazz == float.class
+          || clazz == Float.class
+          || clazz == double.class
+          || clazz == Double.class) {
+        name = "number";
+        tooltip = "A number";
+      } else if (clazz == boolean.class || clazz == Boolean.class) {
+        name = "boolean";
+        tooltip = "Either true or false";
+      } else if (clazz == String.class) {
+        name = "string";
+        tooltip = "A text wrapped in double quotes";
+      } else if (Dictionary.class.isAssignableFrom(clazz)) {
+        name = "section";
+        tooltip = "A configuration section";
+      } else if (clazz == Object.class) {
+        name = "any";
+        tooltip = "Any kind of value";
+      } else {
+        name = clazz.getSimpleName();
+        tooltip = clazz.getName();
+      }
+
+      return String.format("<span tooltip=\"%s\">%s</span>", tooltip, name);
+    }
+
+    return type.getTypeName();
   }
 }
