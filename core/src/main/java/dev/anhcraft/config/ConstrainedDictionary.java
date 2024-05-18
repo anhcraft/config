@@ -48,7 +48,7 @@ public class ConstrainedDictionary extends AbstractDictionary {
     DictionaryProperty property = schema.property(name);
     if (property == null) return;
     Class<?> type = property.type();
-    if (type == null) return;
+    if (type == Object.class) return;
     if (!ComplexTypes.isCompatible(value.getClass(), type))
       throw new IllegalArgumentException(
           "Property '" + name + "' is not of type " + ComplexTypes.describe(type));
