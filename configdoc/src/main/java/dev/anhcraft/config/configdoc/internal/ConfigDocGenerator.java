@@ -2,6 +2,7 @@ package dev.anhcraft.config.configdoc.internal;
 
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.blueprint.DictionaryProperty;
+import dev.anhcraft.config.blueprint.DictionarySchema;
 import dev.anhcraft.config.blueprint.Property;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.configdoc.entity.SchemaEntity;
@@ -16,6 +17,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -68,14 +70,20 @@ public class ConfigDocGenerator {
     Map<String, List<Integer>> keywordMap = new HashMap<>();
     for (int i = 0; i < schemaEntities.size(); i++) {
       SchemaEntity entity = schemaEntities.get(i);
-      Set<String> keywords = new HashSet<>(entity.getSchema().propertyNames());
+
+      // collect keywords
+      Set<String> keywords = new HashSet<>();
+      collectKeywords(entity.getSchema(), keywords);
       keywords.add(entity.getName());
-      keywords.addAll(tokenize(entity.getName()));
+
+      // tokenize keywords
       Set<String> tokens = new HashSet<>();
       for (String keyword : keywords) {
         tokens.add(keyword);
         tokens.addAll(tokenize(keyword));
       }
+
+      // add tokens to search index
       for (String token : tokens) {
         keywordMap.computeIfAbsent(token.toLowerCase(), key -> new ArrayList<>()).add(i);
       }
@@ -102,6 +110,17 @@ public class ConfigDocGenerator {
         .get("search.js")
         .replace("/*__SCHEMA_INDEX__*/", schemaIndex)
         .replace("/*__KEYWORD_INDEX__*/", keywordJoiner.toString());
+  }
+
+  private void collectKeywords(Schema<?> schema, Set<String> keywords) {
+    keywords.addAll(schema.propertyNames());
+    for (Property property : schema.properties()) {
+      if (property instanceof DictionaryProperty) {
+        DictionarySchema ds = ((DictionaryProperty) property).schema();
+        if (ds == null) continue;
+        collectKeywords(ds, keywords);
+      }
+    }
   }
 
   private List<String> tokenize(String str) {
