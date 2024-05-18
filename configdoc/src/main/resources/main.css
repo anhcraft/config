@@ -59,6 +59,7 @@ footer {
     grid-template-columns: 300px 5fr;
     justify-items: stretch;
     align-items: stretch;
+    transition: all 0.5s ease;
 }
 
 #menu {
@@ -70,7 +71,12 @@ footer {
 
 #menu #toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+#menu #toolbar .hidden {
+    display: none;
 }
 
 #menu #toolbar svg {
@@ -79,7 +85,11 @@ footer {
     cursor: pointer;
 }
 
-#page-layout #menu #toolbar #collapse-menu svg.collapsed {
+#menu #toolbar a#go-home {
+    color: inherit;
+}
+
+#menu #toolbar #collapse-menu svg.collapsed {
     display: none;
 }
 
@@ -115,6 +125,7 @@ footer {
     width: 100%;
     padding: 6px 12px;
     color: var(--white);
+    transition: all 0.5s ease;
 }
 
 #menu #menu-links > a.active,
@@ -185,6 +196,7 @@ footer {
 .property-tab .property-tab-nav > div {
     padding: 6px 12px;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .property-tab .property-tab-nav > div.active,
@@ -238,4 +250,9 @@ footer {
 
 .property-tab .property-schema summary {
     cursor: pointer;
+}
+
+.schema-index {
+    font-size: 1.5rem;
+    margin-top: 20px;
 }

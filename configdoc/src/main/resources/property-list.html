@@ -4,7 +4,7 @@
 <div class="property" th:each="prop : ${schema.properties()}">
     <div class="property-header">
         <h2 th:text="${prop.name()}"></h2>
-        <div th:utext="${generator.describeTypeUserFriendly(prop.type())}" class="property-type"></div>
+        <div class="property-type" th:utext="${generator.describeTypeUserFriendly(prop.type())}"></div>
     </div>
     <div class="property-tab">
         <div class="property-tab-nav">
@@ -13,7 +13,7 @@
             <div data-tab-id="restriction" th:if="${!prop.validator().validations().isEmpty()}">Restriction</div>
         </div>
         <div class="property-tab-content">
-            <div data-tab-id="desc" class="active">
+            <div class="active" data-tab-id="desc">
                 <p class="property-desc" th:utext="${#strings.listJoin(prop.description(), '<br>')}"></p>
             </div>
             <div data-tab-id="metadata">

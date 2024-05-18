@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title th:text="${title}"></title>
+    <title>Homepage</title>
     <meta charset="UTF-8"/>
     <meta content="none" name="robots"/>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -14,8 +14,10 @@
     <div id="main-view">
         <div th:replace="search-view :: body"></div>
         <div id="content-view">
-            <h1 th:text="${title}"></h1>
-            <div th:replace="property-list :: body(${schema})"></div>
+            <h1>List of schema(s)</h1>
+            <div th:each="entity : ${schemaEntities}" class="schema-index">
+                <a th:attr="href = ${entity.getPageFileName()}" th:text="${entity.getName() + ' (' + entity.schema.properties().size() + ' properties)'}"></a>
+            </div>
         </div>
     </div>
 </main>

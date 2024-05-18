@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -57,6 +56,12 @@ public class ConfigDocGenerator {
       context.setVariable("schema", entity.getSchema());
       String text = templateEngine.process("schema", context);
       FileUtil.write(new File(output, entity.getPageFileName()), text);
+    }
+
+    {
+      Context context = new Context(Locale.US, globalVars);
+      String text = templateEngine.process("home", context);
+      FileUtil.write(new File(output, "home.html"), text);
     }
 
     FileUtil.write(new File(output, "main.css"), resourceLoader.get("main.css"));

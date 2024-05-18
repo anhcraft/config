@@ -1,6 +1,7 @@
 (function () {
     document.querySelector("#collapse-menu").onclick = function () {
         document.querySelector("#page-layout").classList.toggle("collapsed");
+        document.querySelector("#toolbar > *:not(#collapse-menu)").classList.toggle("hidden");
     };
 
     document.querySelectorAll('.property-tab-nav > div').forEach(tab => {
@@ -19,11 +20,11 @@
     document.querySelector("#search-input").oninput = function() {
         if (this.value.length === 0) {
             document.querySelector("#search-view").style.display = "none";
-            document.querySelector("#schema").style.display = "block";
+            document.querySelector("#content-view").style.display = "block";
             return;
         }
         document.querySelector("#search-view").style.display = "block";
-        document.querySelector("#schema").style.display = "none";
+        document.querySelector("#content-view").style.display = "none";
 
         const searchResult = search(this.value);
         document.querySelector("#search-results-count").innerText = searchResult.schemas.length;
