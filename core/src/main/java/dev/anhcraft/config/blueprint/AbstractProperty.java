@@ -1,5 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.Validator;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,9 @@ public abstract class AbstractProperty implements Property {
   }
 
   @Override
-  public abstract String describeType(boolean simple);
+  public String describeType(boolean simple) {
+    return ComplexTypes.describe(type(), simple);
+  }
 
   @Override
   @NotNull public Set<String> aliases() {

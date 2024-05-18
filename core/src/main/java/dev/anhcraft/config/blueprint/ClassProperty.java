@@ -3,7 +3,6 @@ package dev.anhcraft.config.blueprint;
 import dev.anhcraft.config.meta.Constant;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.Transient;
-import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -35,11 +34,8 @@ public class ClassProperty extends AbstractProperty {
     this.denormalizer = denormalizer;
   }
 
-  /**
-   * Gets the type of this property.
-   * @return the type
-   */
-  @NotNull public Type type() {
+  @Override
+  public @NotNull Type type() {
     return field.getGenericType();
   }
 
@@ -91,11 +87,6 @@ public class ClassProperty extends AbstractProperty {
    */
   @Nullable public Processor denormalizer() {
     return denormalizer;
-  }
-
-  @Override
-  public String describeType(boolean simple) {
-    return ComplexTypes.describe(type(), simple);
   }
 
   /**

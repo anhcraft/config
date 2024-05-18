@@ -2,6 +2,7 @@ package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,12 @@ public interface Property {
    * @return the primary name
    */
   @NotNull String name();
+
+  /**
+   * Gets the type of this property.
+   * @return the type
+   */
+  @NotNull Type type();
 
   /**
    * Describes the type of this property.

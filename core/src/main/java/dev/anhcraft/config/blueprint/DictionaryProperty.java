@@ -40,17 +40,9 @@ public class DictionaryProperty extends AbstractProperty {
     this.schema = schema;
   }
 
-  /**
-   * Gets the type of this property.
-   * @return the type
-   */
-  @Nullable public Class<?> type() {
-    return type;
-  }
-
   @Override
-  public String describeType(boolean simple) {
-    return type == null ? "" : ComplexTypes.describe(type, simple);
+  public @NotNull Class<?> type() {
+    return type == null ? Object.class : type;
   }
 
   /**
