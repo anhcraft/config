@@ -30,7 +30,7 @@ public class ConfigDocBuilder {
     String entityName = schema.getName();
     if (entityName == null)
       entityName = name != null ? name : "UnnamedSchema" + (unnamedSchemaCounter++);
-    return withSchema(new SchemaEntity(schema.getIdentifier(), entityName, schema));
+    return withSchema(new SchemaEntity(entityName, schema));
   }
 
   @Contract("_ -> this")

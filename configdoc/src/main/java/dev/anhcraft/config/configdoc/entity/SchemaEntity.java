@@ -1,24 +1,16 @@
 package dev.anhcraft.config.configdoc.entity;
 
 import dev.anhcraft.config.blueprint.Schema;
+import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class SchemaEntity {
-  private final String id;
   private final String name;
   private final Schema<?> schema;
 
-  public SchemaEntity(@Nullable String id, @NotNull String name, @NotNull Schema<?> schema) {
-    if (id != null && !id.matches("[A-Za-z0-9]+"))
-      throw new IllegalArgumentException("Invalid identifier: " + id);
-    this.id = id;
+  public SchemaEntity(@NotNull String name, @NotNull Schema<?> schema) {
     this.name = name;
     this.schema = schema;
-  }
-
-  @Nullable public String getId() {
-    return id;
   }
 
   @NotNull public String getName() {
@@ -31,5 +23,18 @@ public class SchemaEntity {
 
   @NotNull public String getPageFileName() {
     return "schema." + name + ".html";
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SchemaEntity)) return false;
+    SchemaEntity entity = (SchemaEntity) o;
+    return Objects.equals(schema, entity.schema);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(schema);
   }
 }
