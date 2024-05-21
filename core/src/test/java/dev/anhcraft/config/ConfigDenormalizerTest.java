@@ -7,10 +7,8 @@ import dev.anhcraft.config.adapter.TypeInferencer;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
-import dev.anhcraft.config.meta.Constant;
-import dev.anhcraft.config.meta.Denormalizer;
+import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
-import dev.anhcraft.config.meta.Validate;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -260,5 +258,173 @@ public class ConfigDenormalizerTest {
         return String.format("HealthReport{service=%s, ping=%d, status=%d}", service, ping, status);
       }
     }
+  }
+
+  @Nested
+  public class TestDenormalizationFallback {
+    @Test
+    public void testFallback() throws Exception {
+      class Bucket {
+        public int foo;
+
+        @Fallback public Map<String, Object> _trap;
+      }
+
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
+      Dictionary dict = new SchemalessDictionary();
+      dict.put("foo", 1);
+      dict.put("bar", 2);
+      Bucket bucket = new Bucket();
+      factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+      assertEquals(1, bucket.foo);
+      assertNotNull(bucket._trap);
+      assertEquals(2, bucket._trap.get("bar"));
+    }
+
+    @Test
+    public void testFallbackContainsItself() throws Exception {
+      class Bucket {
+        public int foo;
+
+        @Fallback public Map<String, Object> bar;
+      }
+
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
+      Dictionary dict = new SchemalessDictionary();
+      dict.put("foo", 1);
+      dict.put("bar", 2);
+      dict.put("goo", 3);
+      Bucket bucket = new Bucket();
+      factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+      assertEquals(1, bucket.foo);
+      assertNotNull(bucket.bar);
+      assertEquals(2, bucket.bar.get("bar"));
+      assertEquals(3, bucket.bar.get("goo"));
+    }
+
+    @Test
+    public void testNameDistinctFallbackWhenPrimaryNameExists() throws Exception {
+      class Bucket {
+        @Alias({"a", "b"})
+        public int foo;
+
+        @Fallback public Map<String, Object> bar;
+      }
+
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
+      Dictionary dict = new SchemalessDictionary();
+      dict.put("foo", 1);
+      dict.put("a", 2);
+      dict.put("b", 3);
+      dict.put("c", 4);
+      Bucket bucket = new Bucket();
+      factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+      assertEquals(1, bucket.foo);
+      assertNotNull(bucket.bar);
+      assertEquals(Set.of("a", "b", "c"), bucket.bar.keySet());
+      assertEquals(2, bucket.bar.get("a"));
+      assertEquals(3, bucket.bar.get("b"));
+      assertEquals(4, bucket.bar.get("c"));
+    }
+
+    @Test
+    public void testNameDistinctFallbackWhenPrimaryNameDoesNotExist() throws Exception {
+      class Bucket {
+        @Alias({"a", "b"})
+        public int foo;
+
+        @Fallback public Map<String, Object> bar;
+      }
+
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .ignoreDefaultValues(true)
+              .ignoreEmptyArray(true)
+              .ignoreEmptyDictionary(true)
+              .build();
+      Dictionary dict = new SchemalessDictionary();
+      dict.put("a", 2);
+      dict.put("b", 3);
+      dict.put("c", 4);
+      Bucket bucket = new Bucket();
+      factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+      assertEquals(2, bucket.foo);
+      assertNotNull(bucket.bar);
+      assertEquals(Set.of("b", "c"), bucket.bar.keySet());
+      assertEquals(3, bucket.bar.get("b"));
+      assertEquals(4, bucket.bar.get("c"));
+    }
+  }
+
+  @Test
+  public void testPropertyDistinctFallbackWhenPrimaryNameExists() throws Exception {
+    class Bucket {
+      @Alias({"a", "b"})
+      public int foo;
+
+      @Fallback(distinctBy = Fallback.Distinct.PROPERTY)
+      public Map<String, Object> bar;
+    }
+
+    ConfigFactory factory =
+        ConfigFactory.create()
+            .ignoreDefaultValues(true)
+            .ignoreEmptyArray(true)
+            .ignoreEmptyDictionary(true)
+            .build();
+    Dictionary dict = new SchemalessDictionary();
+    dict.put("foo", 1);
+    dict.put("a", 2);
+    dict.put("b", 3);
+    dict.put("c", 4);
+    Bucket bucket = new Bucket();
+    factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+    assertEquals(1, bucket.foo);
+    assertNotNull(bucket.bar);
+    assertEquals(Set.of("c"), bucket.bar.keySet());
+    assertEquals(4, bucket.bar.get("c"));
+  }
+
+  @Test
+  public void testPropertyDistinctFallbackWhenPrimaryNameDoesNotExist() throws Exception {
+    class Bucket {
+      @Alias({"a", "b"})
+      public int foo;
+
+      @Fallback(distinctBy = Fallback.Distinct.PROPERTY)
+      public Map<String, Object> bar;
+    }
+
+    ConfigFactory factory =
+        ConfigFactory.create()
+            .ignoreDefaultValues(true)
+            .ignoreEmptyArray(true)
+            .ignoreEmptyDictionary(true)
+            .build();
+    Dictionary dict = new SchemalessDictionary();
+    dict.put("a", 2);
+    dict.put("b", 3);
+    dict.put("c", 4);
+    Bucket bucket = new Bucket();
+    factory.getDenormalizer().denormalizeToInstance(dict, Bucket.class, bucket);
+    assertEquals(2, bucket.foo);
+    assertNotNull(bucket.bar);
+    assertEquals(Set.of("c"), bucket.bar.keySet());
+    assertEquals(4, bucket.bar.get("c"));
   }
 }
