@@ -64,11 +64,11 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
 
     // a map of primary name and alias maps to ClassProperty
     // we do not initialize the map at this point because there is a possibility that a different
-    // primary
-    // name will replace the original one
+    // primary name will replace the original one
     Map<String, ClassProperty> lookup = new LinkedHashMap<>();
 
     List<ClassProperty> properties = new ArrayList<>();
+    ClassProperty fallback = null;
 
     for (Map.Entry<String, Field> entry : fields.entrySet()) {
       String originalPrimaryName = entry.getKey();
@@ -85,6 +85,21 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
           new ClassProperty(
               name, description, validator, field, modifier, normalizer, denormalizer);
 
+      if (property.isFallback()) {
+        if (fallback != null)
+          throw new UnsupportedSchemaException(
+              String.format(
+                  "Schema '%s' contains more than one fallback property", type.getName()));
+        try {
+          if (!ComplexTypes.erasure(property.type()).isAssignableFrom(LinkedHashMap.class))
+            throw new UnsupportedSchemaException(
+                String.format("Schema '%s' contains invalid fallback property", type.getName()));
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+        fallback = property;
+      }
+
       lookup.put(name.primary(), property);
 
       // discards the original primary name and uses the new one after scanned
@@ -96,10 +111,14 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
         lookup.put(alias, property);
         nameClaimed.add(alias);
       }
+
+      if (!property.isFallback()) // fallback must be at the end
       properties.add(property);
     }
 
-    return new ClassSchema(type, properties, lookup);
+    if (fallback != null) properties.add(fallback);
+
+    return new ClassSchema(type, properties, lookup, fallback);
   }
 
   private Map<String, Processor> scanNormalizers(Class<?> type) {
