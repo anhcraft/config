@@ -708,30 +708,13 @@ flowchart LR
   }
 ```
 
-### KeyInjector
-- A key injector works on a Map. It takes the key and injects it to a property of the corresponding value
-- Key injection happens once the object is instantiated and denormalized. Therefore, it overrides all previous values set.
-- Key injection is in denormalization process
-
-```java
-@Configurable
-public class Inventory {
-  @KeyInjector("id")
-  public Map<String, Item> items;
-}
-
-@Configurable
-public class Item {
-  @Exclude
-  public String id;
-  public String name;
-  public int stock;
-}
-```
-
 ### Fallback
-- The fallback takes all remaining K-V of the current wrapper and put them into the annotated K-V container or Map
-- Properties fallback is in denormalization process
+- During denormalization, the property with `@Fallback` catches all remaining unmapped settings including its corresponding setting in the configuration
+- The property type must be `LinkedHashMap` or any of its supertypes
+- A schema can have at most one `Fallback` property
+- The fallback property must be the last one in the schema
+  - The order of fallback field can be anywhere within a class
+  - The scanner is responsible for re-ordering the fallback properties and leaving the order of other properties remain similar to source code
 - For example:
 ```yaml
 stack:
@@ -751,6 +734,27 @@ public class Inventory {
 
   @Fallback
   public Map<String, Item> items; // snack, coca
+}
+```
+
+### KeyInjector
+- A key injector works on a Map. It takes the key and injects it to a property of the corresponding value
+- Key injection happens once the object is instantiated and denormalized. Therefore, it overrides all previous values set.
+- Key injection is in denormalization process
+
+```java
+@Configurable
+public class Inventory {
+  @KeyInjector("id")
+  public Map<String, Item> items;
+}
+
+@Configurable
+public class Item {
+  @Exclude
+  public String id;
+  public String name;
+  public int stock;
 }
 ```
 
