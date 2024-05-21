@@ -9,6 +9,7 @@ import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.meta.Denormalizer;
+import dev.anhcraft.config.meta.Fallback;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.type.TypeResolver;
@@ -16,7 +17,9 @@ import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.util.ObjectUtil;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -149,6 +152,7 @@ public class ConfigDenormalizer {
   private <T> Object _denormalize(Context ctx, @Nullable T simple, @NotNull Type targetType)
       throws Exception {
     if (simple == null) return null;
+    if (targetType == Object.class) return simple;
     if (ComplexTypes.isArray(targetType)) return _denormalizeToArray(ctx, targetType, simple);
     Class<?> erasureType = ComplexTypes.erasure(targetType);
     TypeAdapter adapter = configFactory.getTypeAdapter(erasureType);
@@ -191,14 +195,40 @@ public class ConfigDenormalizer {
       Context ctx, Dictionary simple, Type targetType, Object instance) throws Exception {
     TypeResolver resolver = TypeResolver.of(targetType);
     ClassSchema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
+    Set<String> settingsProcessed = new HashSet<>();
 
     for (ClassProperty property : schema.properties()) {
       if (property.isConstant()) continue;
 
-      Map.Entry<String, Object> entry = simple.search(property.name(), property.aliases());
-      Object value = entry == null ? null : entry.getValue();
+      String setting;
+      Object value;
 
-      ctx.enterScope(new PropertyScope(property, entry == null ? "" : entry.getKey()));
+      // if there is a fallback property at the end, we collect all remaining settings including the
+      // setting of the
+      // fallback property
+      Fallback fallback = property.field().getAnnotation(Fallback.class);
+      if (fallback != null) {
+        Set<String> exclusion =
+            fallback.distinctBy() == Fallback.Distinct.NAME
+                ? settingsProcessed
+                : settingsProcessed.stream()
+                    .map(schema::property)
+                    .filter(Objects::nonNull)
+                    .flatMap(p -> Stream.concat(p.aliases().stream(), Stream.of(p.name())))
+                    .collect(Collectors.toSet());
+        SchemalessDictionary trap = new SchemalessDictionary();
+        for (Map.Entry<String, Object> entry : simple.entrySet()) {
+          if (!exclusion.contains(entry.getKey())) trap.put(entry.getKey(), entry.getValue());
+        }
+        setting = "";
+        value = trap;
+      } else {
+        Map.Entry<String, Object> entry = simple.search(property.name(), property.aliases());
+        setting = entry == null ? "" : entry.getKey();
+        value = entry == null ? null : entry.getValue();
+      }
+
+      ctx.enterScope(new PropertyScope(property, setting));
       scope:
       {
         Processor processor = property.denormalizer();
@@ -248,6 +278,8 @@ public class ConfigDenormalizer {
         property.field().set(instance, value);
       }
       ctx.exitScope();
+
+      settingsProcessed.add(setting);
     }
   }
 }

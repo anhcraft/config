@@ -1,6 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.meta.Constant;
+import dev.anhcraft.config.meta.Fallback;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.meta.Transient;
 import dev.anhcraft.config.validate.Validator;
@@ -71,6 +72,14 @@ public class ClassProperty extends AbstractProperty {
    */
   public boolean isConstant() {
     return (modifier & MODIFIER_CONSTANT) == MODIFIER_CONSTANT;
+  }
+
+  /**
+   * Checks if this property is annotated as {@link Fallback}
+   * @return whether the property is constant
+   */
+  public boolean isFallback() {
+    return field.getAnnotation(Fallback.class) != null;
   }
 
   /**
