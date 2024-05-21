@@ -112,8 +112,9 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
         nameClaimed.add(alias);
       }
 
-      if (!property.isFallback()) // fallback must be at the end
-      properties.add(property);
+      if (!property.isFallback()) { // fallback must be at the end
+        properties.add(property);
+      }
     }
 
     if (fallback != null) properties.add(fallback);
