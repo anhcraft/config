@@ -406,4 +406,42 @@ public class ReflectSchemaScannerTest {
       }
     }
   }
+
+  @Nested
+  public class FallbackTest {
+    @Test
+    public void testDuplicateFallbackProperty() {
+      class ConfigWithDuplicateFallbackProperties {
+        @Fallback public Map<String, Object> foo;
+        @Fallback public Map<String, Object> bar;
+      }
+      assertThrows(
+          UnsupportedSchemaException.class,
+          () -> scanner.scanSchema(ConfigWithDuplicateFallbackProperties.class));
+    }
+
+    @Test
+    public void testInvalidTypeFallbackProperty() {
+      class ConfigWithInvalidTypeFallbackProperty {
+        @Fallback public int foo;
+      }
+      assertThrows(
+          UnsupportedSchemaException.class,
+          () -> scanner.scanSchema(ConfigWithInvalidTypeFallbackProperty.class));
+    }
+
+    @Test
+    public void testFallbackPropertyExists() {
+      class Config {
+        public int foo;
+
+        @Fallback public Map<String, Object> _trap;
+      }
+
+      ClassSchema schema = scanner.scanSchema(Config.class);
+      assertEquals(Set.of("foo", "_trap"), schema.propertyNames());
+      assertNotNull(schema.fallback());
+      assertEquals("_trap", schema.fallback().name());
+    }
+  }
 }
