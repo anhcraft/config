@@ -28,7 +28,7 @@ public interface Schema<T extends Property> {
    * Returns all properties in the schema.
    * @return all properties
    */
-  @NotNull Collection<T> properties();
+  @NotNull List<T> properties();
 
   /**
    * Looks up a property by primary name or alias.

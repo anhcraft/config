@@ -39,4 +39,37 @@ public class SchemalessDictionary extends AbstractDictionary {
     }
     return copyOf(this);
   }
+
+  /**
+   * Creates a new {@link SchemalessDictionaryBuilder}.
+   * @return the builder
+   */
+  public static @NotNull SchemalessDictionaryBuilder create() {
+    return new SchemalessDictionaryBuilder();
+  }
+
+  public static class SchemalessDictionaryBuilder {
+    private final LinkedHashMap<String, Object> backend = new LinkedHashMap<>();
+
+    public @NotNull SchemalessDictionaryBuilder put(String key, Object value) {
+      if (!SimpleTypes.test(value)) {
+        throw new IllegalArgumentException("The given value is not a simple type");
+      }
+      backend.put(key, value);
+      return this;
+    }
+
+    public @NotNull SchemalessDictionaryBuilder putAll(@NotNull Map<String, Object> map) {
+      backend.putAll(map);
+      return this;
+    }
+
+    public @NotNull SchemalessDictionaryBuilder putAll(@NotNull Dictionary dictionary) {
+      return putAll(dictionary.unwrap());
+    }
+
+    public @NotNull SchemalessDictionary build() {
+      return copyOf(backend);
+    }
+  }
 }

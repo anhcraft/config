@@ -22,7 +22,7 @@ public abstract class AbstractSchema<T extends Property> implements Schema<T> {
   }
 
   @Override
-  @NotNull public Collection<T> properties() {
+  @NotNull public List<T> properties() {
     return properties;
   }
 

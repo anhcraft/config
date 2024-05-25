@@ -24,10 +24,10 @@ public class ContextTest {
   public static void setUp() {
     factory = ConfigFactory.create().build();
     schema = factory.getSchema(Dummy.class);
-    foo = new PropertyScope(schema.property("foo"), "foo");
-    bar = new PropertyScope(schema.property("BAR"), "bar");
-    baz = new PropertyScope(schema.property("baz"), "baz");
-    qux = new PropertyScope(schema.property("QUX"), "qux");
+    foo = new PropertyScope(schema.property("foo"), "foo", null);
+    bar = new PropertyScope(schema.property("BAR"), "bar", null);
+    baz = new PropertyScope(schema.property("baz"), "baz", null);
+    qux = new PropertyScope(schema.property("QUX"), "qux", null);
   }
 
   @BeforeEach
@@ -80,6 +80,9 @@ public class ContextTest {
     assertEquals("", context.getPath());
     context.enterScope(foo);
     assertEquals("foo", context.getPath());
+    context.enterScope(new ValueScope(0));
+    assertEquals("foo", context.getPath());
+    context.exitScope();
     context.enterScope(qux);
     assertEquals("foo.qux", context.getPath());
     context.enterScope(bar);
@@ -88,6 +91,9 @@ public class ContextTest {
     assertEquals("foo.qux.bar[0]", context.getPath());
     context.enterScope(new ElementScope(3));
     assertEquals("foo.qux.bar[0][3]", context.getPath());
+    context.enterScope(new ValueScope(null));
+    assertEquals("foo.qux.bar[0][3]", context.getPath());
+    context.exitScope();
     context.exitScope();
     context.exitScope();
     assertEquals("foo.qux.bar", context.getPath());

@@ -132,6 +132,8 @@ public class Context implements TypeAdapter<Object> {
             throw new UnsupportedOperationException();
         }
         wasProperty = true;
+      } else if (scope instanceof ValueScope) {
+        continue;
       } else {
         throw new UnsupportedOperationException();
       }

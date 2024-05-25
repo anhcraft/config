@@ -1,20 +1,26 @@
 package dev.anhcraft.config.context;
 
+import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.blueprint.Property;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * A property scope involves a property and a setting.<br>
- * Both the normalization and the denormalization relies on the schema, so the property is guaranteed to exist.
- * The setting, however, may not exist in denormalization if no setting exists in the configuration.
+ * A property scope involves a property and an optional container.<br>
+ * Both the normalization and the denormalization relies on the schema, so the property is guaranteed to exist.<br>
+ * The setting, however, may not exist in denormalization if no setting exists in the configuration.<br>
+ * The container is optional depending on the context.
  */
 public class PropertyScope implements Scope {
   private final Property property;
   private final String setting;
+  private final Dictionary container;
 
-  public PropertyScope(@NotNull Property property, @NotNull String setting) {
+  public PropertyScope(
+      @NotNull Property property, @NotNull String setting, @Nullable Dictionary container) {
     this.property = property;
     this.setting = setting;
+    this.container = container;
   }
 
   /**
@@ -34,5 +40,13 @@ public class PropertyScope implements Scope {
    */
   public @NotNull String getSetting() {
     return setting;
+  }
+
+  /**
+   * Gets the container involved in this scope.
+   * @return the container
+   */
+  @Nullable public Dictionary getContainer() {
+    return container;
   }
 }

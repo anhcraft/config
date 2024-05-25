@@ -6,6 +6,7 @@ import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
+import dev.anhcraft.config.context.ValueScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.SimpleTypes;
@@ -44,6 +45,10 @@ public final class ConfigNormalizer {
     this.settings = settings;
   }
 
+  private Context createContext() {
+    return configFactory.getContextProvider().provideNormalizationContext(configFactory);
+  }
+
   /**
    * Gets the setting flags.
    * @return the settings
@@ -62,7 +67,7 @@ public final class ConfigNormalizer {
    * @see #normalize(Context, Class, Object)
    */
   public <T> @Nullable Object normalize(@NotNull T complex) throws Exception {
-    return normalize(configFactory.createContext(), complex);
+    return normalize(createContext(), complex);
   }
 
   /**
@@ -110,8 +115,7 @@ public final class ConfigNormalizer {
   public <T> void normalizeToDictionary(@NotNull T complex, @NotNull Dictionary dictionary)
       throws Exception {
     //noinspection unchecked
-    normalizeToDictionary(
-        configFactory.createContext(), (Class<T>) complex.getClass(), complex, dictionary);
+    normalizeToDictionary(createContext(), (Class<T>) complex.getClass(), complex, dictionary);
   }
 
   /**
@@ -196,7 +200,10 @@ public final class ConfigNormalizer {
       {
         Object elem = Array.get(complex, i);
         Class<?> clazz = elem == null ? Object.class : elem.getClass();
-        result[i] = _normalize(ctx, clazz, elem);
+        Object value = _normalize(ctx, clazz, elem);
+        ctx.enterScope(new ValueScope(value));
+        result[i] = value;
+        ctx.exitScope();
       }
       ctx.exitScope();
     }
@@ -218,7 +225,7 @@ public final class ConfigNormalizer {
     for (ClassProperty property : schema.properties()) {
       if (property.isTransient()) continue;
 
-      ctx.enterScope(new PropertyScope(property, property.name()));
+      ctx.enterScope(new PropertyScope(property, property.name(), container));
       scope:
       {
         Object value;
@@ -254,7 +261,9 @@ public final class ConfigNormalizer {
             && value instanceof Dictionary
             && ((Dictionary) value).isEmpty()) break scope;
 
+        ctx.enterScope(new ValueScope(value));
         container.put(property.name(), value);
+        ctx.exitScope();
       }
       ctx.exitScope();
     }

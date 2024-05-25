@@ -1,11 +1,16 @@
 package dev.anhcraft.config.adapter;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.context.Context;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -51,6 +56,30 @@ public class CacheableAdapterProviderTest {
     assertInstanceOf(TypeAdapter2.class, provider.getTypeAdapter(DummyF.class));
     assertNull(provider.getTypeAdapter(Inf3.class));
     assertNull(provider.getTypeAdapter(Inf1.class));
+    assertNull(provider.getTypeAdapter(List.class));
+  }
+
+  @Test
+  public void testSynchronized() throws Exception {
+    LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
+    typeAdapters.put(DummyB.class, new TypeAdapter1());
+    AdapterProvider provider = new CacheableAdapterProvider(typeAdapters);
+    CountDownLatch count = new CountDownLatch(3);
+    ExecutorService executorService = Executors.newFixedThreadPool(3);
+    AtomicBoolean success = new AtomicBoolean(true);
+
+    for (int i = 0; i < 3; i++) {
+      executorService.submit(
+          () -> {
+            if (provider.getTypeAdapter(DummyB.class) == null) success.set(false);
+            if (provider.getTypeAdapter(ArrayList.class) != null) success.set(false);
+            count.countDown();
+          });
+    }
+
+    count.await();
+    executorService.shutdown();
+    assertTrue(success.get());
   }
 
   private static class DummyA {}
