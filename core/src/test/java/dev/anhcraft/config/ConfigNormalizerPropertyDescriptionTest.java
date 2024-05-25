@@ -24,7 +24,7 @@ public class ConfigNormalizerPropertyDescriptionTest {
     @Describe("The content")
     private String message;
 
-    @Describe("The timestamp of the message")
+    @Describe({"The timestamp of the message", "Unix timestamp in milliseconds"})
     private long timestamp;
   }
 
@@ -56,6 +56,8 @@ public class ConfigNormalizerPropertyDescriptionTest {
     assertEquals(message, dict.get("message"));
     assertEquals("The content", dict.get("#message"));
     assertEquals(time, dict.get("timestamp"));
-    assertEquals("The timestamp of the message", dict.get("#timestamp"));
+    assertArrayEquals(
+        new String[] {"The timestamp of the message", "Unix timestamp in milliseconds"},
+        (String[]) dict.get("#timestamp"));
   }
 }
