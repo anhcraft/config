@@ -16,7 +16,8 @@ public class PropertyScope implements Scope {
   private final String setting;
   private final Dictionary container;
 
-  public PropertyScope(@NotNull Property property, @NotNull String setting, @Nullable Dictionary container) {
+  public PropertyScope(
+      @NotNull Property property, @NotNull String setting, @Nullable Dictionary container) {
     this.property = property;
     this.setting = setting;
     this.container = container;
@@ -45,8 +46,7 @@ public class PropertyScope implements Scope {
    * Gets the container involved in this scope.
    * @return the container
    */
-  @Nullable
-  public Dictionary getContainer() {
+  @Nullable public Dictionary getContainer() {
     return container;
   }
 }
