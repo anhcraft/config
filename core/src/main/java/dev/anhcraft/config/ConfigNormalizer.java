@@ -218,7 +218,7 @@ public final class ConfigNormalizer {
     for (ClassProperty property : schema.properties()) {
       if (property.isTransient()) continue;
 
-      ctx.enterScope(new PropertyScope(property, property.name()));
+      ctx.enterScope(new PropertyScope(property, property.name(), container));
       scope:
       {
         Object value;
