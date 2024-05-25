@@ -228,7 +228,7 @@ public class ConfigDenormalizer {
         value = entry == null ? null : entry.getValue();
       }
 
-      ctx.enterScope(new PropertyScope(property, setting));
+      ctx.enterScope(new PropertyScope(property, setting, simple));
       scope:
       {
         Processor processor = property.denormalizer();
