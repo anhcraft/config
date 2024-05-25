@@ -80,6 +80,9 @@ public class ContextTest {
     assertEquals("", context.getPath());
     context.enterScope(foo);
     assertEquals("foo", context.getPath());
+    context.enterScope(new ValueScope(0));
+    assertEquals("foo", context.getPath());
+    context.exitScope();
     context.enterScope(qux);
     assertEquals("foo.qux", context.getPath());
     context.enterScope(bar);
@@ -88,6 +91,9 @@ public class ContextTest {
     assertEquals("foo.qux.bar[0]", context.getPath());
     context.enterScope(new ElementScope(3));
     assertEquals("foo.qux.bar[0][3]", context.getPath());
+    context.enterScope(new ValueScope(null));
+    assertEquals("foo.qux.bar[0][3]", context.getPath());
+    context.exitScope();
     context.exitScope();
     context.exitScope();
     assertEquals("foo.qux.bar", context.getPath());

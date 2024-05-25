@@ -6,6 +6,7 @@ import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
+import dev.anhcraft.config.context.ValueScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.SimpleTypes;
@@ -196,7 +197,10 @@ public final class ConfigNormalizer {
       {
         Object elem = Array.get(complex, i);
         Class<?> clazz = elem == null ? Object.class : elem.getClass();
-        result[i] = _normalize(ctx, clazz, elem);
+        Object value = _normalize(ctx, clazz, elem);
+        ctx.enterScope(new ValueScope(value));
+        result[i] = value;
+        ctx.exitScope();
       }
       ctx.exitScope();
     }
@@ -254,7 +258,9 @@ public final class ConfigNormalizer {
             && value instanceof Dictionary
             && ((Dictionary) value).isEmpty()) break scope;
 
+        ctx.enterScope(new ValueScope(value));
         container.put(property.name(), value);
+        ctx.exitScope();
       }
       ctx.exitScope();
     }

@@ -6,6 +6,7 @@ import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
+import dev.anhcraft.config.context.ValueScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.meta.Denormalizer;
@@ -183,8 +184,10 @@ public class ConfigDenormalizer {
     for (int i = 0; i < len; i++) {
       ctx.enterScope(new ElementScope(i));
       {
-        Object elem = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
-        Array.set(object, i, elem);
+        Object value = _denormalize(ctx, SimpleTypes.getContainerElement(simple, i), elemType);
+        ctx.enterScope(new ValueScope(value));
+        Array.set(object, i, value);
+        ctx.exitScope();
       }
       ctx.exitScope();
     }
@@ -275,7 +278,9 @@ public class ConfigDenormalizer {
               ctx, String.format("'%s' %s", value, property.validator().message()));
         }
 
+        ctx.enterScope(new ValueScope(value));
         property.field().set(instance, value);
+        ctx.exitScope();
       }
       ctx.exitScope();
 
