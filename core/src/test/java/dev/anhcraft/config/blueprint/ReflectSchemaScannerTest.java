@@ -201,7 +201,7 @@ public class ReflectSchemaScannerTest {
 
     @Test
     public void testInit() {
-      assertEquals(new ClassSchema(schema.type(), new ArrayList<>(schema.properties()), Map.of(), null), schema);
+      assertEquals(new ClassSchema(schema.type(), schema.properties(), Map.of(), null), schema);
       assertEquals(Profile.class, schema.type());
       assertEquals("Profile", schema.getName());
       assertEquals(4, schema.properties().size());
