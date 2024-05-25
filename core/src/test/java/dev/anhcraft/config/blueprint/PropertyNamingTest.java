@@ -1,11 +1,10 @@
 package dev.anhcraft.config.blueprint;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.LinkedHashSet;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 public class PropertyNamingTest {
 
