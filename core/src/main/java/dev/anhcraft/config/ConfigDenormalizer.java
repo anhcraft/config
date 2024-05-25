@@ -59,6 +59,10 @@ public class ConfigDenormalizer {
     this.settings = settings;
   }
 
+  private Context createContext() {
+    return configFactory.getContextProvider().provideDenormalizationContext(configFactory);
+  }
+
   /**
    * Gets the setting flags.
    * @return the settings
@@ -79,7 +83,7 @@ public class ConfigDenormalizer {
    */
   public <T> @Nullable Object denormalize(@Nullable T simple, @NotNull Type targetType)
       throws Exception {
-    return denormalize(configFactory.createContext(), simple, targetType);
+    return denormalize(createContext(), simple, targetType);
   }
 
   /**
@@ -108,7 +112,7 @@ public class ConfigDenormalizer {
   public void denormalizeToInstance(
       @NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance)
       throws Exception {
-    denormalizeToInstance(configFactory.createContext(), simple, targetType, instance);
+    denormalizeToInstance(createContext(), simple, targetType, instance);
   }
 
   /**

@@ -64,11 +64,11 @@ public final class ConfigFactory {
   }
 
   /**
-   * Creates a new context.
+   * Creates a new generic context.
    * @return a new context
    */
   @NotNull public Context createContext() {
-    return contextProvider.apply(this);
+    return contextProvider.provideGenericContext(this);
   }
 
   /**
@@ -103,13 +103,21 @@ public final class ConfigFactory {
   }
 
   /**
+   * Gets the context provider.
+   * @return the context provider
+   */
+  @NotNull public ContextProvider getContextProvider() {
+    return contextProvider;
+  }
+
+  /**
    * A builder for {@link ConfigFactory}
    */
   public static class Builder {
     private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
-    private ContextProvider contextProvider = Context::new;
+    private ContextProvider contextProvider = new ContextProvider() {};
     private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
             new LinkedHashMap<>() {

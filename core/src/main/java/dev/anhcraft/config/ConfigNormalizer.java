@@ -45,6 +45,10 @@ public final class ConfigNormalizer {
     this.settings = settings;
   }
 
+  private Context createContext() {
+    return configFactory.getContextProvider().provideNormalizationContext(configFactory);
+  }
+
   /**
    * Gets the setting flags.
    * @return the settings
@@ -63,7 +67,7 @@ public final class ConfigNormalizer {
    * @see #normalize(Context, Class, Object)
    */
   public <T> @Nullable Object normalize(@NotNull T complex) throws Exception {
-    return normalize(configFactory.createContext(), complex);
+    return normalize(createContext(), complex);
   }
 
   /**
@@ -111,8 +115,7 @@ public final class ConfigNormalizer {
   public <T> void normalizeToDictionary(@NotNull T complex, @NotNull Dictionary dictionary)
       throws Exception {
     //noinspection unchecked
-    normalizeToDictionary(
-        configFactory.createContext(), (Class<T>) complex.getClass(), complex, dictionary);
+    normalizeToDictionary(createContext(), (Class<T>) complex.getClass(), complex, dictionary);
   }
 
   /**

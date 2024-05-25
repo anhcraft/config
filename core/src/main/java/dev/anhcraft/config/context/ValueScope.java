@@ -16,8 +16,7 @@ public class ValueScope implements Scope {
    * Gets the value
    * @return the value
    */
-  @Nullable
-  public Object getValue() {
+  @Nullable public Object getValue() {
     return value;
   }
 }
