@@ -1,30 +1,52 @@
 package dev.anhcraft.config.json;
 
 import dev.anhcraft.config.Dictionary;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class JsonSerializer {
+/**
+ * A JSON writer compliant with JSON spec (RFC 8259) that natively supports Config functionalities.<br>
+ * <b>Important Considerations:</b>
+ * <ul>
+ *   <li>{@code null} values are not written</li>
+ *   <li>{@code /} (slash) is not escaped</li>
+ *   <li>Number is handled by {@link Number#toString()}</li>
+ * </ul>
+ * @see JsonWriterOptions
+ */
+public class JsonWriter {
   private int currentIndent = 0;
   private final Writer writer;
-  private final Options options;
+  private final JsonWriterOptions options;
 
-  public JsonSerializer(@NotNull Writer writer, @NotNull Options options) {
+  /**
+   * Constructs a new {@code JsonWriter} with the specified writer and options.
+   *
+   * @param writer the {@code Writer} to which JSON text will be written
+   * @param options the {@link JsonWriterOptions} specifying formatting options
+   */
+  public JsonWriter(@NotNull Writer writer, @NotNull JsonWriterOptions options) {
     this.writer = writer;
     this.options = options;
   }
 
-  private void startBlock() throws IOException {
-    if (options.pretty) {
-      writer.append('\n');
-      writer.append(" ".repeat(currentIndent));
-    }
+  /**
+   * Constructs a new {@code JsonWriter} with the specified writer and default options.
+   *
+   * @param writer the {@code Writer} to which JSON text will be written
+   */
+  public JsonWriter(@NotNull Writer writer) {
+    this(writer, JsonWriterOptions.DEFAULT);
   }
 
+  /**
+   * Serializes the given object into a JSON string.
+   * @param obj the object
+   * @throws IOException if an I/O error occurs
+   */
   public void serialize(@Nullable Object obj) throws IOException {
     if (obj instanceof Dictionary) {
       serializeSection((Dictionary) obj);
@@ -37,17 +59,23 @@ public class JsonSerializer {
     }
   }
 
-  public void serializeSection(@NotNull Dictionary dict) throws IOException {
+  private void startBlock() throws IOException {
+    if (options.isPretty()) {
+      writer.append('\n');
+      writer.append(" ".repeat(currentIndent));
+    }
+  }
+
+  private void serializeSection(@NotNull Dictionary dict) throws IOException {
     writer.append('{');
     currentIndent += 2;
     int i = 0;
     for (String key : dict.keySet()) {
       startBlock();
       appendEscape(key);
-      writer.append(options.pretty ? ": " : ":");
+      writer.append(options.isPretty() ? ": " : ":");
       serialize(dict.get(key));
-      if (i++ < dict.size() - 1 || options.trailingCommas)
-        writer.append(',');
+      if (i++ < dict.size() - 1 || options.shouldAppendTrailingCommas()) writer.append(',');
     }
     currentIndent -= 2;
     startBlock();
@@ -94,44 +122,17 @@ public class JsonSerializer {
     writer.append('\"');
   }
 
-  public void serializeArray(@NotNull Object obj) throws IOException {
+  private void serializeArray(@NotNull Object obj) throws IOException {
     writer.append('[');
     currentIndent += 2;
     int n = Array.getLength(obj);
     for (int i = 0; i < n; i++) {
       startBlock();
       serialize(Array.get(obj, i));
-      if (i < n - 1 || options.trailingCommas)
-        writer.append(',');
+      if (i < n - 1 || options.shouldAppendTrailingCommas()) writer.append(',');
     }
     currentIndent -= 2;
     startBlock();
     writer.append(']');
-  }
-  
-  public static class Options {
-    public static final Options DEFAULT = new Options(false, false, 2);
-
-    private final boolean pretty;
-    private final boolean trailingCommas;
-    private final int indent;
-
-    public Options(boolean pretty, boolean trailingCommas, int indent) {
-      this.pretty = pretty;
-      this.trailingCommas = trailingCommas;
-      this.indent = Math.max(indent, 0);
-    }
-
-    public boolean isPretty() {
-      return pretty;
-    }
-
-    public boolean withTrailingCommas() {
-      return trailingCommas;
-    }
-
-    public int getIndent() {
-      return indent;
-    }
   }
 }
