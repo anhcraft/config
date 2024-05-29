@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * Utilities for working with complex types.
  */
 public class ComplexTypes {
-  public static final Map<Class<?>, Class<?>> map = new HashMap<>();
+  private static final Map<Class<?>, Class<?>> map = new HashMap<>();
 
   static {
     map.put(byte.class, Byte.class);
