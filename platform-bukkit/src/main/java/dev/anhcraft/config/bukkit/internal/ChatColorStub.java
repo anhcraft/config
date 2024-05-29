@@ -1,14 +1,13 @@
 package dev.anhcraft.config.bukkit.internal;
 
 import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.ApiStatus;
-
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.ApiStatus;
 
 // https://github.com/SpigotMC/BungeeCord/blob/master/chat/src/main/java/net/md_5/bungee/api/ChatColor.java
 @ApiStatus.Internal

@@ -4,7 +4,6 @@ import dev.anhcraft.config.util.StringUtil;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 
 /**

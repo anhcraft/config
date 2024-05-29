@@ -5,11 +5,10 @@ import dev.anhcraft.config.SchemalessDictionary;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.InvalidValueException;
+import java.lang.reflect.Type;
 import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Type;
 
 public class ColorAdapter implements TypeAdapter<Color> {
   public static final ColorAdapter INSTANCE = new ColorAdapter();
@@ -19,11 +18,11 @@ public class ColorAdapter implements TypeAdapter<Color> {
       @NotNull Context ctx, @NotNull Class<? extends Color> sourceType, @NotNull Color value)
       throws Exception {
     return SchemalessDictionary.create()
-      .put("red", value.getRed())
-      .put("green", value.getGreen())
-      .put("blue", value.getBlue())
-      .put("alpha", value.getAlpha())
-      .build();
+        .put("red", value.getRed())
+        .put("green", value.getGreen())
+        .put("blue", value.getBlue())
+        .put("alpha", value.getAlpha())
+        .build();
   }
 
   @Override
@@ -57,11 +56,10 @@ public class ColorAdapter implements TypeAdapter<Color> {
     } else if (value instanceof Dictionary) {
       Dictionary dict = (Dictionary) value;
       return Color.fromARGB(
-        (Integer) dict.getOrDefault("alpha", 255),
-        (Integer) dict.getOrDefault("red", 0),
-        (Integer) dict.getOrDefault("green", 0),
-        (Integer) dict.getOrDefault("blue", 0)
-      );
+          (Integer) dict.getOrDefault("alpha", 255),
+          (Integer) dict.getOrDefault("red", 0),
+          (Integer) dict.getOrDefault("green", 0),
+          (Integer) dict.getOrDefault("blue", 0));
     }
     return null;
   }
