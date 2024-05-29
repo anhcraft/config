@@ -19,6 +19,8 @@
         <module>core</module>
         <module>configdoc</module>
         <module>json</module>
+        <module>platform-bukkit</module>
+        <module>tools</module>
     </modules>
 
     <developers>
