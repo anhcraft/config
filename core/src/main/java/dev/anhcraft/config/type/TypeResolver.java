@@ -1,7 +1,6 @@
 package dev.anhcraft.config.type;
 
 import java.lang.reflect.*;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,20 +83,20 @@ public abstract class TypeResolver implements Type {
     */
     if (type instanceof ParameterizedType) {
       ParameterizedType paramType = (ParameterizedType) type;
+      Type[] args = paramType.getActualTypeArguments();
+      for (int i = 0; i < args.length; i++) args[i] = resolve(args[i]);
       return new TypeImpl.ParameterizedTypeImpl(
-          paramType.getOwnerType(),
-          paramType.getRawType(),
-          Arrays.stream(paramType.getActualTypeArguments())
-              .map(this::resolve)
-              .toArray(Type[]::new));
+          paramType.getOwnerType(), paramType.getRawType(), args);
     } else if (type instanceof GenericArrayType) {
       GenericArrayType arrayType = (GenericArrayType) type;
       return new TypeImpl.GenericArrayTypeImpl(resolve(arrayType.getGenericComponentType()));
     } else if (type instanceof WildcardType) {
       WildcardType wildcardType = (WildcardType) type;
-      return new TypeImpl.WildcardTypeImpl(
-          Arrays.stream(wildcardType.getUpperBounds()).map(this::resolve).toArray(Type[]::new),
-          Arrays.stream(wildcardType.getLowerBounds()).map(this::resolve).toArray(Type[]::new));
+      Type[] upperBounds = wildcardType.getUpperBounds();
+      for (int i = 0; i < upperBounds.length; i++) upperBounds[i] = resolve(upperBounds[i]);
+      Type[] lowerBounds = wildcardType.getLowerBounds();
+      for (int i = 0; i < lowerBounds.length; i++) lowerBounds[i] = resolve(lowerBounds[i]);
+      return new TypeImpl.WildcardTypeImpl(upperBounds, lowerBounds);
     } else if (type instanceof TypeVariable) {
       TypeVariable<?> typeVariable = (TypeVariable<?>) type;
       return getTypeMapping().getOrDefault(typeVariable.getName(), Object.class);
