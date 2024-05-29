@@ -20,12 +20,12 @@ final class TypeImpl {
 
     @Override
     public Type[] getUpperBounds() {
-      return upperBounds;
+      return upperBounds.clone();
     }
 
     @Override
     public Type[] getLowerBounds() {
-      return lowerBounds;
+      return lowerBounds.clone();
     }
   }
 
@@ -55,7 +55,7 @@ final class TypeImpl {
 
     @Override
     public Type[] getActualTypeArguments() {
-      return actualTypeArguments;
+      return actualTypeArguments.clone();
     }
 
     @Override
