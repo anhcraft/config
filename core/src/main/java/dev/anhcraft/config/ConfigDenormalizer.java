@@ -276,7 +276,10 @@ public class ConfigDenormalizer {
             && !ComplexTypes.wrapPrimitive(propertyTypeErasure).isAssignableFrom(value.getClass()))
           break scope;
 
-        if (!property.validator().check(value)) {
+        if (!SettingFlag.has(
+                ctx.getFactory().getDenormalizer().getSettings(),
+                SettingFlag.Denormalizer.DISABLE_VALIDATION)
+            && !property.validator().check(value)) {
           if (property.validator().silent()) break scope;
           throw new InvalidValueException(
               ctx, String.format("'%s' %s", value, property.validator().message()));

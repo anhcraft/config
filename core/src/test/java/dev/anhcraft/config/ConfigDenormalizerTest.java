@@ -186,6 +186,25 @@ public class ConfigDenormalizerTest {
                   .getDenormalizer()
                   .denormalizeToInstance(dict, Transaction.class, new Transaction()));
     }
+
+    @Test
+    @Order(5)
+    public void testSkipValidate() {
+      dict.put(
+          "items",
+          new Dictionary[] {
+            Dictionary.of(Map.of("id", "f")),
+            Dictionary.of(Map.of("id", "fo")),
+            Dictionary.of(Map.of("id", "foo"))
+          });
+      assertDoesNotThrow(
+          () ->
+              ConfigFactory.create()
+                  .disableValidation(true)
+                  .build()
+                  .getDenormalizer()
+                  .denormalizeToInstance(dict, Transaction.class, new Transaction()));
+    }
   }
 
   public static class Transaction {

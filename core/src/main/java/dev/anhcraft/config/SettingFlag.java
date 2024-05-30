@@ -42,6 +42,11 @@ public class SettingFlag {
      * See: {@link ConfigFactory.Builder#strictNumberParsing(boolean)}
      */
     public static final byte STRICT_NUMBER_PARSING = 2;
+
+    /**
+     * See: {@link ConfigFactory.Builder#disableValidation(boolean)}
+     */
+    public static final byte DISABLE_VALIDATION = 4;
   }
 
   /**

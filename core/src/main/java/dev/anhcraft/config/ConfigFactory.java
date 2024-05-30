@@ -309,6 +309,19 @@ public final class ConfigFactory {
     }
 
     /**
+     * Disables validation in denormalization.<br>
+     * This setting is {@code false} by default.
+     * @param disabled if validation should be disabled
+     * @return this
+     */
+    public @NotNull Builder disableValidation(boolean disabled) {
+      denormalizerSettings =
+          SettingFlag.set(
+              denormalizerSettings, SettingFlag.Denormalizer.DISABLE_VALIDATION, disabled);
+      return this;
+    }
+
+    /**
      * Builds the config factory.
      * @return the config factory
      */
