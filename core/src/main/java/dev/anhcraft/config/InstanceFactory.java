@@ -64,6 +64,7 @@ public final class InstanceFactory implements InstanceAssembler {
 
     try {
       Constructor<T> c = clazz.getDeclaredConstructor();
+      c.setAccessible(true);
       ic =
           new InstanceAssembler() {
             @Override
