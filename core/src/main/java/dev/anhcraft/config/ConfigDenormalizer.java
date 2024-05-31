@@ -15,7 +15,6 @@ import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import dev.anhcraft.config.type.TypeResolver;
 import dev.anhcraft.config.type.TypeToken;
-import dev.anhcraft.config.util.ObjectUtil;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -174,7 +173,7 @@ public class ConfigDenormalizer {
       return result;
     }
     if (!(simple instanceof Dictionary)) return null;
-    Object object = ObjectUtil.newInstance(erasureType);
+    Object object = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
     _denormalizeToInstance(ctx, (Dictionary) simple, targetType, object);
     return object;
   }

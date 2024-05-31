@@ -30,6 +30,7 @@ public final class ConfigFactory {
   private final Map<Class<?>, Schema<?>> classSchemas;
   private final ContextProvider contextProvider;
   private final AdapterProvider adapterProvider;
+  private final InstanceFactory instanceFactory;
 
   ConfigFactory(Builder builder) {
     this.schemaScanner = new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry);
@@ -37,6 +38,7 @@ public final class ConfigFactory {
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.classSchemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
+    this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
     try {
       this.adapterProvider =
           builder
@@ -111,10 +113,20 @@ public final class ConfigFactory {
   }
 
   /**
+   * Gets the instance factory.
+   * @return the instance factory
+   */
+  @NotNull public InstanceFactory getInstanceFactory() {
+    return instanceFactory;
+  }
+
+  /**
    * A builder for {@link ConfigFactory}
    */
   public static class Builder {
     private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
+    private final LinkedHashMap<Class<?>, InstanceAssembler> instanceAssemblers =
+        new LinkedHashMap<>();
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = new ContextProvider() {};
@@ -175,6 +187,19 @@ public final class ConfigFactory {
       if (TypeAdapter.class.isAssignableFrom(type))
         throw new IllegalArgumentException("Wrong type?");
       typeAdapters.put(type, adapter);
+      return this;
+    }
+
+    /**
+     * Registers the instance assembler for the given type.
+     * @param type the type
+     * @param instanceAssembler the instance assembler
+     * @return this
+     * @param <T> the type
+     */
+    public @NotNull <T> Builder useInstanceAssembler(
+        @NotNull Class<T> type, @NotNull InstanceAssembler instanceAssembler) {
+      instanceAssemblers.put(type, instanceAssembler);
       return this;
     }
 
