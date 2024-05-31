@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class JsonParser {
   private final Reader reader;
+  private final StringBuilder buffer = new StringBuilder();
   private int currentChar;
   private int pos = -1;
 
@@ -240,7 +241,6 @@ public class JsonParser {
 
   private String readString() throws IOException {
     expectCurrentChar('"');
-    StringBuilder sb = new StringBuilder();
     boolean escaped = false;
     byte unicode = -1;
     char[] unicodeBuffer = new char[4];
@@ -260,14 +260,14 @@ public class JsonParser {
           if (unicode == 4) {
             int codepoint = hexToDecimal(unicodeBuffer);
             if (Character.isValidCodePoint(codepoint)) {
-              sb.appendCodePoint(codepoint);
+              buffer.appendCodePoint(codepoint);
               unicode = -1;
               continue;
             }
           } else continue;
         }
 
-        sb.append('\\').append('u').append(unicodeBuffer, 0, unicode + 1);
+        buffer.append('\\').append('u').append(unicodeBuffer, 0, unicode + 1);
         unicode = -1;
         continue;
       }
@@ -275,31 +275,31 @@ public class JsonParser {
       if (escaped) {
         switch (currentChar) {
           case 'n':
-            sb.append('\n');
+            buffer.append('\n');
             break;
           case 'r':
-            sb.append('\r');
+            buffer.append('\r');
             break;
           case 't':
-            sb.append('\t');
+            buffer.append('\t');
             break;
           case 'b':
-            sb.append('\b');
+            buffer.append('\b');
             break;
           case 'f':
-            sb.append('\f');
+            buffer.append('\f');
             break;
           case 'u':
             unicode = 0;
             break;
           case '\\':
-            sb.append('\\');
+            buffer.append('\\');
             break;
           case '\"':
-            sb.append('\"');
+            buffer.append('\"');
             break;
           default:
-            sb.append('\\').append((char) currentChar);
+            buffer.append('\\').append((char) currentChar);
             break;
         }
         escaped = false;
@@ -309,7 +309,7 @@ public class JsonParser {
         } else if (currentChar == '"') {
           break;
         } else {
-          sb.append((char) currentChar);
+          buffer.append((char) currentChar);
         }
       }
     } while (currentChar != -1);
@@ -317,7 +317,7 @@ public class JsonParser {
     expectCurrentChar('"');
     nextNonWhitespaceChar();
 
-    return sb.toString();
+    return buffer.toString();
   }
 
   private <T> T readLiteral(String match, T value) throws IOException {
@@ -341,7 +341,7 @@ public class JsonParser {
   }
 
   private Number readNumber() throws IOException {
-    StringBuilder sb = new StringBuilder();
+    buffer.setLength(0);
     boolean doubleNum = false;
 
     do {
@@ -352,7 +352,7 @@ public class JsonParser {
           || currentChar == 'e'
           || currentChar == 'E'
           || (currentChar >= '0' && currentChar <= '9')) {
-        sb.append((char) currentChar);
+        buffer.append((char) currentChar);
       } else {
         skipWhitespace();
         break;
@@ -362,11 +362,11 @@ public class JsonParser {
 
     try {
       Number v;
-      if (doubleNum) v = Double.parseDouble(sb.toString());
-      else v = Integer.parseInt(sb.toString());
+      if (doubleNum) v = Double.parseDouble(buffer.toString());
+      else v = Integer.parseInt(buffer.toString());
       return v;
     } catch (NumberFormatException e) {
-      throw new MalformedJsonException(errorMessage("Invalid number: " + sb), e);
+      throw new MalformedJsonException(errorMessage("Invalid number: " + buffer), e);
     }
   }
 }
