@@ -105,6 +105,20 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
     return new ImmutableView(this);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof AbstractDictionary)) return false;
+    if (!super.equals(o)) return false;
+    AbstractDictionary that = (AbstractDictionary) o;
+    return backend.equals(that.backend);
+  }
+
+  @Override
+  public int hashCode() {
+    return backend.hashCode();
+  }
+
   final class LinkedEntrySet extends AbstractSet<Map.Entry<String, Object>> {
     public int size() {
       return backend.entrySet().size();
