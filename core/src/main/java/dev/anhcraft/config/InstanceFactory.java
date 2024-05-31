@@ -1,6 +1,7 @@
 package dev.anhcraft.config;
 
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.type.ComplexTypes;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
@@ -52,6 +53,11 @@ public final class InstanceFactory implements InstanceAssembler {
 
     InstanceAssembler ic = instanceAssemblers.get(clazz);
     if (ic != null) return ic;
+
+    // If there is no instance assembler provided beforehand, the current class may not be
+    // instantiable normally.
+    if (!ComplexTypes.isInstantiable(clazz))
+      throw new IllegalArgumentException("Cannot instantiate " + clazz.getName());
 
     ic = onDemandCache.get(clazz);
     if (ic != null) return ic;

@@ -50,6 +50,16 @@ public class ComplexTypes {
   }
 
   /**
+   * Checks whether given class is instantiable.
+   * @param clazz the class
+   * @return {@code true} if the class is instantiable
+   */
+  public static boolean isInstantiable(@NotNull Class<?> clazz) {
+    int mod = clazz.getModifiers();
+    return !Modifier.isAbstract(mod) && !Modifier.isInterface(mod);
+  }
+
+  /**
    * Checks whether the given type is an array.<br>
    * For example: {@code int[]} and {@code List<Integer>[]}
    * @param type the type
