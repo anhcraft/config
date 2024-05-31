@@ -1,6 +1,7 @@
 package dev.anhcraft.config.json;
 
 import dev.anhcraft.config.Dictionary;
+import dev.anhcraft.config.type.ComplexTypes;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Array;
@@ -50,7 +51,7 @@ public class JsonWriter {
   public void serialize(@Nullable Object obj) throws IOException {
     if (obj instanceof Dictionary) {
       serializeSection((Dictionary) obj);
-    } else if (obj != null && obj.getClass().isArray()) {
+    } else if (ComplexTypes.isArray(obj)) {
       serializeArray(obj);
     } else if (obj instanceof String) {
       appendEscape(obj.toString());
