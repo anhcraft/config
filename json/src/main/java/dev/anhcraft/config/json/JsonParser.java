@@ -241,6 +241,7 @@ public class JsonParser {
 
   private String readString() throws IOException {
     expectCurrentChar('"');
+    buffer.setLength(0);
     boolean escaped = false;
     byte unicode = -1;
     char[] unicodeBuffer = new char[4];
