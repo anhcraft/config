@@ -56,7 +56,10 @@ public class ComplexTypes {
    */
   public static boolean isInstantiable(@NotNull Class<?> clazz) {
     int mod = clazz.getModifiers();
-    return !Modifier.isAbstract(mod) && !Modifier.isInterface(mod);
+    return !Modifier.isAbstract(mod)
+        && !Modifier.isInterface(mod)
+        && !clazz.isEnum()
+        && !clazz.isArray();
   }
 
   /**
