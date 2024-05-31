@@ -50,6 +50,20 @@ public class ComplexTypesTest {
   }
 
   @Test
+  void testIsInstantiable() {
+    assertTrue(ComplexTypes.isInstantiable(ArrayList.class), "ArrayList should be instantiable");
+    assertFalse(
+        ComplexTypes.isInstantiable(AbstractList.class), "AbstractList should not be instantiable");
+    assertFalse(
+        ComplexTypes.isInstantiable(List.class), "List interface should not be instantiable");
+    assertFalse(
+        ComplexTypes.isInstantiable(Thread.State.class),
+        "Enum Thread.State should not be instantiable");
+    class LocalClass {}
+    assertTrue(ComplexTypes.isInstantiable(LocalClass.class), "LocalClass should be instantiable");
+  }
+
+  @Test
   public void testIsArray() {
     assertTrue(ComplexTypes.isArray(int[].class));
     assertTrue(ComplexTypes.isArray(int[][].class));
