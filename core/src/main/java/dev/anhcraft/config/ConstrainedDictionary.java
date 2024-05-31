@@ -57,7 +57,7 @@ public class ConstrainedDictionary extends AbstractDictionary {
       if (value instanceof Dictionary && !((Dictionary) value).isCompatibleWith(subSchema))
         throw new IllegalArgumentException(
             "Property '" + name + "' does not have compatible schema");
-      else if (value.getClass().isArray()) {
+      else if (ComplexTypes.isArray(value)) {
         int length = Array.getLength(value);
         for (int i = 0; i < length; i++) {
           Object elem = Array.get(value, i);

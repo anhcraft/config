@@ -66,7 +66,7 @@ public final class SimpleTypes {
         || value instanceof Boolean
         || value instanceof Character
         || value instanceof Dictionary) return true;
-    if (value.getClass().isArray()) {
+    if (ComplexTypes.isArray(value)) {
       Class<?> componentType = value.getClass().getComponentType();
       // If the array is of Object type, we need to check each element
       if (componentType == Object.class) {
@@ -89,7 +89,7 @@ public final class SimpleTypes {
    * @param <T> The container type
    */
   public static <T> int getContainerSize(@NotNull T value) {
-    if (value.getClass().isArray()) return Array.getLength(value);
+    if (ComplexTypes.isArray(value)) return Array.getLength(value);
     else if (value instanceof Dictionary) return ((Dictionary) value).size();
     else return 1;
   }
@@ -105,7 +105,7 @@ public final class SimpleTypes {
    */
   @Nullable public static <T> Object getContainerElement(@Nullable T value, int i) {
     if (value == null) return null;
-    if (value.getClass().isArray()) return Array.get(value, i);
+    if (ComplexTypes.isArray(value)) return Array.get(value, i);
     else if (value instanceof Dictionary) return ((Dictionary) value).getValueAt(i);
     else return value;
   }
@@ -125,7 +125,7 @@ public final class SimpleTypes {
         || value instanceof Character) return value; // immutable
     else if (value instanceof Dictionary) {
       return (T) ((Dictionary) value).duplicate(true);
-    } else if (value.getClass().isArray()) {
+    } else if (ComplexTypes.isArray(value)) {
       Class<?> componentType = value.getClass().getComponentType();
       int n = Array.getLength(value);
       Object result = Array.newInstance(componentType, n);

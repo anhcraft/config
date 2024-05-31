@@ -9,6 +9,7 @@ import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.context.ValueScope;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.meta.Normalizer;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import java.lang.reflect.Array;
 import org.jetbrains.annotations.ApiStatus;
@@ -254,8 +255,7 @@ public final class ConfigNormalizer {
             && value instanceof Boolean
             && !((Boolean) value)) break scope;
         if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
-            && value != null
-            && value.getClass().isArray()
+            && ComplexTypes.isArray(value)
             && Array.getLength(value) == 0) break scope;
         if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
             && value instanceof Dictionary

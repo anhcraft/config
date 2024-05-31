@@ -1,6 +1,7 @@
 package dev.anhcraft.config.validate.check;
 
 import dev.anhcraft.config.error.ValidationParseException;
+import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.util.StringUtil;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -52,7 +53,7 @@ public class SizeValidation extends ParameterizedValidation {
     if (value instanceof String) number = ((String) value).length();
     else if (value instanceof Collection) number = ((Collection<?>) value).size();
     else if (value instanceof Map) number = ((Map<?, ?>) value).size();
-    else if (value.getClass().isArray()) number = Array.getLength(value);
+    else if (ComplexTypes.isArray(value)) number = Array.getLength(value);
     if (number == -1) return true;
     if (min != null && number < min) return false;
     return max == null || !(number > max);

@@ -30,7 +30,7 @@ public class IterableAdapter implements TypeAdapter<Iterable> {
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
     if (SimpleTypes.isScalar(value.getClass())) {
       return complexify(ctx, new Object[] {value}, targetType);
-    } else if (value.getClass().isArray()) {
+    } else if (ComplexTypes.isArray(value)) {
       Type componentType = ComplexTypes.getActualTypeArgument(targetType, 0);
       if (componentType == null) return null;
 

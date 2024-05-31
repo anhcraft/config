@@ -50,6 +50,23 @@ public class ComplexTypes {
   }
 
   /**
+   * Checks if the given object is an array.
+   * @param obj the object
+   * @return {@code true} if it is
+   */
+  public static boolean isArray(@Nullable Object obj) {
+    return obj instanceof Object[]
+        || obj instanceof byte[]
+        || obj instanceof short[]
+        || obj instanceof int[]
+        || obj instanceof long[]
+        || obj instanceof float[]
+        || obj instanceof double[]
+        || obj instanceof char[]
+        || obj instanceof boolean[];
+  }
+
+  /**
    * Checks whether given class is instantiable.
    * @param clazz the class
    * @return {@code true} if the class is instantiable
