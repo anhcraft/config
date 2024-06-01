@@ -1,6 +1,7 @@
 package dev.anhcraft.config;
 
 import dev.anhcraft.config.adapter.AdapterProvider;
+import dev.anhcraft.config.adapter.CacheableAdapterProvider;
 import dev.anhcraft.config.adapter.SimpleAdapterProvider;
 import dev.anhcraft.config.adapter.TypeAdapter;
 import dev.anhcraft.config.adapter.defaults.*;
@@ -138,7 +139,7 @@ public final class ConfigFactory {
                 return size() > 100;
               }
             };
-    private Class<? extends AdapterProvider> adapterProvider = SimpleAdapterProvider.class;
+    private Class<? extends AdapterProvider> adapterProvider = CacheableAdapterProvider.class;
     private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
     private byte denormalizerSettings = 0;
 
