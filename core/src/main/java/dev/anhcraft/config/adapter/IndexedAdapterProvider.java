@@ -1,5 +1,6 @@
 package dev.anhcraft.config.adapter;
 
+import java.io.Serializable;
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,6 +21,7 @@ public class IndexedAdapterProvider extends SimpleAdapterProvider {
       classGraph.decorate(e.getKey(), e.getValue());
     }
     classGraph.fill();
+    classGraph.decoration.remove(Serializable.class); // exclude to prevent wrong adapter selection
     return classGraph.decoration;
   }
 
