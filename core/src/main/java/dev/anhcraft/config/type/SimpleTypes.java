@@ -6,7 +6,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Utilities for working with simple types.
+ * Utilities for working with simple types.<br>
+ * Simple types including:
+ * <ul>
+ *   <li>Primitives</li>
+ *   <li>Primitive wrappers</li>
+ *   <li>String</li>
+ *   <li>Dictionary</li>
+ *   <li>Array of simple values</li>
+ * </ul>
  */
 public final class SimpleTypes {
   /**
