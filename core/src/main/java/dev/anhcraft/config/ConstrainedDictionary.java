@@ -11,11 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The constrained dictionary is constrained by a dictionary schema which restricts the type of values.<br>
+ * The constrained dictionary is constrained by a {@link DictionarySchema} which restricts the type of values.<br>
  * If the schema is not provided, it behaves similar to {@link SchemalessDictionary}.<br>
- * To put a value to a property typed {@code T}, the value must be {@code T} or a subtype of {@code T}. If {@code T}
- * is a {@link Dictionary} and there exists a schema restricted on the property, the value will be validated against
- * the schema recursively.<br>
+ * To put a value to a property typed {@code T}, the value must be {@code T} or a subtype of {@code T}. {@code T} must be
+ * a simple type. If {@code T} is a {@link Dictionary} and there exists a schema restricted on the property, the value
+ * will be validated against the schema recursively.<br>
  * This implementation is not thread-safe.
  * @see Dictionary
  */

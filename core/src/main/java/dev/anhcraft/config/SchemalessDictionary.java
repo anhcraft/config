@@ -4,9 +4,11 @@ import dev.anhcraft.config.type.SimpleTypes;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * A schemaless dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects.<br>
+ * A schemaless dictionary has no schema associated, as such, its content grows dynamically and fit any simple objects.
+ * A schemaless dictionary has no value validation, user must be aware that the value type must be a simple type.
  * This implementation is not thread-safe.
  * @see Dictionary
  */
@@ -49,12 +51,9 @@ public class SchemalessDictionary extends AbstractDictionary {
   }
 
   public static class SchemalessDictionaryBuilder {
-    private final LinkedHashMap<String, Object> backend = new LinkedHashMap<>();
+    private final SchemalessDictionary backend = new SchemalessDictionary();
 
-    public @NotNull SchemalessDictionaryBuilder put(String key, Object value) {
-      if (!SimpleTypes.test(value)) {
-        throw new IllegalArgumentException("The given value is not a simple type");
-      }
+    public @NotNull SchemalessDictionaryBuilder put(@NotNull String key, @Nullable Object value) {
       backend.put(key, value);
       return this;
     }
@@ -69,7 +68,7 @@ public class SchemalessDictionary extends AbstractDictionary {
     }
 
     public @NotNull SchemalessDictionary build() {
-      return copyOf(backend);
+      return backend;
     }
   }
 }

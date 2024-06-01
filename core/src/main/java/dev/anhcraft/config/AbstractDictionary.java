@@ -2,7 +2,6 @@ package dev.anhcraft.config;
 
 import dev.anhcraft.config.blueprint.DictionaryProperty;
 import dev.anhcraft.config.blueprint.DictionarySchema;
-import dev.anhcraft.config.type.SimpleTypes;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -32,10 +31,10 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
 
   @Override
   public @Nullable Object put(@NotNull String key, @Nullable Object value) {
-    if (!SimpleTypes.test(value))
-      throw new IllegalArgumentException(
-          String.format("Object of type %s is not a simple type", value.getClass().getName()));
-    // TODO deep clone array since the element can be mutated to be a non-simple type
+    // NOTE: validation is omitted for performance reasons -> user awareness
+    // if (!SimpleTypes.test(value))
+    //  throw new IllegalArgumentException(
+    //    String.format("Object of type %s is not a simple type", value.getClass().getName()));
     Object previous = backend.get(key);
     if ((previous == null && value != null) || (previous != null && value == null))
       sortedKeys = null; // invalidate the cache only when add/remove (not modify)

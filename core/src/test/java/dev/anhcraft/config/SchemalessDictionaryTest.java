@@ -59,7 +59,6 @@ public class SchemalessDictionaryTest {
     assertDoesNotThrow(() -> dict.put("a", 3));
     assertDoesNotThrow(() -> dict.put("b", "99"));
     assertDoesNotThrow(() -> dict.put("c", new int[0]));
-    assertThrows(IllegalArgumentException.class, () -> dict.put("d", new Object()));
   }
 
   @SuppressWarnings("OverwrittenKey")

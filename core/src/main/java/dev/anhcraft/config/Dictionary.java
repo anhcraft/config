@@ -1,14 +1,18 @@
 package dev.anhcraft.config;
 
 import dev.anhcraft.config.blueprint.DictionarySchema;
+import dev.anhcraft.config.type.SimpleTypes;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a dictionary containing simple objects only.<br>
- * The dictionary does not allow {@code null} keys and values.
+ * Represents a dictionary which is a key-value data store with string keys and simple values.<br>
+ * Value restriction is implementation-specific. An implementation may have no value restrictions for performance reasons.
+ * However, when manipulating a dictionary, it is important to be aware of value types. The most basic requirement is that
+ * the value type must be a simple type (see: {@link SimpleTypes})
+ * The dictionary does not allow {@code null} keys and {@code null} values.
  */
 public interface Dictionary extends Map<String, Object> {
   // ======== Helpers ========
@@ -100,7 +104,7 @@ public interface Dictionary extends Map<String, Object> {
   /**
    * Duplicates this dictionary.<br>
    * If the dictionary is immutable, it will return itself in shallow-copy mode.
-   * Otherwise, a new immutable, deep copy dictionary will be created.
+   * Otherwise, a new immutable, deep-copied dictionary will be created.
    * @param deepCopy if true, the dictionary will be deep-copied
    * @return duplicated dictionary
    */
