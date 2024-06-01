@@ -76,10 +76,10 @@ public class ClassProperty extends AbstractProperty {
 
   /**
    * Checks if this property is annotated as {@link Fallback}
-   * @return whether the property is constant
+   * @return whether the property is fallback
    */
   public boolean isFallback() {
-    return field.getAnnotation(Fallback.class) != null;
+    return (modifier & MODIFIER_FALLBACK) == MODIFIER_FALLBACK;
   }
 
   /**

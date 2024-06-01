@@ -30,6 +30,11 @@ public interface Property {
   byte MODIFIER_CONSTANT = 4;
 
   /**
+   * Modifier to mark fallback properties.
+   */
+  byte MODIFIER_FALLBACK = 8;
+
+  /**
    * Gets the primary name of this property.
    *
    * @return the primary name

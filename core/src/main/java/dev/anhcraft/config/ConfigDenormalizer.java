@@ -212,8 +212,8 @@ public class ConfigDenormalizer {
       // if there is a fallback property at the end, we collect all remaining settings including the
       // setting of the
       // fallback property
-      Fallback fallback = property.field().getAnnotation(Fallback.class);
-      if (fallback != null) {
+      if (property.isFallback()) {
+        Fallback fallback = property.field().getAnnotation(Fallback.class);
         Set<String> exclusion =
             fallback.distinctBy() == Fallback.Distinct.NAME
                 ? settingsProcessed

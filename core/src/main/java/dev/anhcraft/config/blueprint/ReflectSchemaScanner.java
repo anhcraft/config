@@ -294,6 +294,7 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
     modifier |= field.getAnnotation(Optional.class) != null ? Property.MODIFIER_OPTIONAL : 0;
     modifier |= field.getAnnotation(Transient.class) != null ? Property.MODIFIER_TRANSIENT : 0;
     modifier |= field.getAnnotation(Constant.class) != null ? Property.MODIFIER_CONSTANT : 0;
+    modifier |= field.getAnnotation(Fallback.class) != null ? Property.MODIFIER_FALLBACK : 0;
     return modifier;
   }
 
