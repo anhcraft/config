@@ -18,8 +18,6 @@ import dev.anhcraft.config.type.TypeToken;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -214,14 +212,19 @@ public class ConfigDenormalizer {
       // fallback property
       if (property.isFallback()) {
         Fallback fallback = property.field().getAnnotation(Fallback.class);
-        Set<String> exclusion =
-            fallback.distinctBy() == Fallback.Distinct.NAME
-                ? settingsProcessed
-                : settingsProcessed.stream()
-                    .map(schema::property)
-                    .filter(Objects::nonNull)
-                    .flatMap(p -> Stream.concat(p.aliases().stream(), Stream.of(p.name())))
-                    .collect(Collectors.toSet());
+        Set<String> exclusion;
+        if (fallback.distinctBy() == Fallback.Distinct.NAME) {
+          exclusion = settingsProcessed;
+        } else {
+          exclusion = new HashSet<>();
+          for (String s : settingsProcessed) {
+            ClassProperty cp = schema.property(s);
+            if (cp != null) {
+              exclusion.add(cp.name());
+              exclusion.addAll(cp.aliases());
+            }
+          }
+        }
         SchemalessDictionary trap = new SchemalessDictionary();
         for (Map.Entry<String, Object> entry : simple.entrySet()) {
           if (!exclusion.contains(entry.getKey())) trap.put(entry.getKey(), entry.getValue());
