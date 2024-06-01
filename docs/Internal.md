@@ -121,6 +121,7 @@ flowchart TD
 ### Dictionary schema
 - The schema is built dynamically in an _imperative_ manner
 - Provides the view of a _virtual_ class which does not exist at runtime
+- Represents a basic structural type system
 
 ### Schema identity
 ### Class schema
