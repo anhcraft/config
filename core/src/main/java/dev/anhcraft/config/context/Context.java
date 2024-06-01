@@ -121,6 +121,7 @@ public class Context implements TypeAdapter<Object> {
           case FIELD:
             if (ps.getProperty() instanceof ClassProperty)
               sb.append(((ClassProperty) ps.getProperty()).field().getName());
+            else sb.append(ps.getProperty().name());
             break;
           case PRIMARY:
             sb.append(ps.getProperty().name());
