@@ -27,6 +27,8 @@ import org.jetbrains.annotations.Nullable;
 public class JsonParser {
   private final Reader reader;
   private final StringBuilder buffer = new StringBuilder();
+  private final char[] unicodeBuffer = new char[4];
+  private byte unicode = -1;
   private int currentChar;
   private int pos = -1;
 
@@ -243,8 +245,7 @@ public class JsonParser {
     expectCurrentChar('"');
     buffer.setLength(0);
     boolean escaped = false;
-    byte unicode = -1;
-    char[] unicodeBuffer = new char[4];
+    unicode = -1;
 
     do {
       readChar();
