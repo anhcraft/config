@@ -15,13 +15,14 @@ public class CacheableAdapterProvider extends IndexedAdapterProvider {
   @SuppressWarnings("unchecked")
   @Override
   public @Nullable <T> TypeAdapter<T> getTypeAdapter(@NotNull Class<T> type) {
-    if (typeAdapters.containsKey(type)) {
-      return (TypeAdapter<T>) typeAdapters.get(type);
+    TypeAdapter<?> adapter = typeAdapters.get(type);
+    if (adapter != null) {
+      return (TypeAdapter<T>) adapter;
     }
     synchronized (typeAdapters) {
-      TypeAdapter<T> adapter = super.getTypeAdapter(type);
+      adapter = super.getTypeAdapter(type);
       typeAdapters.put(type, adapter);
-      return adapter;
+      return (TypeAdapter<T>) adapter;
     }
   }
 }
