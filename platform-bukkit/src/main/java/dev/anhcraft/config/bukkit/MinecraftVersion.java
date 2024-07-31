@@ -17,6 +17,7 @@ public class MinecraftVersion implements Comparable<MinecraftVersion> {
   }
 
   // START: generated using config/tools
+  public static final MinecraftVersion v1_21 = new MinecraftVersion(1, 21, 0);
   public static final MinecraftVersion v1_20_6 = new MinecraftVersion(1, 20, 6);
   public static final MinecraftVersion v1_20_5 = new MinecraftVersion(1, 20, 5);
   public static final MinecraftVersion v1_20_4 = new MinecraftVersion(1, 20, 4);
