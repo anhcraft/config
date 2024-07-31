@@ -26,9 +26,9 @@ public final class SimpleTypes {
   public static boolean isScalar(@NotNull Class<?> type) {
     if (type.isPrimitive()) return true;
     return type == String.class
-        || type == Number.class
         || type == Boolean.class
-        || type == Character.class;
+        || type == Character.class
+        || Number.class.isAssignableFrom(type);
   }
 
   /**
@@ -46,9 +46,9 @@ public final class SimpleTypes {
   public static <T> boolean validate(@NotNull Class<T> type) {
     if (type.isPrimitive()) return true;
     if (type == String.class
-        || type == Number.class
         || type == Boolean.class
         || type == Character.class
+        || Number.class.isAssignableFrom(type)
         || Dictionary.class.isAssignableFrom(type)) return true;
     if (type.isArray()) return validate(type.getComponentType());
     return false;
