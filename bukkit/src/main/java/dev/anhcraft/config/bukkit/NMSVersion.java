@@ -23,7 +23,8 @@ public enum NMSVersion {
     v1_19_R3,
     v1_20_R1,
     v1_20_R2,
-    v1_20_R3;
+    v1_20_R3,
+    v1_21_R1;
 
     private static NMSVersion current;
 
@@ -31,8 +32,11 @@ public enum NMSVersion {
         current = NMSVersion.values()[NMSVersion.values().length - 1];
         //noinspection ConstantConditions
         try {
-            if (Bukkit.getServer() != null) {
-                current = NMSVersion.valueOf(Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3]);
+          //noinspection ConstantValue
+          if (Bukkit.getServer() != null) { // pass test
+                String[] args = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",");
+                if (args.length >= 4)
+                    current = NMSVersion.valueOf(args[3]);
             }
         } catch (Exception ignored) {} // use default if not found
     }
