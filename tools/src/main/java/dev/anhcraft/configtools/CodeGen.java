@@ -45,6 +45,8 @@ public class CodeGen {
       int minor = Integer.parseInt(parts.get(1));
       int patch = parts.size() > 2 ? Integer.parseInt(parts.get(2)) : 0;
 
+      if (minor < 12) continue;
+
       if (patch == 0) {
         System.out.printf(
             "public static final MinecraftVersion v%d_%d = new MinecraftVersion(%d, %d, 0);%n",
