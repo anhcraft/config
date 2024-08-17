@@ -19,9 +19,9 @@ public class ConfigDocBuilder {
   private int unnamedSchemaCounter = 1;
 
   public ConfigDocBuilder() {
-    addJavadoc("(org\\.bukkit.+)|(org\\.spigotmc.+)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(com\\.destroystokyo\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
-    addJavadoc("(io\\.papermc\\.paper.+)", "https://jd.papermc.io/paper/1.20/");
+    addJavadoc("(org\\.bukkit.+)|(org\\.spigotmc.+)", "https://jd.papermc.io/paper/1.21.1/");
+    addJavadoc("(com\\.destroystokyo\\.paper.+)", "https://jd.papermc.io/paper/1.21.1/");
+    addJavadoc("(io\\.papermc\\.paper.+)", "https://jd.papermc.io/paper/1.21.1/");
     addJavadoc("(java\\..+)", "https://docs.oracle.com/en/java/javase/22/docs/api/");
   }
 
