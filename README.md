@@ -16,9 +16,9 @@ A Java library for working with configuration.
 ## Features
 - Lightweight and simple
 - Support common Java data types
-- Adaptable _via_ various configuration formats
+- Adaptable _with_ various configuration formats
 - Extendable _using_ type adapter and processor
-- ConfigDoc: config documentation generator
+- Config documentation generator (ConfigDoc)
 
 ## Getting started
 Check out the [wiki](https://github.com/anhcraft/config/wiki/) for installation guide, tutorials and code examples.
