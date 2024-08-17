@@ -15,8 +15,10 @@ public class DictionaryAdapter implements TypeAnnotator<Dictionary> {
   public @Nullable Dictionary complexify(
       @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
     if (value instanceof Dictionary) {
-      if (SettingFlag.has(
-          ctx.getFactory().getDenormalizer().getSettings(), SettingFlag.Denormalizer.DEEP_CLONE))
+      if (ctx.getFactory()
+          .getDenormalizer()
+          .getSettings()
+          .contains(SettingFlag.Denormalizer.DEEP_CLONE))
         return ((Dictionary) value).duplicate(true);
       return (Dictionary) value;
     }

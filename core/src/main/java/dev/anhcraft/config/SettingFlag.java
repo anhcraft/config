@@ -1,5 +1,7 @@
 package dev.anhcraft.config;
 
+import dev.anhcraft.config.error.InvalidValueException;
+
 /**
  * Flags to control the behavior of various Config components.
  */
@@ -7,68 +9,54 @@ public class SettingFlag {
   /**
    * Flags to control the behavior of normalization.
    */
-  public static class Normalizer {
+  public enum Normalizer {
     /**
-     * See: {@link ConfigFactory.Builder#deepClone(boolean)}
+     * Deep clones simple values. This applies to arrays, dictionaries and theirs descendants.
      */
-    public static final byte DEEP_CLONE = 1;
+    DEEP_CLONE,
 
     /**
-     * See: {@link ConfigFactory.Builder#ignoreDefaultValues(boolean)}
+     * Ignores default values when normalizing.<br>
+     * The default value including number and boolean.
      */
-    public static final byte IGNORE_DEFAULT_VALUES = 2;
+    IGNORE_DEFAULT_VALUES,
 
     /**
-     * See: {@link ConfigFactory.Builder#ignoreEmptyArray(boolean)}
+     * Ignores empty array when normalizing.
      */
-    public static final byte IGNORE_EMPTY_ARRAY = 4;
+    IGNORE_EMPTY_ARRAY,
 
     /**
-     * See: {@link ConfigFactory.Builder#ignoreEmptyDictionary(boolean)}
+     * Ignores empty dictionary when normalizing.
      */
-    public static final byte IGNORE_EMPTY_DICTIONARY = 8;
+    IGNORE_EMPTY_DICTIONARY
   }
 
   /**
    * Flags to control the behavior of denormalization.
    */
-  public static class Denormalizer {
+  public enum Denormalizer {
     /**
-     * See: {@link ConfigFactory.Builder#deepClone(boolean)}
+     * Deep clones simple values. This applies to arrays, dictionaries and theirs descendants.
      */
-    public static final byte DEEP_CLONE = 1;
-
-    /**
-     * See: {@link ConfigFactory.Builder#strictNumberParsing(boolean)}
-     */
-    public static final byte STRICT_NUMBER_PARSING = 2;
+    DEEP_CLONE,
 
     /**
-     * See: {@link ConfigFactory.Builder#disableValidation(boolean)}
+     * When parsing a number, strictly checks the number range. For example:
+     * <ul>
+     *     <li>Without this flag: {@code adaptByte("255.001") == -1}</li>
+     *     <li>With this flag: {@code adaptByte("255.001")} throws {@link InvalidValueException}</li>
+     * </ul>
+     * When this flag is unset, the denormalizer parses the string as {@link Double} first, and then casts it to
+     * the desired number type. When it is set, the denormalizer parses the string using the "parse" method of
+     * the desired number type, e.g: {@link Integer#parseInt(String)} for the integer adapter.<br>
+     * Note: the string is always trimmed before parsing.
      */
-    public static final byte DISABLE_VALIDATION = 4;
-  }
+    STRICT_NUMBER_PARSING,
 
-  /**
-   * Sets the state of the given flag in the given settings.
-   * @param settings the settings
-   * @param flag the flag
-   * @param state whether to set or clear the flag
-   * @return the new settings
-   */
-  public static byte set(byte settings, byte flag, boolean state) {
-    if (state) settings |= flag;
-    else settings &= (byte) ~flag;
-    return settings;
-  }
-
-  /**
-   * Checks if the given flag is set in the given settings.
-   * @param settings the settings
-   * @param flag the flag
-   * @return whether the flag is set
-   */
-  public static boolean has(byte settings, byte flag) {
-    return flag == (settings & flag);
+    /**
+     * Disables validation in denormalization.
+     */
+    DISABLE_VALIDATION
   }
 }

@@ -12,6 +12,8 @@ import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
 import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.Set;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,15 +37,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class ConfigNormalizer {
   private final ConfigFactory configFactory;
-  private final byte settings;
+  private final Set<SettingFlag.Normalizer> settings;
 
   /**
    * Use {@link ConfigFactory#getNormalizer()}
    */
   @ApiStatus.Internal
-  public ConfigNormalizer(ConfigFactory configFactory, byte settings) {
+  public ConfigNormalizer(ConfigFactory configFactory, Set<SettingFlag.Normalizer> settings) {
     this.configFactory = configFactory;
-    this.settings = settings;
+    this.settings = Collections.unmodifiableSet(settings);
   }
 
   private Context createContext() {
@@ -54,7 +56,7 @@ public final class ConfigNormalizer {
    * Gets the setting flags.
    * @return the settings
    */
-  public byte getSettings() {
+  public @NotNull Set<SettingFlag.Normalizer> getSettings() {
     return settings;
   }
 
@@ -171,7 +173,7 @@ public final class ConfigNormalizer {
   @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
   private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
     if (SimpleTypes.test(complex)) {
-      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE))
+      if (settings.contains(SettingFlag.Normalizer.DEEP_CLONE))
         return SimpleTypes.deepClone(complex);
       return complex;
     }
@@ -214,7 +216,7 @@ public final class ConfigNormalizer {
   private void _dynamicNormalize(Context ctx, Class<?> type, Object complex, Dictionary container)
       throws Exception {
     if (complex instanceof Dictionary) {
-      if (SettingFlag.has(settings, SettingFlag.Normalizer.DEEP_CLONE)) { // TODO reduce allocations
+      if (settings.contains(SettingFlag.Normalizer.DEEP_CLONE)) { // TODO reduce allocations
         container.putAll(SimpleTypes.deepClone((Dictionary) complex));
       } else {
         container.putAll((Dictionary) complex);
@@ -248,16 +250,16 @@ public final class ConfigNormalizer {
           if (value != null) value = _normalize(ctx, value.getClass(), value);
         }
 
-        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+        if (settings.contains(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
             && value instanceof Number
             && Math.abs(((Number) value).floatValue()) < 1e-8) break scope;
-        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+        if (settings.contains(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
             && value instanceof Boolean
             && !((Boolean) value)) break scope;
-        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+        if (settings.contains(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
             && ComplexTypes.isArray(value)
             && Array.getLength(value) == 0) break scope;
-        if (SettingFlag.has(settings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
+        if (settings.contains(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
             && value instanceof Dictionary
             && ((Dictionary) value).isEmpty()) break scope;
 

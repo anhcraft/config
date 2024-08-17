@@ -19,9 +19,10 @@ public class FloatAdapter implements TypeAnnotator<Float> {
       try {
         String str = ((String) value).trim();
         boolean strict =
-            SettingFlag.has(
-                ctx.getFactory().getDenormalizer().getSettings(),
-                SettingFlag.Denormalizer.STRICT_NUMBER_PARSING);
+            ctx.getFactory()
+                .getDenormalizer()
+                .getSettings()
+                .contains(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING);
         return strict ? Float.parseFloat(str) : (float) Double.parseDouble(str);
       } catch (NumberFormatException e) {
         throw new InvalidValueException(

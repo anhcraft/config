@@ -45,15 +45,15 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ConfigDenormalizer {
   private final ConfigFactory configFactory;
-  private final byte settings;
+  private final Set<SettingFlag.Denormalizer> settings;
 
   /**
    * Use {@link ConfigFactory#getDenormalizer()}
    */
   @ApiStatus.Internal
-  public ConfigDenormalizer(ConfigFactory configFactory, byte settings) {
+  public ConfigDenormalizer(ConfigFactory configFactory, Set<SettingFlag.Denormalizer> settings) {
     this.configFactory = configFactory;
-    this.settings = settings;
+    this.settings = Collections.unmodifiableSet(settings);
   }
 
   private Context createContext() {
@@ -64,7 +64,7 @@ public class ConfigDenormalizer {
    * Gets the setting flags.
    * @return the settings
    */
-  public byte getSettings() {
+  public @NotNull Set<SettingFlag.Denormalizer> getSettings() {
     return settings;
   }
 
@@ -278,9 +278,10 @@ public class ConfigDenormalizer {
             && !ComplexTypes.wrapPrimitive(propertyTypeErasure).isAssignableFrom(value.getClass()))
           break scope;
 
-        if (!SettingFlag.has(
-                ctx.getFactory().getDenormalizer().getSettings(),
-                SettingFlag.Denormalizer.DISABLE_VALIDATION)
+        if (!ctx.getFactory()
+                .getDenormalizer()
+                .getSettings()
+                .contains(SettingFlag.Denormalizer.DISABLE_VALIDATION)
             && !property.validator().check(value)) {
           if (property.validator().silent()) break scope;
           throw new InvalidValueException(

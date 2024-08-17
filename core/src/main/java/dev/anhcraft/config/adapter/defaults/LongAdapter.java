@@ -19,9 +19,10 @@ public class LongAdapter implements TypeAnnotator<Long> {
       try {
         String str = ((String) value).trim();
         boolean strict =
-            SettingFlag.has(
-                ctx.getFactory().getDenormalizer().getSettings(),
-                SettingFlag.Denormalizer.STRICT_NUMBER_PARSING);
+            ctx.getFactory()
+                .getDenormalizer()
+                .getSettings()
+                .contains(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING);
         return strict ? Long.parseLong(str) : (long) Double.parseDouble(str);
       } catch (NumberFormatException e) {
         throw new InvalidValueException(

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import dev.anhcraft.config.ConfigFactory;
+import dev.anhcraft.config.SettingFlag;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.InvalidValueException;
 import org.junit.jupiter.api.BeforeAll;
@@ -61,7 +62,11 @@ public class FloatAdapterTest {
   @SuppressWarnings("DataFlowIssue")
   @Test
   public void testComplexifyStringStrictly() throws Exception {
-    Context strict = ConfigFactory.create().strictNumberParsing(true).build().createContext();
+    Context strict =
+        ConfigFactory.create()
+            .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
+            .build()
+            .createContext();
     assertEquals(3.005f, adapter.complexify(strict, "3.005", Float.class), 1e-8);
     assertEquals(2f, adapter.complexify(strict, "2 ", Float.class), 1e-8);
     assertEquals(12f, adapter.complexify(strict, "0012", Float.class), 1e-8);

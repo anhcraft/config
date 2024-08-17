@@ -200,7 +200,7 @@ public class ConfigDenormalizerTest {
       assertDoesNotThrow(
           () ->
               ConfigFactory.create()
-                  .disableValidation(true)
+                  .enableDenormalizerSetting(SettingFlag.Denormalizer.DISABLE_VALIDATION)
                   .build()
                   .getDenormalizer()
                   .denormalizeToInstance(dict, Transaction.class, new Transaction()));
@@ -224,9 +224,9 @@ public class ConfigDenormalizerTest {
     public void testDefaultSyntax() throws Exception {
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Dictionary dict = new SchemalessDictionary();
       dict.put(
@@ -291,9 +291,9 @@ public class ConfigDenormalizerTest {
 
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Dictionary dict = new SchemalessDictionary();
       dict.put("foo", 1);
@@ -315,9 +315,9 @@ public class ConfigDenormalizerTest {
 
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Dictionary dict = new SchemalessDictionary();
       dict.put("foo", 1);
@@ -342,9 +342,9 @@ public class ConfigDenormalizerTest {
 
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Dictionary dict = new SchemalessDictionary();
       dict.put("foo", 1);
@@ -372,9 +372,9 @@ public class ConfigDenormalizerTest {
 
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Dictionary dict = new SchemalessDictionary();
       dict.put("a", 2);
@@ -402,9 +402,9 @@ public class ConfigDenormalizerTest {
 
     ConfigFactory factory =
         ConfigFactory.create()
-            .ignoreDefaultValues(true)
-            .ignoreEmptyArray(true)
-            .ignoreEmptyDictionary(true)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
             .build();
     Dictionary dict = new SchemalessDictionary();
     dict.put("foo", 1);
@@ -431,9 +431,9 @@ public class ConfigDenormalizerTest {
 
     ConfigFactory factory =
         ConfigFactory.create()
-            .ignoreDefaultValues(true)
-            .ignoreEmptyArray(true)
-            .ignoreEmptyDictionary(true)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+            .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
             .build();
     Dictionary dict = new SchemalessDictionary();
     dict.put("a", 2);

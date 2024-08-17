@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.SchemalessDictionary;
+import dev.anhcraft.config.SettingFlag;
 import dev.anhcraft.config.context.Context;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,12 @@ public class DictionaryAdapterTest {
 
   @Test
   public void testDeepComplexify() throws Exception {
-    Context deepContext = ConfigFactory.create().deepClone(true).build().createContext();
+    Context deepContext =
+        ConfigFactory.create()
+            .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)
+            .enableDenormalizerSetting(SettingFlag.Denormalizer.DEEP_CLONE)
+            .build()
+            .createContext();
     Dictionary dict = new SchemalessDictionary();
     dict.put("foo", "bar");
     assertNotSame(dict, adapter.complexify(deepContext, dict, Dictionary.class));

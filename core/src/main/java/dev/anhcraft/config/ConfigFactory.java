@@ -10,7 +10,6 @@ import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
-import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -122,7 +121,14 @@ public final class ConfigFactory {
   }
 
   /**
-   * A builder for {@link ConfigFactory}
+   * A builder for {@link ConfigFactory}.<br>
+   * Default settings:
+   * <ul>
+   *   <li>Type adapters: Java primitives and wrappers of primitives, String, Dictionary, Iterable, Map, Enum, UUID, URI, URL</li>
+   *   <li>Default naming policy</li>
+   *   <li>{@link CacheableAdapterProvider}</li>
+   *   <li>Normalizer settings: {@link SettingFlag.Normalizer#IGNORE_DEFAULT_VALUES}</li>
+   * </ul>
    */
   public static class Builder {
     private final LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
@@ -140,8 +146,10 @@ public final class ConfigFactory {
               }
             };
     private Class<? extends AdapterProvider> adapterProvider = CacheableAdapterProvider.class;
-    private byte normalizerSettings = SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES;
-    private byte denormalizerSettings = 0;
+    private Set<SettingFlag.Normalizer> normalizerSettings =
+        EnumSet.of(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES);
+    private Set<SettingFlag.Denormalizer> denormalizerSettings =
+        EnumSet.noneOf(SettingFlag.Denormalizer.class);
 
     public Builder() {
       typeAdapters.put(Byte.class, ByteAdapter.INSTANCE);
@@ -261,89 +269,26 @@ public final class ConfigFactory {
     }
 
     /**
-     * Ignores setting default values when normalizing an instance into a {@link Dictionary}<br>
-     * The default value including number and boolean.<br>
-     * By default, sets to {@code true}
-     * @param ignore if the default values should be ignored
+     * Enables setting flags for the normalizer.
+     * @param flags a list of setting flags
      * @return this
      */
-    public @NotNull Builder ignoreDefaultValues(boolean ignore) {
-      normalizerSettings =
-          SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES, ignore);
+    public @NotNull Builder enableNormalizerSetting(@NotNull SettingFlag.Normalizer... flags) {
+      if (flags.length == 0) return this;
+      if (flags.length == 1) normalizerSettings.add(flags[0]);
+      else normalizerSettings.addAll(Arrays.asList(flags));
       return this;
     }
 
     /**
-     * Ignores setting empty array when normalizing an instance into a {@link Dictionary}<br>
-     * By default, sets to {@code false}
-     * @param ignore if empty array should be ignored
+     * Enables setting flags for the denormalizer.
+     * @param flags a list of setting flags
      * @return this
      */
-    public @NotNull Builder ignoreEmptyArray(boolean ignore) {
-      normalizerSettings =
-          SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY, ignore);
-      return this;
-    }
-
-    /**
-     * Ignores setting empty dictionary when normalizing an instance into a {@link Dictionary}<br>
-     * By default, sets to {@code false}
-     * @param ignore if empty dictionary should be ignored
-     * @return this
-     */
-    public @NotNull Builder ignoreEmptyDictionary(boolean ignore) {
-      normalizerSettings =
-          SettingFlag.set(
-              normalizerSettings, SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY, ignore);
-      return this;
-    }
-
-    /**
-     * In normalization and denormalization, deep clones simple values. This applies to arrays, dictionaries and
-     * theirs nested children.<br>
-     * By defaults, sets to {@code false} to improve performance.
-     * @param deepClone if simple values should be deep cloned
-     * @return this
-     */
-    public @NotNull Builder deepClone(boolean deepClone) {
-      normalizerSettings =
-          SettingFlag.set(normalizerSettings, SettingFlag.Normalizer.DEEP_CLONE, deepClone);
-      denormalizerSettings =
-          SettingFlag.set(denormalizerSettings, SettingFlag.Denormalizer.DEEP_CLONE, deepClone);
-      return this;
-    }
-
-    /**
-     * When parsing a number, strictly checks the number range. For example:
-     * <ul>
-     *     <li>Without this flag: {@code adaptByte("255.001") == -1}</li>
-     *     <li>With this flag: {@code adaptByte("255.001")} throws {@link InvalidValueException}</li>
-     * </ul>
-     * When this flag is off, the denormalizer parses the string as {@link Double} first, and then casts it to
-     * the desired number type. When it is on, the denormalizer parses the string using the "parse" method of
-     * the desired number type, e.g: {@link Integer#parseInt(String)} for the integer adapter.<br>
-     * Note: the string is always trimmed before parsing no matter this flag is on or off.<br>
-     * This setting is {@code false} by default to enhance user convenience.
-     * @param strict should strictly parse numbers
-     * @return this
-     */
-    public @NotNull Builder strictNumberParsing(boolean strict) {
-      denormalizerSettings =
-          SettingFlag.set(
-              denormalizerSettings, SettingFlag.Denormalizer.STRICT_NUMBER_PARSING, strict);
-      return this;
-    }
-
-    /**
-     * Disables validation in denormalization.<br>
-     * This setting is {@code false} by default.
-     * @param disabled if validation should be disabled
-     * @return this
-     */
-    public @NotNull Builder disableValidation(boolean disabled) {
-      denormalizerSettings =
-          SettingFlag.set(
-              denormalizerSettings, SettingFlag.Denormalizer.DISABLE_VALIDATION, disabled);
+    public @NotNull Builder enableDenormalizerSetting(@NotNull SettingFlag.Denormalizer... flags) {
+      if (flags.length == 0) return this;
+      if (flags.length == 1) denormalizerSettings.add(flags[0]);
+      else denormalizerSettings.addAll(Arrays.asList(flags));
       return this;
     }
 

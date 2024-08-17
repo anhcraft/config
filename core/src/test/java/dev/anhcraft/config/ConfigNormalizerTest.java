@@ -37,7 +37,12 @@ public class ConfigNormalizerTest {
 
   @Test
   public void testNormalizeSimpleValueDeep() throws Exception {
-    ConfigNormalizer normalizer = ConfigFactory.create().deepClone(true).build().getNormalizer();
+    ConfigNormalizer normalizer =
+        ConfigFactory.create()
+            .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)
+            .enableDenormalizerSetting(SettingFlag.Denormalizer.DEEP_CLONE)
+            .build()
+            .getNormalizer();
     assertSame("abc", normalizer.normalize("abc"));
 
     int[] foo = new int[0];
@@ -130,7 +135,11 @@ public class ConfigNormalizerTest {
 
     @Test
     public void testDeepCloneDictionary() throws Exception {
-      ConfigFactory factory = ConfigFactory.create().deepClone(true).build();
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)
+              .enableDenormalizerSetting(SettingFlag.Denormalizer.DEEP_CLONE)
+              .build();
       String[] pet = new String[] {"dog"};
       Dictionary foo = new SchemalessDictionary();
       foo.put("pet", pet);
@@ -159,7 +168,10 @@ public class ConfigNormalizerTest {
 
     @Test
     public void testIgnoreDefaultValue() throws Exception {
-      ConfigFactory factory = ConfigFactory.create().ignoreDefaultValues(true).build();
+      ConfigFactory factory =
+          ConfigFactory.create()
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .build();
       Transaction transaction = new Transaction();
       Dictionary dict = new SchemalessDictionary();
       factory.getNormalizer().normalizeToDictionary(transaction, dict);
@@ -169,7 +181,9 @@ public class ConfigNormalizerTest {
     @Test
     public void testIgnoreEmptyArray() throws Exception {
       ConfigFactory factory =
-          ConfigFactory.create().ignoreDefaultValues(true).ignoreEmptyArray(true).build();
+          ConfigFactory.create()
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .build();
       Transaction transaction = new Transaction();
       transaction.note = new String[0];
       Dictionary dict = new SchemalessDictionary();
@@ -181,9 +195,7 @@ public class ConfigNormalizerTest {
     public void testIgnoreEmptyDictionary() throws Exception {
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Transaction transaction = new Transaction();
       transaction.icon = new Transaction.Item();
@@ -196,9 +208,9 @@ public class ConfigNormalizerTest {
     public void testDoNotIgnoreEmptyDictionaryInArray() throws Exception {
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       Transaction transaction = new Transaction();
       transaction.items = List.of(new Transaction.Item());
@@ -225,9 +237,9 @@ public class ConfigNormalizerTest {
     public void testDefaultSyntax() throws Exception {
       ConfigFactory factory =
           ConfigFactory.create()
-              .ignoreDefaultValues(true)
-              .ignoreEmptyArray(true)
-              .ignoreEmptyDictionary(true)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
+              .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
               .build();
       ChatLog chatLog = new ChatLog();
       chatLog.sender = UUID.randomUUID();

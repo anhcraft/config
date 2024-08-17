@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 import dev.anhcraft.config.ConfigFactory;
+import dev.anhcraft.config.SettingFlag;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.InvalidValueException;
 import org.junit.jupiter.api.BeforeAll;
@@ -62,7 +63,11 @@ public class ShortAdapterTest {
 
   @Test
   public void testComplexifyStringStrictly() throws Exception {
-    Context strict = ConfigFactory.create().strictNumberParsing(true).build().createContext();
+    Context strict =
+        ConfigFactory.create()
+            .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
+            .build()
+            .createContext();
     assertEquals((short) 0, adapter.complexify(strict, "0", Short.class));
     assertEquals((short) 127, adapter.complexify(strict, "127", Short.class));
     assertEquals((short) -128, adapter.complexify(strict, " -128 ", Short.class));
