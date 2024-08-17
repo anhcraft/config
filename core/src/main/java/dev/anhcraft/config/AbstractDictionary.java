@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * A generic implementation of {@link Dictionary}.
+ * This implementation is not thread-safe.
  */
 public abstract class AbstractDictionary extends AbstractMap<String, Object> implements Dictionary {
   private final LinkedHashMap<String, Object> backend;
