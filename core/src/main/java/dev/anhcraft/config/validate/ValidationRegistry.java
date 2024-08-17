@@ -22,8 +22,8 @@ public class ValidationRegistry {
    *     <li>{@link NotNullValidation}: {@code not-null, notNull, non-null, nonNull}</li>
    *     <li>{@link NotEmptyValidation}: {@code not-empty, notEmpty, non-empty, nonEmpty}</li>
    *     <li>{@link NotBlankValidation}: {@code not-blank, notBlank, non-blank, nonBlank}</li>
-   *     <li>{@link RangeValidation}: {@code range=min|max, range=min|, range=|max}</li>
-   *     <li>{@link SizeValidation}: {@code size=min|max, size=min|, size=|max}</li>
+   *     <li>{@link RangeValidation}: {@code range=exact, range=min|max, range=min|, range=|max}</li>
+   *     <li>{@link SizeValidation}: {@code size=exact, size=min|max, size=min|, size=|max}</li>
    * </ul>
    */
   // Default validator
