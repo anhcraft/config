@@ -91,14 +91,6 @@ flowchart TD
   ConfigFormat --->|Define| Serializer
 ```
 
-## Official platform packages
-- `bukkit`: target the Bukkit platform (Minecraft server-side)
-  - depends `core`
-  - contains platform-dependent type adapters and processors
-- `bungee`: target the Bungeecord platform (Minecraft proxy-side)
-  - depends `core`
-  - contains platform-dependent type adapters and processors
-
 # Structure
 
 | Instance of `T` | Object     | Dictionary                       |

@@ -18,9 +18,6 @@ A Java library for working with configuration.
 - Support common Java data types
 - Adaptable _via_ various configuration formats
 - Extendable _using_ type adapter and processor
-- Official platform-dependent package with battery included:
-  - Bukkit: Minecraft server-side
-  - Bungeecord: Minecraft proxy-side
 - ConfigDoc: config documentation generator
 
 ## Getting started
