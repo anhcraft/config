@@ -19,11 +19,11 @@ Simple, lightweight, adaptable and extendable:
 
 ## Terminologies
 1. `Object` denotes an instance of a reference type `T`
-2. `Configutation` (or `Config`) denotes a human-readable text expressing an arrangement to the system
+2. `Configuration` (or `Config`) denotes a human-readable text expressing an arrangement to the system
 3. `Configuration format` is a specific representation that defines the syntax and structure of configuration
 4. `Schema` (or `model`) depicts the structure of a configuration without being fixed into any particular `Configuration format`
-5. `Serialization` is the process of turning an `Object` into a `Configuration text` by `mapping` it in respect of the representation (JSON/XML/YAML/etc)
-6. `Deserialization` (or `Parsing`) is the process of turning a `Configuration text` into an `Object` by `mapping` it in respect of the `schema`
+5. `Serialization` is the process of turning an `Object` into a `Configuration text` by `mapping` it in respect of the `Configuration format` (JSON/XML/YAML/etc)
+6. `Deserialization` (or `Parsing`) is the process of turning a `Configuration text` (represented in `Configuration format`) into an `Object` by `mapping` it in respect of the `schema`
 7. `Mapping` implies a deterministic one-to-many or many-to-one transformation
 8. `Conversion` implies a deterministic one-to-one transformation
 9. `Simple type` denotes widely-supported data types by all `configuration format` including string, number, boolean, array of `Simple type` and configuration sections of string-key and `Simple typed`-value
@@ -38,6 +38,7 @@ Simple, lightweight, adaptable and extendable:
 ## Modules
 - `core`: contains the framework, built-in type adapters, built-in processor and common utilities
 - `configdoc`: configuration documentation generator
+- `json`: JSON parser and writer
 
 ## Flows
 - Normalize and denormalize objects
@@ -721,7 +722,6 @@ bread:
   stock: 5
 ```
 ```java
-@Configurable
 public class Inventory {
   public Item bread; // bread
 
@@ -730,3 +730,31 @@ public class Inventory {
 }
 ```
 
+## Embedding
+- Embedding is a feature to compose and flatten fields from another schema in a schema without inheritance:
+  - Composition: the composed schema is nested in the code
+  - Flattening: the composed schema is flattened in the configuration
+  - Favor composition over inheritance
+- When flattening, naming conflict can happen; as such, by default, all members of the mixin field is prefixed with the field name. Config follows Java convention which prefers `camelCase`.
+- Embedded fields are inherently unique at runtime. If conflicts occur in configuration, the later one will override prior ones
+- For example:
+  - Note that `Gun#ammoDamage` can override `ammoDamage` composed by `ammo` field plus `damage`
+```java
+public class Gun {
+  private String name = "Desert Eagle";
+  @Embedded private Ammo ammo;
+  private int ammoCount = 7;
+  private int ammoDamage = 50;
+}
+
+public class Ammo {
+  private float damage = 20;
+  private float weight = 0.02;
+}
+```
+```yaml
+name: "Desert Eagle"
+ammoCount: 7
+ammoDamage: 50.0
+ammoWeight: 0.02
+```
