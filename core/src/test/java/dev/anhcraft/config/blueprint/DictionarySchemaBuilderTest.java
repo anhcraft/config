@@ -46,7 +46,7 @@ public class DictionarySchemaBuilderTest {
 
   @Test
   public void testSchemaName() {
-    assertEquals("foo", DictionarySchema.create().withName("foo").build().getName());
+    assertEquals("foo", DictionarySchema.create().withName("foo").build().name());
   }
 
   @Test

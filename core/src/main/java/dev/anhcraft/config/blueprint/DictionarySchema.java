@@ -30,7 +30,7 @@ public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
   }
 
   @Override
-  public @Nullable String getName() {
+  public @Nullable String name() {
     return name;
   }
 

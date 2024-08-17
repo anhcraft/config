@@ -14,7 +14,7 @@ public interface Schema<T extends Property> {
    * Gets the name of the schema.
    * @return the name
    */
-  @Nullable String getName();
+  @Nullable String name();
 
   /**
    * Gets all property names including primary names and aliases.<br>

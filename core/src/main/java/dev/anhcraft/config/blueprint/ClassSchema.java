@@ -40,7 +40,7 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   @Override
-  public String getName() {
+  public String name() {
     return type.getSimpleName();
   }
 

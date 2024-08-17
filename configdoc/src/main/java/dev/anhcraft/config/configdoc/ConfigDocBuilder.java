@@ -27,7 +27,7 @@ public class ConfigDocBuilder {
 
   @Contract("_, _ -> this")
   public ConfigDocBuilder withSchema(@Nullable String name, @NotNull Schema<?> schema) {
-    String entityName = schema.getName();
+    String entityName = schema.name();
     if (entityName == null)
       entityName = name != null ? name : "UnnamedSchema" + (unnamedSchemaCounter++);
     return withSchema(new SchemaEntity(entityName, schema));
