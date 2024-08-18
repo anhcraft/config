@@ -27,16 +27,14 @@ public final class ConfigFactory {
   private final ReflectSchemaScanner schemaScanner;
   private final ConfigNormalizer normalizer;
   private final ConfigDenormalizer denormalizer;
-  private final Map<Class<?>, Schema<?>> classSchemas;
   private final ContextProvider contextProvider;
   private final AdapterProvider adapterProvider;
   private final InstanceFactory instanceFactory;
 
   ConfigFactory(Builder builder) {
-    this.schemaScanner = new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry);
+    this.schemaScanner = new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry, builder.schemaCacheProvider);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
-    this.classSchemas = builder.schemaCacheProvider.get();
     this.contextProvider = builder.contextProvider;
     this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
     try {
@@ -81,11 +79,7 @@ public final class ConfigFactory {
    * @return the schema
    */
   @NotNull public ClassSchema getSchema(@NotNull Class<?> type) {
-    ClassSchema schema = (ClassSchema) classSchemas.get(type);
-    if (schema != null) return schema;
-    schema = schemaScanner.scanSchema(type);
-    classSchemas.put(type, schema);
-    return schema;
+    return schemaScanner.scanSchema(type);
   }
 
   /**

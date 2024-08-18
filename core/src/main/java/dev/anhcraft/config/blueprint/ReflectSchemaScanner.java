@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,15 +22,26 @@ import org.jetbrains.annotations.NotNull;
 public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
+  private final Map<Class<?>, Schema<?>> schemaCache;
 
   public ReflectSchemaScanner(
-      @NotNull UnaryOperator<String> namingPolicy, @NotNull ValidationRegistry validationRegistry) {
+      @NotNull UnaryOperator<String> namingPolicy,
+      @NotNull ValidationRegistry validationRegistry,
+    @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
     this.namingPolicy = namingPolicy;
     this.validationRegistry = validationRegistry;
+    this.schemaCache = schemaCacheProvider.get();
   }
 
   @Override
   public @NotNull ClassSchema scanSchema(@NotNull Class<?> type) {
+    ClassSchema schema = (ClassSchema) schemaCache.get(type);
+    if (schema != null) return schema;
+    schemaCache.put(type, schema = createSchema(type));
+    return schema;
+  }
+
+  private @NotNull ClassSchema createSchema(@NotNull Class<?> type) {
     if (!ComplexTypes.isNormalClassOrAbstract(type))
       throw new UnsupportedSchemaException(
           String.format("Cannot create schema for '%s'", type.getName()));
