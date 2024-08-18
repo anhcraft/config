@@ -23,7 +23,9 @@ public class ReflectSchemaScannerTest {
 
   @BeforeAll
   public static void setUp() {
-    scanner = new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+    scanner =
+        new ReflectSchemaScanner(
+            NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
   }
 
   @Test
@@ -43,7 +45,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testConflictNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT, LinkedHashMap::new);
       assertThrows(UnsupportedSchemaException.class, () -> custom.scanSchema(FooBar.class));
     }
 
@@ -58,7 +61,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDefaultNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("fooBar", "barFoo"), schema.propertyNames());
       assertNotNull(schema.property("fooBar"));
@@ -70,7 +74,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testKebabCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo-bar", "bar-foo"), schema.propertyNames());
       assertNotNull(schema.property("foo-bar"));
@@ -82,7 +87,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testSnakeCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo_bar", "bar_foo"), schema.propertyNames());
       assertNotNull(schema.property("foo_bar"));
@@ -94,7 +100,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testPascalCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("FooBar", "BarFoo"), schema.propertyNames());
       assertNotNull(schema.property("FooBar"));
@@ -114,7 +121,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDefaultNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
           Set.of(
@@ -143,7 +151,9 @@ public class ReflectSchemaScannerTest {
     public void testDefaultCustomPolicy() {
       ReflectSchemaScanner custom =
           new ReflectSchemaScanner(
-              s -> s.length() > 2 ? s.substring(0, 2) : s, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+              s -> s.length() > 2 ? s.substring(0, 2) : s,
+              ValidationRegistry.DEFAULT,
+              LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
           Set.of("up", "lo", "lowerStorage", "co", "upper", "lower", "backup", "cold"),
@@ -176,7 +186,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testAliasDuplicateCustomPrimaryName() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
+          new ReflectSchemaScanner(
+              NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(HelloGreet.class);
       assertEquals(Set.of("greet", "hiya"), schema.propertyNames());
       assertEquals("hello", schema.property("greet").field().getName());
@@ -202,9 +213,9 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testSchemaIdentity() {
       assertNotEquals(
-        new ClassSchema(null, schema.type(), schema.properties(), Map.of(), null), schema);
+          new ClassSchema(null, schema.type(), schema.properties(), Map.of(), null), schema);
       assertEquals(
-        new ClassSchema(scanner, schema.type(), schema.properties(), Map.of(), null), schema);
+          new ClassSchema(scanner, schema.type(), schema.properties(), Map.of(), null), schema);
     }
 
     @Test

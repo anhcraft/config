@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents a class schema associating with a class.<br>
  * Class schema is read-only and identifiable. The identity of a class schema depends on the {@link Class} it represents
- * and the {@link SchemaScanner} creates it. If two class schemas represent the same class but coming from different
- * {@link SchemaScanner}, they are considered different.<br>
+ * and the {@link ClassSchemaScanner} creates it. If two class schemas represent the same class but coming from different
+ * {@link ClassSchemaScanner}, they are considered different.<br>
  * Note: Two {@link Class} might have the same class path but different identity due to being loaded by two different
  * class loaders. Inherently, {@link ClassSchema} also depends on the class loader.
  */
@@ -20,7 +20,7 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final ClassProperty fallback;
 
   public ClassSchema(
-      @Nullable SchemaScanner<?> scanner,
+      @Nullable ClassSchemaScanner scanner,
       @NotNull Class<?> type,
       @NotNull List<ClassProperty> properties,
       @NotNull Map<String, ClassProperty> lookup,

@@ -17,9 +17,9 @@ import java.util.function.UnaryOperator;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A Reflection-based {@link SchemaScanner} that generates {@link ClassSchema}.
+ * A Reflection-based, thread-safe {@link ClassSchemaScanner} that generates {@link ClassSchema}.
  */
-public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
+public class ReflectSchemaScanner implements ClassSchemaScanner {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
   private final Map<Class<?>, Schema<?>> schemaCache;
@@ -27,21 +27,24 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
   public ReflectSchemaScanner(
       @NotNull UnaryOperator<String> namingPolicy,
       @NotNull ValidationRegistry validationRegistry,
-    @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
+      @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
     this.namingPolicy = namingPolicy;
     this.validationRegistry = validationRegistry;
     this.schemaCache = schemaCacheProvider.get();
   }
 
   @Override
-  public @NotNull ClassSchema scanSchema(@NotNull Class<?> type) {
+  public @NotNull ClassSchema getOrScanSchema(@NotNull Class<?> type) {
     ClassSchema schema = (ClassSchema) schemaCache.get(type);
     if (schema != null) return schema;
-    schemaCache.put(type, schema = createSchema(type));
+    synchronized (this) {
+      schemaCache.put(type, schema = scanSchema(type));
+    }
     return schema;
   }
 
-  private @NotNull ClassSchema createSchema(@NotNull Class<?> type) {
+  @Override
+  public @NotNull ClassSchema scanSchema(@NotNull Class<?> type) {
     if (!ComplexTypes.isNormalClassOrAbstract(type))
       throw new UnsupportedSchemaException(
           String.format("Cannot create schema for '%s'", type.getName()));

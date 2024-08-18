@@ -32,7 +32,9 @@ public final class ConfigFactory {
   private final InstanceFactory instanceFactory;
 
   ConfigFactory(Builder builder) {
-    this.schemaScanner = new ReflectSchemaScanner(builder.namingPolicy, builder.validationRegistry, builder.schemaCacheProvider);
+    this.schemaScanner =
+        new ReflectSchemaScanner(
+            builder.namingPolicy, builder.validationRegistry, builder.schemaCacheProvider);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.contextProvider = builder.contextProvider;
@@ -73,13 +75,12 @@ public final class ConfigFactory {
 
   /**
    * Gets the schema for the given type.<br>
-   * The result will be cached for future calls.<br>
-   * This method is not thread-safe by default, unless the factory has a custom concurrent {@link SchemaCacheProvider}.
+   * The result will be cached for future calls.
    * @param type the type
    * @return the schema
    */
   @NotNull public ClassSchema getSchema(@NotNull Class<?> type) {
-    return schemaScanner.scanSchema(type);
+    return schemaScanner.getOrScanSchema(type);
   }
 
   /**
