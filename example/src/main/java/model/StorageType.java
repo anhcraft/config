@@ -1,7 +1,8 @@
 package model;
 
 public enum StorageType {
-    FOOD,
-    FRUIT,
-    VEGETABLE
+  FOOD,
+  FRUIT,
+  VEGETABLE,
+  WEAPON
 }
