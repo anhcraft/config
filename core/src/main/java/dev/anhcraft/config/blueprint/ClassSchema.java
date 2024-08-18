@@ -3,6 +3,8 @@ package dev.anhcraft.config.blueprint;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import dev.anhcraft.config.type.ComplexTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,21 +17,60 @@ import org.jetbrains.annotations.Nullable;
  * class loaders. Inherently, {@link ClassSchema} also depends on the class loader.
  */
 public class ClassSchema extends AbstractSchema<ClassProperty> {
+  private final ClassSchemaScanner scanner;
   private final int scannerIdentity;
   private final Class<?> type;
   private final ClassProperty fallback;
 
+  private volatile ClassSchema parent;
+
+  // 1st bit: whether the class has no parent
+  private byte internalState;
+
   public ClassSchema(
-      @Nullable ClassSchemaScanner scanner,
+      @NotNull ClassSchemaScanner scanner,
       @NotNull Class<?> type,
       @NotNull List<ClassProperty> properties,
       @NotNull Map<String, ClassProperty> lookup,
       @Nullable ClassProperty fallback) {
     super(properties, lookup);
-    // use identity-hash-code to avoid GC and custom #hashCode
-    this.scannerIdentity = scanner == null ? 0 : System.identityHashCode(scanner);
+    this.scanner = scanner;
+    this.scannerIdentity = System.identityHashCode(scanner); // avoid GC relocation and custom-defined #hashCode
     this.type = type;
     this.fallback = fallback;
+
+    // setup internal state
+    this.internalState |=
+      type.getSuperclass() != null &&
+        type.getSuperclass() != Object.class &&
+      ComplexTypes.isNormalClassOrAbstract(type.getSuperclass()) ? 0 : (byte) 1;
+  }
+
+  /**
+   * Gets the parent class schema.<br>
+   * A class schema has a parent if the represented class has a superclass that:
+   * <ul>
+   *   <li>Is not {@link Object}</li>
+   *   <li>Is a normal class or an abstract class</li>
+   * </ul>
+   * @return the parent class schema or {@code null} if not exists
+   */
+  public @Nullable ClassSchema parent() {
+    if ((internalState & 1) == 1) {
+      return null;
+    }
+
+    ClassSchema parentRef = parent;
+    if (parentRef == null) {
+      synchronized (this) {
+        parentRef = parent;
+        if (parentRef == null) {
+          parent = parentRef = scanner.getOrScanSchema(type.getSuperclass());
+        }
+      }
+    }
+
+    return parentRef;
   }
 
   /**

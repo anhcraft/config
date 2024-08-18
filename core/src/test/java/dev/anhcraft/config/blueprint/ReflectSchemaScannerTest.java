@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.UnaryOperator;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -208,81 +210,94 @@ public class ReflectSchemaScannerTest {
 
   @Nested
   public class SimpleModelTest {
-    private final ClassSchema schema = scanner.scanSchema(Profile.class);
+    private final ClassSchema ps = scanner.scanSchema(Profile.class);
+    private final ClassSchema ops = scanner.scanSchema(OnlineProfile.class);
 
     @Test
     public void testSchemaIdentity() {
       assertNotEquals(
-          new ClassSchema(null, schema.type(), schema.properties(), Map.of(), null), schema);
+          new ClassSchema(
+            new ReflectSchemaScanner(UnaryOperator.identity(), ValidationRegistry.DEFAULT, LinkedHashMap::new),
+            ps.type(), ps.properties(), Map.of(), null), ps);
       assertEquals(
-          new ClassSchema(scanner, schema.type(), schema.properties(), Map.of(), null), schema);
+          new ClassSchema(scanner, ps.type(), ps.properties(), Map.of(), null), ps);
     }
 
     @Test
     public void testInit() {
-      assertEquals(Profile.class, schema.type());
-      assertEquals("Profile", schema.name());
-      assertEquals(4, schema.properties().size());
-      assertEquals(Set.of("id", "email", "age", "birth", "bio"), schema.propertyNames());
+      assertEquals(Profile.class, ps.type());
+      assertNull(ps.parent());
+      assertEquals("Profile", ps.name());
+      assertEquals(4, ps.properties().size());
+      assertEquals(Set.of("id", "email", "age", "birth", "bio"), ps.propertyNames());
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     public void testUser() {
-      assertEquals("id", schema.property("id").name());
-      assertEquals("java.lang.String", schema.property("id").describeType(false));
-      assertEquals("user", schema.property("id").field().getName());
-      assertTrue(schema.property("id").description().isEmpty());
-      assertTrue(schema.property("id").aliases().isEmpty());
-      assertTrue(schema.property("id").isConstant());
-      assertFalse(schema.property("id").isTransient());
-      assertFalse(schema.property("id").isOptional());
+      assertEquals("id", ps.property("id").name());
+      assertEquals("java.lang.String", ps.property("id").describeType(false));
+      assertEquals("user", ps.property("id").field().getName());
+      assertTrue(ps.property("id").description().isEmpty());
+      assertTrue(ps.property("id").aliases().isEmpty());
+      assertTrue(ps.property("id").isConstant());
+      assertFalse(ps.property("id").isTransient());
+      assertFalse(ps.property("id").isOptional());
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     public void testEmail() {
-      assertEquals("email", schema.property("email").field().getName());
-      assertEquals("java.lang.String", schema.property("email").describeType(false));
-      assertTrue(schema.property("email").description().isEmpty());
-      assertTrue(schema.property("email").aliases().isEmpty());
-      assertFalse(schema.property("email").isConstant());
-      assertFalse(schema.property("email").isTransient());
-      assertFalse(schema.property("email").isOptional());
-      assertFalse(schema.property("email").validator().check(null));
+      assertEquals("email", ps.property("email").field().getName());
+      assertEquals("java.lang.String", ps.property("email").describeType(false));
+      assertTrue(ps.property("email").description().isEmpty());
+      assertTrue(ps.property("email").aliases().isEmpty());
+      assertFalse(ps.property("email").isConstant());
+      assertFalse(ps.property("email").isTransient());
+      assertFalse(ps.property("email").isOptional());
+      assertFalse(ps.property("email").validator().check(null));
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     public void testAge() {
-      assertEquals("age", schema.property("age").name());
-      assertEquals("age", schema.property("age").field().getName());
-      assertEquals("int", schema.property("age").describeType(false));
-      assertEquals(List.of("Age in years"), schema.property("age").description());
-      assertEquals(Set.of("birth"), (schema.property("age").aliases()));
-      assertFalse(schema.property("age").isConstant());
-      assertFalse(schema.property("age").isTransient());
-      assertFalse(schema.property("age").isOptional());
+      assertEquals("age", ps.property("age").name());
+      assertEquals("age", ps.property("age").field().getName());
+      assertEquals("int", ps.property("age").describeType(false));
+      assertEquals(List.of("Age in years"), ps.property("age").description());
+      assertEquals(Set.of("birth"), (ps.property("age").aliases()));
+      assertFalse(ps.property("age").isConstant());
+      assertFalse(ps.property("age").isTransient());
+      assertFalse(ps.property("age").isOptional());
 
-      assertEquals("age", schema.property("birth").name());
-      assertEquals("age", schema.property("birth").field().getName());
-      assertEquals(List.of("Age in years"), schema.property("birth").description());
-      assertEquals(Set.of("birth"), (schema.property("birth").aliases()));
-      assertFalse(schema.property("birth").isConstant());
-      assertFalse(schema.property("birth").isTransient());
-      assertFalse(schema.property("birth").isOptional());
+      assertEquals("age", ps.property("birth").name());
+      assertEquals("age", ps.property("birth").field().getName());
+      assertEquals(List.of("Age in years"), ps.property("birth").description());
+      assertEquals(Set.of("birth"), (ps.property("birth").aliases()));
+      assertFalse(ps.property("birth").isConstant());
+      assertFalse(ps.property("birth").isTransient());
+      assertFalse(ps.property("birth").isOptional());
     }
 
     @SuppressWarnings("DataFlowIssue")
     @Test
     public void testBio() {
-      assertEquals("bio", schema.property("bio").field().getName());
-      assertEquals("java.util.List<java.lang.String>", schema.property("bio").describeType(false));
-      assertTrue(schema.property("bio").description().isEmpty());
-      assertTrue(schema.property("bio").aliases().isEmpty());
-      assertTrue(schema.property("bio").isTransient());
-      assertTrue(schema.property("bio").isOptional());
-      assertFalse(schema.property("bio").isConstant());
+      assertEquals("bio", ps.property("bio").field().getName());
+      assertEquals("java.util.List<java.lang.String>", ps.property("bio").describeType(false));
+      assertTrue(ps.property("bio").description().isEmpty());
+      assertTrue(ps.property("bio").aliases().isEmpty());
+      assertTrue(ps.property("bio").isTransient());
+      assertTrue(ps.property("bio").isOptional());
+      assertFalse(ps.property("bio").isConstant());
+    }
+
+    @Test
+    public void testInitOnlineProfile() {
+      assertEquals(OnlineProfile.class, ops.type());
+      assertEquals(ps, ops.parent());
+      assertEquals("OnlineProfile", ops.name());
+      assertEquals(2, ops.properties().size());
+      assertEquals(Set.of("lastOnline", "status"), ops.propertyNames());
     }
 
     public class Profile {
@@ -301,6 +316,11 @@ public class ReflectSchemaScannerTest {
       @Exclude public List<String> education;
 
       @Optional @Transient public List<String> bio = List.of();
+    }
+
+    public class OnlineProfile extends Profile {
+      public int lastOnline;
+      public String status;
     }
   }
 
