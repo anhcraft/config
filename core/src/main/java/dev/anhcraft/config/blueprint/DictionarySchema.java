@@ -8,7 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a dictionary schema.
+ * Represents a dictionary schema.<br>
+ * Dictionary schema is read-only and unidentifiable.
  */
 public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
   private final String name;

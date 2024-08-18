@@ -119,7 +119,7 @@ public class ReflectSchemaScanner implements SchemaScanner<ClassSchema> {
 
     if (fallback != null) properties.add(fallback);
 
-    return new ClassSchema(type, properties, lookup, fallback);
+    return new ClassSchema(this, type, properties, lookup, fallback);
   }
 
   private Map<String, Processor> scanNormalizers(Class<?> type) {

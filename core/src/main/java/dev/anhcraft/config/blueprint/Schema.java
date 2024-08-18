@@ -5,9 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents the schema of a class.<br>
- * The schema is scanner-dependent and thus is factory-dependent even though in certain cases, it is possible
- * to compare two {@link Schema} by comparing their associated {@link Class}
+ * Represents the schema of a configuration.
  */
 public interface Schema<T extends Property> {
   /**
