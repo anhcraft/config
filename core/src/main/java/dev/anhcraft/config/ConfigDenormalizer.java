@@ -285,7 +285,8 @@ public class ConfigDenormalizer {
             && !property.validator().check(value)) {
           if (property.validator().silent()) break scope;
           throw new InvalidValueException(
-              ctx, String.format("Property '%s' %s", property.name(), property.validator().message()));
+              ctx,
+              String.format("Property '%s' %s", property.name(), property.validator().message()));
         }
 
         ctx.enterScope(new ValueScope(value));
