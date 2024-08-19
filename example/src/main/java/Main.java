@@ -6,6 +6,7 @@ import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.SettingFlag;
 import dev.anhcraft.config.configdoc.ConfigDocBuilder;
+import dev.anhcraft.config.type.TypeToken;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +22,9 @@ public class Main {
         new Storage[] {
           new Storage<>(
               StorageType.FRUIT,
-              List.of(new Item<>("orange", 12, UUID.randomUUID()), new Item<>("apple", 16, null)),
+              List.of(
+                  new Item<>("orange", 12, UUID.randomUUID()),
+                  new Item<>("apple", 16, UUID.randomUUID())),
               new Location(1, 2)),
           new Storage<>(
               StorageType.FOOD,
@@ -51,6 +54,23 @@ public class Main {
             .build();
     Dictionary wrapper = (Dictionary) factory.getNormalizer().normalize(item);
     System.out.println(GSON.toJson(wrapper));
+    System.out.println();
+
+    //noinspection unchecked
+    Warehouse<Item<String>> warehouse =
+        (Warehouse<Item<String>>)
+            factory
+                .getDenormalizer()
+                .denormalize(wrapper, new TypeToken<Warehouse<Item<String>>>() {});
+    System.out.println("Name: " + warehouse.name);
+    for (Storage<Item<String>> storage : warehouse.storages) {
+      System.out.println("Storage Type: " + storage.type);
+      System.out.println("Location: " + storage.location);
+      for (Item<String> it : storage.items) {
+        System.out.println(" * Item: " + it);
+      }
+    }
+    System.out.println();
 
     new ConfigDocBuilder()
         .withSchema(factory.getSchema(Warehouse.class))

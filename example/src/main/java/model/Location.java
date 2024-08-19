@@ -8,4 +8,9 @@ public class Location {
     this.x = x;
     this.y = y;
   }
+
+  @Override
+  public String toString() {
+    return "Location{" + "x=" + x + ", y=" + y + '}';
+  }
 }

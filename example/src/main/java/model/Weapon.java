@@ -14,4 +14,18 @@ public class Weapon<T> extends Item<T> {
   @Describe("The damage")
   @Validate("range=0|")
   public double damage;
+
+  @Override
+  public String toString() {
+    return "Weapon{"
+        + "damage="
+        + damage
+        + ", value="
+        + value
+        + ", stack="
+        + stack
+        + ", owner="
+        + owner
+        + '}';
+  }
 }

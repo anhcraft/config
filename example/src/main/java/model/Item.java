@@ -21,4 +21,9 @@ public class Item<T> {
   @Describe("The owner of the item")
   @Validate("not-null")
   public UUID owner;
+
+  @Override
+  public String toString() {
+    return "Item{" + "value=" + value + ", stack=" + stack + ", owner=" + owner + '}';
+  }
 }
