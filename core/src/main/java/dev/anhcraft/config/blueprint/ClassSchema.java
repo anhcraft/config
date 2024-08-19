@@ -18,9 +18,9 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final int scannerIdentity;
   private final Class<?> type;
   private final ClassProperty fallback;
-  private final List<ClassProperty> localProperties;
-  private final Map<String, ClassProperty> localPropertyLookup;
-  private final ClassProperty localFallback;
+  private final List<ClassProperty> declaredProperties;
+  private final Map<String, ClassProperty> declaredPropertyLookup;
+  private final ClassProperty declaredFallback;
 
   private volatile ClassSchema parent;
 
@@ -33,18 +33,18 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
       @NotNull List<ClassProperty> properties,
       @NotNull Map<String, ClassProperty> lookup,
       @Nullable ClassProperty fallback,
-      @NotNull List<ClassProperty> localProperties,
-      @NotNull Map<String, ClassProperty> localPropertyLookup,
-      @Nullable ClassProperty localFallback) {
+      @NotNull List<ClassProperty> declaredProperties,
+      @NotNull Map<String, ClassProperty> declaredPropertyLookup,
+      @Nullable ClassProperty declaredFallback) {
     super(properties, lookup);
     this.scanner = scanner;
     this.scannerIdentity =
         System.identityHashCode(scanner); // avoid GC relocation and custom-defined #hashCode
     this.type = type;
     this.fallback = fallback;
-    this.localProperties = Collections.unmodifiableList(localProperties);
-    this.localPropertyLookup = Collections.unmodifiableMap(localPropertyLookup);
-    this.localFallback = localFallback;
+    this.declaredProperties = Collections.unmodifiableList(declaredProperties);
+    this.declaredPropertyLookup = Collections.unmodifiableMap(declaredPropertyLookup);
+    this.declaredFallback = declaredFallback;
 
     // setup internal state
     this.internalState |=
@@ -104,41 +104,41 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   /**
-   * Gets all local property names including primary names and aliases.<br>
-   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * Gets all declared property names including primary names and aliases.<br>
    * <b>Note:</b> Using this method to iterate over the properties may result in duplication
    * of {@link Property} because a property may have more than one name.
    * @return all property names
    */
-  public @NotNull Set<String> localPropertyNames() {
-    return localPropertyLookup.keySet();
+  public @NotNull Set<String> declaredPropertyNames() {
+    return declaredPropertyLookup.keySet();
   }
 
   /**
-   * Returns all local properties in the schema.<br>
-   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * Returns all declared properties in the schema.
    * @return all properties
+   * @see ClassProperty
    */
-  public @NotNull List<ClassProperty> localProperties() {
-    return localProperties;
+  public @NotNull List<ClassProperty> declaredProperties() {
+    return declaredProperties;
   }
 
   /**
-   * Looks up a local property by primary name or alias.<br>
-   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * Looks up a declared property by primary name or alias.
    * @param name property name
    * @return property
+   * @see ClassProperty
    */
-  public @Nullable ClassProperty localProperty(@Nullable String name) {
-    return localPropertyLookup.get(name);
+  public @Nullable ClassProperty declaredProperty(@Nullable String name) {
+    return declaredPropertyLookup.get(name);
   }
 
   /**
-   * Gets the local fallback property.
+   * Gets the declared fallback property.
    * @return the fallback
+   * @see ClassProperty
    */
-  public @Nullable ClassProperty localFallback() {
-    return localFallback;
+  public @Nullable ClassProperty declaredFallback() {
+    return declaredFallback;
   }
 
   @Override

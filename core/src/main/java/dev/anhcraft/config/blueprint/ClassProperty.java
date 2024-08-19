@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Represents a property in a {@link ClassSchema}.
+ * Represents a property in a {@link ClassSchema}.<br/>
+ * A declared property is one declared in the class schema, not from inheritance or embedding.
  */
 public interface ClassProperty extends Property {
 

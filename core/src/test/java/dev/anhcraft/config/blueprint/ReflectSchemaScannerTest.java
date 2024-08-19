@@ -293,7 +293,7 @@ public class ReflectSchemaScannerTest {
       assertEquals(ps, ops.parent());
       assertEquals("OnlineProfile", ops.name());
       assertEquals(6, ops.properties().size());
-      assertEquals(Set.of("lastOnline", "status", "bio"), ops.localPropertyNames());
+      assertEquals(Set.of("lastOnline", "status", "bio"), ops.declaredPropertyNames());
       assertEquals(
           Set.of("id", "email", "age", "birth", "bio", "lastOnline", "status"),
           ops.propertyNames());

@@ -101,7 +101,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       @NotNull Supplier<Map<String, Processor>> denormalizerSupplier) {
 
     /*
-      SCHEMA RESOLUTION algorithm:
+      PROPERTY LIST RESOLUTION algorithm:
 
       1. Goals
       - Respect Property list resolution in Internal.md
@@ -109,7 +109,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       - Integrates well with Java inheritance
         * Field hiding is unsupported (inherently unavailable from configuration-side)
 
-      2. Schema creation initially contains local property list resolution
+      2. Schema creation initially contains declared property list resolution
       - Init:
         + PN-F mapping: <String, Field> (Property name -> Field)
         + FN-PN mapping: <String, Set<String>> (Field name -> Property Names)
@@ -134,7 +134,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       - Create P from FN-PN, add to PN-P and P list and assign processor to P based on F
 
       3. Effective property list resolution
-      - Create proxied list and map; see below for the computation
+      - Create proxied list and map similar to (2)
     */
 
     Map<String, Field> propertyName2Field = new LinkedHashMap<>();
@@ -166,8 +166,8 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       }
     }
 
-    List<ClassProperty> localPropertyList = new ArrayList<>();
-    Map<String, ClassProperty> localPropertyMap = new LinkedHashMap<>();
+    List<ClassProperty> propertyList = new ArrayList<>();
+    Map<String, ClassProperty> propertyMap = new LinkedHashMap<>();
 
     // normalizer and denormalizer bounds to fields
     Map<String, Processor> normalizers = normalizerSupplier.get();
@@ -210,20 +210,20 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       }
 
       for (String name : entry.getValue()) {
-        localPropertyMap.put(name, property);
+        propertyMap.put(name, property);
       }
 
       if (!property.isFallback()) { // fallback must be at the end
-        localPropertyList.add(property);
+        propertyList.add(property);
       }
     }
 
-    if (fallback != null) localPropertyList.add(fallback);
+    if (fallback != null) propertyList.add(fallback);
 
     PropertyScanResult result = new PropertyScanResult();
     result.fallback = fallback;
-    result.properties = localPropertyList;
-    result.propertyMap = localPropertyMap;
+    result.properties = propertyList;
+    result.propertyMap = propertyMap;
 
     return result;
   }
