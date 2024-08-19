@@ -15,7 +15,7 @@ public interface Schema<T extends Property> {
   @Nullable String name();
 
   /**
-   * Gets all property names including primary names and aliases.<br>
+   * Gets all effective property names including primary names and aliases.<br>
    * <b>Note:</b> Using this method to iterate over the properties may result in duplication
    * of {@link Property} because a property may have more than one name.
    * @return all property names
@@ -23,13 +23,13 @@ public interface Schema<T extends Property> {
   @NotNull Set<String> propertyNames();
 
   /**
-   * Returns all properties in the schema.
+   * Returns all effective properties in the schema.
    * @return all properties
    */
   @NotNull List<T> properties();
 
   /**
-   * Looks up a property by primary name or alias.
+   * Looks up an effective property by primary name or alias.
    * @param name property name
    * @return property
    */

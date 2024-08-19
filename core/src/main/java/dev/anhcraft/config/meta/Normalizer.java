@@ -7,6 +7,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/*
+ NOTE 1: The decision to let Normalizer/Denormalizer bound to field names due to:
+  - property overriding, which might lead to different field (different name, type, etc.)
+  - property implicit naming can be customized, which can be different from the field name
+*/
+
 /**
  * Indicates a normalization processor.<br>
  * A processor is an annotated instance method that takes the responsibility of type adapter to transform values
@@ -43,6 +49,7 @@ public @interface Normalizer {
    * Returns a list of <b>field name</b> that this processor bounds to.
    * @return the field names
    */
+  // NOTE ^ see above
   String[] value() default {};
 
   /**

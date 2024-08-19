@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Provides a list of names for the associated property.<br>
  * {@link Name} and {@link Alias} can be used together (neither of them is required) to provide the names. They must
- * be unique and non-blank. If a name is invalid, it is ignored implicitly.<br>
+ * be non-blank. If a name is invalid, it is ignored implicitly.<br>
  * <ul>
  *     <li>If both {@link Name} and {@link Alias} exist, the first one {@link Name} provided is the primary, following
  *     with the aliases, and finally following aliases from {@link Alias}</li>

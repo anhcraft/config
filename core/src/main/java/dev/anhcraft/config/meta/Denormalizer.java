@@ -50,6 +50,7 @@ public @interface Denormalizer {
    * Returns a list of <b>field name</b> that this processor bounds to.
    * @return the field names
    */
+  // NOTE ^ see: in Normalizer
   String[] value() default {};
 
   /**

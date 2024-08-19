@@ -8,9 +8,7 @@ import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.validate.DisabledValidator;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import dev.anhcraft.config.validate.Validator;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -49,11 +47,100 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       throw new UnsupportedSchemaException(
           String.format("Cannot create schema for '%s'", type.getName()));
 
-    Map<String, Processor> normalizers = scanNormalizers(type);
-    Map<String, Processor> denormalizers = scanDenormalizers(type);
-    Map<String, Field> fields = new LinkedHashMap<>();
+    PropertyScanResult propertyListResult =
+        scanPropertyList(
+            Arrays.asList(type.getDeclaredFields()),
+            () -> scanNormalizers(Arrays.asList(type.getDeclaredMethods())),
+            () -> scanDenormalizers(Arrays.asList(type.getDeclaredMethods())));
 
-    for (Field field : type.getDeclaredFields()) {
+    LazyEffectivePropertyResult effectivePropertyResult =
+        new LazyEffectivePropertyResult(this, type);
+
+    //noinspection unchecked
+    List<ClassProperty> effectivePropertyList =
+        (List<ClassProperty>)
+            Proxy.newProxyInstance(
+                ReflectSchemaScanner.class.getClassLoader(),
+                new Class[] {List.class},
+                (proxy, method, args) ->
+                    method.invoke(
+                        effectivePropertyResult.getPropertyListResult().properties, args));
+
+    //noinspection unchecked
+    Map<String, ClassProperty> effectivePropertyMap =
+        (Map<String, ClassProperty>)
+            Proxy.newProxyInstance(
+                ReflectSchemaScanner.class.getClassLoader(),
+                new Class[] {Map.class},
+                (proxy, method, args) ->
+                    method.invoke(
+                        effectivePropertyResult.getPropertyListResult().propertyMap, args));
+
+    ClassProperty effectiveFallback =
+        (ClassProperty)
+            Proxy.newProxyInstance(
+                ReflectSchemaScanner.class.getClassLoader(),
+                new Class[] {ClassProperty.class},
+                (proxy, method, args) ->
+                    method.invoke(effectivePropertyResult.getPropertyListResult().fallback, args));
+
+    return new ClassSchema(
+        this,
+        type,
+        effectivePropertyList,
+        effectivePropertyMap,
+        effectiveFallback,
+        propertyListResult.properties,
+        propertyListResult.propertyMap,
+        propertyListResult.fallback);
+  }
+
+  @NotNull ReflectSchemaScanner.PropertyScanResult scanPropertyList(
+      @NotNull Collection<Field> fields,
+      @NotNull Supplier<Map<String, Processor>> normalizerSupplier,
+      @NotNull Supplier<Map<String, Processor>> denormalizerSupplier) {
+
+    /*
+      SCHEMA RESOLUTION algorithm:
+
+      1. Goals
+      - Respect Property list resolution in Internal.md
+      - Effective property list should be lazy-initialized
+      - Integrates well with Java inheritance
+        * Field hiding is unsupported (inherently unavailable from configuration-side)
+
+      2. Schema creation initially contains local property list resolution
+      - Init:
+        + PN-F mapping: <String, Field> (Property name -> Field)
+        + FN-PN mapping: <String, Set<String>> (Field name -> Property Names)
+      - Filter and iterate a list of eligible fields (accessible and non-excluded)
+        + Apply naming policy on the field to obtain the Initial primary name
+        + Validate Initial primary name (non-blank)
+          NOTE: Even if primary name is not used, this step ensures the custom naming policy is correct
+        + Create a list of property names
+          + If only @Name exists, use its list of names; discard Initial primary name
+          + If only @Alias exists, use Initial primary name, then append the list of alias
+          + If both @Name and @Alias, @Name first, then append @Alias; discard Initial primary name
+        + Filter properties name and implicitly discard invalid ones
+        + For each name:
+          * put into PN-F
+            NOTE: override mapping of the property name to a new field
+          * (if overriding) delete PN from old F in FN-PN
+          * add new F -> PN to FN-PN
+      - Init:
+        + P list: Property[]
+        + PN-P mapping: <String, Property> (Property name -> Property)
+      - Scan processors
+      - Create P from FN-PN, add to PN-P and P list and assign processor to P based on F
+
+      3. Effective property list resolution
+      - Create proxied list and map; see below for the computation
+    */
+
+    Map<String, Field> propertyName2Field = new LinkedHashMap<>();
+    Map<String, Set<String>> fieldName2PropertyNames = new LinkedHashMap<>();
+
+    for (Field field : fields) {
       try {
         field.setAccessible(true);
       } catch (Exception e) { // TODO is there better way to check accessibility?
@@ -61,86 +148,86 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       }
       if (isExcluded(field)) continue;
 
-      String primaryName = namingPolicy.apply(field.getName()).trim();
-      if (primaryName.isBlank())
+      String initPrimaryName = namingPolicy.apply(field.getName()).trim();
+      if (initPrimaryName.isBlank())
         throw new UnsupportedSchemaException(
             String.format(
-                "Schema '%s' contains naming error due to naming policy", type.getName()));
-      if (fields.containsKey(primaryName))
-        throw new UnsupportedSchemaException(
-            String.format(
-                "Schema '%s' contains naming conflicts due to naming policy", type.getName()));
-      fields.put(primaryName, field);
+                "Field '%s' contains naming error due to naming policy", field.getName()));
+      propertyName2Field.put(initPrimaryName, field);
       // It is guaranteed that naming policy generates unique names at this point
+      fieldName2PropertyNames.put(field.getName(), new LinkedHashSet<>());
+
+      Set<String> names = scanName(field, initPrimaryName);
+      for (String name : names) {
+        Field lastField = propertyName2Field.put(name, field);
+        if (lastField != null) fieldName2PropertyNames.get(lastField.getName()).remove(name);
+        fieldName2PropertyNames.get(field.getName()).add(name);
+      }
     }
 
-    // names claimed at a point in time; initially, they are names after naming policy applied
-    Set<String> nameClaimed = new HashSet<>(fields.keySet());
+    List<ClassProperty> localPropertyList = new ArrayList<>();
+    Map<String, ClassProperty> localPropertyMap = new LinkedHashMap<>();
 
-    // a map of primary name and alias maps to ClassProperty
-    // we do not initialize the map at this point because there is a possibility that a different
-    // primary name will replace the original one
-    Map<String, ClassProperty> lookup = new LinkedHashMap<>();
-
-    List<ClassProperty> properties = new ArrayList<>();
+    // normalizer and denormalizer bounds to fields
+    Map<String, Processor> normalizers = normalizerSupplier.get();
+    Map<String, Processor> denormalizers = denormalizerSupplier.get();
     ClassProperty fallback = null;
 
-    for (Map.Entry<String, Field> entry : fields.entrySet()) {
-      String originalPrimaryName = entry.getKey();
-      Field field = entry.getValue();
+    for (Map.Entry<String, Set<String>> entry : fieldName2PropertyNames.entrySet()) {
+      String fieldName = entry.getKey();
+      if (entry.getValue().isEmpty()) continue;
 
-      PropertyNaming name = scanName(field, originalPrimaryName, nameClaimed);
+      PropertyNaming propertyNaming = PropertyNaming.of(entry.getValue());
+      Field field = propertyName2Field.get(propertyNaming.primary());
+
       List<String> description = scanDescription(field);
       byte modifier = scanModifier(field);
       Validator validator = scanValidation(field);
-      Processor normalizer = normalizers.get(field.getName());
-      Processor denormalizer = denormalizers.get(field.getName());
+      Processor normalizer = normalizers.get(fieldName);
+      Processor denormalizer = denormalizers.get(fieldName);
 
       ClassProperty property =
-          new ClassProperty(
-              name, description, validator, field, modifier, normalizer, denormalizer);
+          new ClassPropertyImpl(
+              propertyNaming, description, validator, field, modifier, normalizer, denormalizer);
 
       if (property.isFallback()) {
         if (fallback != null)
           throw new UnsupportedSchemaException(
               String.format(
-                  "Schema '%s' contains more than one fallback property", type.getName()));
+                  "Field '%s' contains more than one fallback property", field.getName()));
         try {
           if (!ComplexTypes.erasure(property.type()).isAssignableFrom(LinkedHashMap.class))
             throw new UnsupportedSchemaException(
-                String.format("Schema '%s' contains invalid fallback property", type.getName()));
+                String.format("Field '%s' contains invalid fallback property", field.getName()));
         } catch (ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
         fallback = property;
       }
 
-      lookup.put(name.primary(), property);
-
-      // discards the original primary name and uses the new one after scanned
-      // the new one could be similar to the original one if no new primary name was provided
-      nameClaimed.remove(originalPrimaryName);
-      nameClaimed.add(name.primary());
-
-      for (String alias : name.aliases()) {
-        lookup.put(alias, property);
-        nameClaimed.add(alias);
+      for (String name : entry.getValue()) {
+        localPropertyMap.put(name, property);
       }
 
       if (!property.isFallback()) { // fallback must be at the end
-        properties.add(property);
+        localPropertyList.add(property);
       }
     }
 
-    if (fallback != null) properties.add(fallback);
+    if (fallback != null) localPropertyList.add(fallback);
 
-    return new ClassSchema(this, type, properties, lookup, fallback);
+    PropertyScanResult result = new PropertyScanResult();
+    result.fallback = fallback;
+    result.properties = localPropertyList;
+    result.propertyMap = localPropertyMap;
+
+    return result;
   }
 
-  private Map<String, Processor> scanNormalizers(Class<?> type) {
+  Map<String, Processor> scanNormalizers(Collection<Method> methods) {
     Map<String, Processor> lookup = new LinkedHashMap<>();
 
-    for (Method method : type.getDeclaredMethods()) {
+    for (Method method : methods) {
       try {
         method.setAccessible(true);
       } catch (Exception e) { // TODO is there better way to check accessibility?
@@ -177,10 +264,10 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     return lookup;
   }
 
-  private Map<String, Processor> scanDenormalizers(Class<?> type) {
+  Map<String, Processor> scanDenormalizers(Collection<Method> methods) {
     Map<String, Processor> lookup = new LinkedHashMap<>();
 
-    for (Method method : type.getDeclaredMethods()) {
+    for (Method method : methods) {
       try {
         method.setAccessible(true);
       } catch (Exception e) { // TODO is there better way to check accessibility?
@@ -247,50 +334,28 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
         || method.isSynthetic();
   }
 
-  private PropertyNaming scanName(Field field, String originalPrimaryName, Set<String> existing) {
-    LinkedHashSet<String> aliases = new LinkedHashSet<>();
-    String primary = null;
+  private Set<String> scanName(Field field, String initPrimaryName) {
+    LinkedHashSet<String> names = new LinkedHashSet<>();
 
     Name nameMeta = field.getAnnotation(Name.class);
     if (nameMeta != null) {
       for (String name : nameMeta.value()) {
         name = name.trim();
-        /*
-          To be the new primary name:
-          - It must not be empty
-          - It must not collide with existing names
-
-          To be an alias:
-          - It must not be empty
-          - It must not collide with existing names
-          - It must not collide with to-be-added aliases
-          - It must not collide with the new primary name
-        */
-        if (name.isEmpty()
-            || existing.contains(name)
-            || aliases.contains(name)
-            || name.equals(primary)) continue;
-        if (primary == null) {
-          primary = name;
-        } else {
-          aliases.add(name);
-        }
+        if (!name.isEmpty()) names.add(name);
       }
     }
+
+    if (names.isEmpty()) names.add(initPrimaryName);
 
     Alias aliasMeta = field.getAnnotation(Alias.class);
     if (aliasMeta != null) {
       for (String alias : aliasMeta.value()) {
         alias = alias.trim();
-        if (alias.isEmpty()
-            || existing.contains(alias)
-            || aliases.contains(alias)
-            || alias.equals(primary)) continue;
-        aliases.add(alias);
+        if (!alias.isEmpty()) names.add(alias);
       }
     }
 
-    return new PropertyNaming(aliases, primary == null ? originalPrimaryName : primary);
+    return names;
   }
 
   private List<String> scanDescription(Field field) {
@@ -319,5 +384,11 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
       return validationRegistry.parseString(validateMeta.value(), validateMeta.silent());
     }
     return DisabledValidator.INSTANCE;
+  }
+
+  static class PropertyScanResult {
+    List<ClassProperty> properties;
+    Map<String, ClassProperty> propertyMap;
+    ClassProperty fallback;
   }
 }

@@ -16,16 +16,25 @@ public abstract class AbstractSchema<T extends Property> implements Schema<T> {
     this.lookup = Collections.unmodifiableMap(lookup);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   @NotNull public Set<String> propertyNames() {
     return lookup.keySet();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   @NotNull public List<T> properties() {
     return properties;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   @Nullable public T property(@Nullable String name) {
     return lookup.get(name);

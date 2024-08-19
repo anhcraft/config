@@ -1,10 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import dev.anhcraft.config.type.ComplexTypes;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +18,9 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final int scannerIdentity;
   private final Class<?> type;
   private final ClassProperty fallback;
+  private final List<ClassProperty> localProperties;
+  private final Map<String, ClassProperty> localPropertyLookup;
+  private final ClassProperty localFallback;
 
   private volatile ClassSchema parent;
 
@@ -32,18 +32,27 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
       @NotNull Class<?> type,
       @NotNull List<ClassProperty> properties,
       @NotNull Map<String, ClassProperty> lookup,
-      @Nullable ClassProperty fallback) {
+      @Nullable ClassProperty fallback,
+      @NotNull List<ClassProperty> localProperties,
+      @NotNull Map<String, ClassProperty> localPropertyLookup,
+      @Nullable ClassProperty localFallback) {
     super(properties, lookup);
     this.scanner = scanner;
-    this.scannerIdentity = System.identityHashCode(scanner); // avoid GC relocation and custom-defined #hashCode
+    this.scannerIdentity =
+        System.identityHashCode(scanner); // avoid GC relocation and custom-defined #hashCode
     this.type = type;
     this.fallback = fallback;
+    this.localProperties = Collections.unmodifiableList(localProperties);
+    this.localPropertyLookup = Collections.unmodifiableMap(localPropertyLookup);
+    this.localFallback = localFallback;
 
     // setup internal state
     this.internalState |=
-      type.getSuperclass() != null &&
-        type.getSuperclass() != Object.class &&
-      ComplexTypes.isNormalClassOrAbstract(type.getSuperclass()) ? 0 : (byte) 1;
+        type.getSuperclass() != null
+                && type.getSuperclass() != Object.class
+                && ComplexTypes.isNormalClassOrAbstract(type.getSuperclass())
+            ? 0
+            : (byte) 1;
   }
 
   /**
@@ -82,7 +91,7 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   /**
-   * Gets the fallback property.
+   * Gets the effective fallback property.
    * @return the fallback
    */
   public @Nullable ClassProperty fallback() {
@@ -92,6 +101,44 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   @Override
   public String name() {
     return type.getSimpleName();
+  }
+
+  /**
+   * Gets all local property names including primary names and aliases.<br>
+   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * <b>Note:</b> Using this method to iterate over the properties may result in duplication
+   * of {@link Property} because a property may have more than one name.
+   * @return all property names
+   */
+  public @NotNull Set<String> localPropertyNames() {
+    return localPropertyLookup.keySet();
+  }
+
+  /**
+   * Returns all local properties in the schema.<br>
+   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * @return all properties
+   */
+  public @NotNull List<ClassProperty> localProperties() {
+    return localProperties;
+  }
+
+  /**
+   * Looks up a local property by primary name or alias.<br>
+   * A local property is one declared in the class schema, not from inheritance or embedding.
+   * @param name property name
+   * @return property
+   */
+  public @Nullable ClassProperty localProperty(@Nullable String name) {
+    return localPropertyLookup.get(name);
+  }
+
+  /**
+   * Gets the local fallback property.
+   * @return the fallback
+   */
+  public @Nullable ClassProperty localFallback() {
+    return localFallback;
   }
 
   @Override

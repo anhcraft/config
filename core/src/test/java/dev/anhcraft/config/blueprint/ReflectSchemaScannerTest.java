@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.function.UnaryOperator;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,22 +39,6 @@ public class ReflectSchemaScannerTest {
     assertThrows(
         UnsupportedSchemaException.class,
         () -> scanner.scanSchema(new TypeToken<>() {}.getClass()));
-  }
-
-  @Nested
-  public class ConflictNamingPolicyTest {
-    @Test
-    public void testConflictNamingPolicy() {
-      ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
-              s -> String.valueOf(s.length()), ValidationRegistry.DEFAULT, LinkedHashMap::new);
-      assertThrows(UnsupportedSchemaException.class, () -> custom.scanSchema(FooBar.class));
-    }
-
-    public class FooBar {
-      public int foo;
-      public int bar;
-    }
   }
 
   @Nested
@@ -127,26 +110,24 @@ public class ReflectSchemaScannerTest {
               NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
-          Set.of(
-              "cold",
-              "upperStorage",
-              "up",
-              "upper",
-              "lowerStorage",
-              "lo",
-              "lower",
-              "backup",
-              "coldStorage"),
-          schema.propertyNames());
+          List.of("upperStorage", "upper", "up", "lower", "lowerStorage", "backup", "lo", "cold"),
+          new ArrayList<>(schema.propertyNames()));
       assertEquals("upperStorage", schema.property("upperStorage").field().getName());
-      assertEquals("upperStorage", schema.property("up").field().getName());
       assertEquals("upperStorage", schema.property("upper").field().getName());
-      assertEquals("lowerStorage", schema.property("lowerStorage").field().getName());
-      assertEquals("lowerStorage", schema.property("lo").field().getName());
+      assertEquals("lowerStorage", schema.property("up").field().getName());
       assertEquals("lowerStorage", schema.property("lower").field().getName());
+      assertEquals("backupStorage", schema.property("lowerStorage").field().getName());
       assertEquals("backupStorage", schema.property("backup").field().getName());
-      assertEquals("backupStorage", schema.property("cold").field().getName());
-      assertEquals("coldStorage", schema.property("coldStorage").field().getName());
+      assertEquals("backupStorage", schema.property("lo").field().getName());
+      assertEquals("coldStorage", schema.property("cold").field().getName());
+      assertEquals("upperStorage", schema.property("upperStorage").field().getName());
+      assertEquals("upperStorage", schema.property("upper").field().getName());
+      assertEquals("lowerStorage", schema.property("up").field().getName());
+      assertEquals("lowerStorage", schema.property("lower").field().getName());
+      assertEquals("backupStorage", schema.property("lowerStorage").field().getName());
+      assertEquals("backupStorage", schema.property("backup").field().getName());
+      assertEquals("backupStorage", schema.property("lo").field().getName());
+      assertEquals("coldStorage", schema.property("cold").field().getName());
     }
 
     @Test
@@ -158,16 +139,22 @@ public class ReflectSchemaScannerTest {
               LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
-          Set.of("up", "lo", "lowerStorage", "co", "upper", "lower", "backup", "cold"),
-          schema.propertyNames());
-      assertEquals("upperStorage", schema.property("up").field().getName());
+          List.of("upper", "up", "lower", "lowerStorage", "backup", "lo", "cold"),
+          new ArrayList<>(schema.propertyNames()));
       assertEquals("upperStorage", schema.property("upper").field().getName());
-      assertEquals("lowerStorage", schema.property("lo").field().getName());
+      assertEquals("lowerStorage", schema.property("up").field().getName());
       assertEquals("lowerStorage", schema.property("lower").field().getName());
       assertEquals("backupStorage", schema.property("lowerStorage").field().getName());
       assertEquals("backupStorage", schema.property("backup").field().getName());
-      assertEquals("backupStorage", schema.property("cold").field().getName());
-      assertEquals("coldStorage", schema.property("co").field().getName());
+      assertEquals("backupStorage", schema.property("lo").field().getName());
+      assertEquals("coldStorage", schema.property("cold").field().getName());
+      assertEquals("upperStorage", schema.property("upper").field().getName());
+      assertEquals("lowerStorage", schema.property("up").field().getName());
+      assertEquals("lowerStorage", schema.property("lower").field().getName());
+      assertEquals("backupStorage", schema.property("lowerStorage").field().getName());
+      assertEquals("backupStorage", schema.property("backup").field().getName());
+      assertEquals("backupStorage", schema.property("lo").field().getName());
+      assertEquals("coldStorage", schema.property("cold").field().getName());
     }
 
     public class Container {
@@ -217,10 +204,20 @@ public class ReflectSchemaScannerTest {
     public void testSchemaIdentity() {
       assertNotEquals(
           new ClassSchema(
-            new ReflectSchemaScanner(UnaryOperator.identity(), ValidationRegistry.DEFAULT, LinkedHashMap::new),
-            ps.type(), ps.properties(), Map.of(), null), ps);
+              new ReflectSchemaScanner(
+                  UnaryOperator.identity(), ValidationRegistry.DEFAULT, LinkedHashMap::new),
+              ps.type(),
+              ps.properties(),
+              Map.of(),
+              null,
+              ps.properties(),
+              Map.of(),
+              null),
+          ps);
       assertEquals(
-          new ClassSchema(scanner, ps.type(), ps.properties(), Map.of(), null), ps);
+          new ClassSchema(
+              scanner, ps.type(), ps.properties(), Map.of(), null, ps.properties(), Map.of(), null),
+          ps);
     }
 
     @Test
@@ -296,8 +293,11 @@ public class ReflectSchemaScannerTest {
       assertEquals(OnlineProfile.class, ops.type());
       assertEquals(ps, ops.parent());
       assertEquals("OnlineProfile", ops.name());
-      assertEquals(2, ops.properties().size());
-      assertEquals(Set.of("lastOnline", "status"), ops.propertyNames());
+      assertEquals(6, ops.properties().size());
+      assertEquals(Set.of("lastOnline", "status", "bio"), ops.localPropertyNames());
+      assertEquals(
+          Set.of("id", "email", "age", "birth", "bio", "lastOnline", "status"),
+          ops.propertyNames());
     }
 
     public class Profile {
@@ -321,6 +321,7 @@ public class ReflectSchemaScannerTest {
     public class OnlineProfile extends Profile {
       public int lastOnline;
       public String status;
+      public String bio; // field hiding, should override "bio" property
     }
   }
 
