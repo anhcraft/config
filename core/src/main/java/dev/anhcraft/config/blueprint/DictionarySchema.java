@@ -1,6 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.error.UnsupportedSchemaException;
+import dev.anhcraft.config.error.SchemaCreationException;
 import java.util.*;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.Contract;
@@ -99,7 +99,7 @@ public class DictionarySchema extends AbstractSchema<DictionaryProperty> {
       List<DictionaryProperty> properties = new ArrayList<>();
       for (DictionaryProperty property : this.propertyList) {
         if (lookup.containsKey(property.name())) {
-          throw new UnsupportedSchemaException("Duplicate property name: " + property.name());
+          throw new SchemaCreationException("Duplicated property name: " + property.name());
         }
         lookup.put(property.name(), property);
         properties.add(property);

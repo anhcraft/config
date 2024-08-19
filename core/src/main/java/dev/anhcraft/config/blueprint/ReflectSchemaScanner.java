@@ -1,7 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.context.Context;
-import dev.anhcraft.config.error.UnsupportedSchemaException;
+import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.ComplexTypes;
@@ -44,8 +44,8 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
   @Override
   public @NotNull ClassSchema scanSchema(@NotNull Class<?> type) {
     if (!ComplexTypes.isNormalClassOrAbstract(type))
-      throw new UnsupportedSchemaException(
-          String.format("Cannot create schema for '%s'", type.getName()));
+      throw new SchemaCreationException(
+          String.format("'%s' is not an eligible class to create", type.getName()));
 
     PropertyScanResult propertyListResult =
         scanPropertyList(
@@ -150,9 +150,10 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
 
       String initPrimaryName = namingPolicy.apply(field.getName()).trim();
       if (initPrimaryName.isBlank())
-        throw new UnsupportedSchemaException(
+        throw new SchemaCreationException(
             String.format(
-                "Field '%s' contains naming error due to naming policy", field.getName()));
+                "Field '%s' (declared in '%s') contains blank initial primary name",
+                field.getName(), field.getDeclaringClass().getName()));
       propertyName2Field.put(initPrimaryName, field);
       // It is guaranteed that naming policy generates unique names at this point
       fieldName2PropertyNames.put(field.getName(), new LinkedHashSet<>());
@@ -192,13 +193,16 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
 
       if (property.isFallback()) {
         if (fallback != null)
-          throw new UnsupportedSchemaException(
+          throw new SchemaCreationException(
               String.format(
-                  "Field '%s' contains more than one fallback property", field.getName()));
+                  "Field '%s' (declared in '%s') contains more than one fallback property",
+                  field.getName(), field.getDeclaringClass().getName()));
         try {
           if (!ComplexTypes.erasure(property.type()).isAssignableFrom(LinkedHashMap.class))
-            throw new UnsupportedSchemaException(
-                String.format("Field '%s' contains invalid fallback property", field.getName()));
+            throw new SchemaCreationException(
+                String.format(
+                    "Field '%s' (declared in '%s') contains invalid fallback property",
+                    field.getName(), field.getDeclaringClass().getName()));
         } catch (ClassNotFoundException e) {
           throw new RuntimeException(e);
         }

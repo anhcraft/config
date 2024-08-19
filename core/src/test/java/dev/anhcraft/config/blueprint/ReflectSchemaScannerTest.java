@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
-import dev.anhcraft.config.error.UnsupportedSchemaException;
+import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.TypeToken;
@@ -31,14 +31,13 @@ public class ReflectSchemaScannerTest {
 
   @Test
   public void testScanInvalid() {
-    assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(int.class));
-    assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(int[].class));
-    assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(List.class));
-    assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(PathType.class));
-    assertThrows(UnsupportedSchemaException.class, () -> scanner.scanSchema(Name.class));
+    assertThrows(SchemaCreationException.class, () -> scanner.scanSchema(int.class));
+    assertThrows(SchemaCreationException.class, () -> scanner.scanSchema(int[].class));
+    assertThrows(SchemaCreationException.class, () -> scanner.scanSchema(List.class));
+    assertThrows(SchemaCreationException.class, () -> scanner.scanSchema(PathType.class));
+    assertThrows(SchemaCreationException.class, () -> scanner.scanSchema(Name.class));
     assertThrows(
-        UnsupportedSchemaException.class,
-        () -> scanner.scanSchema(new TypeToken<>() {}.getClass()));
+        SchemaCreationException.class, () -> scanner.scanSchema(new TypeToken<>() {}.getClass()));
   }
 
   @Nested
@@ -457,7 +456,7 @@ public class ReflectSchemaScannerTest {
         @Fallback public Map<String, Object> bar;
       }
       assertThrows(
-          UnsupportedSchemaException.class,
+          SchemaCreationException.class,
           () -> scanner.scanSchema(ConfigWithDuplicateFallbackProperties.class));
     }
 
@@ -467,7 +466,7 @@ public class ReflectSchemaScannerTest {
         @Fallback public int foo;
       }
       assertThrows(
-          UnsupportedSchemaException.class,
+          SchemaCreationException.class,
           () -> scanner.scanSchema(ConfigWithInvalidTypeFallbackProperty.class));
     }
 

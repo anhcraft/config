@@ -3,7 +3,7 @@ package dev.anhcraft.config.blueprint;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.Dictionary;
-import dev.anhcraft.config.error.UnsupportedSchemaException;
+import dev.anhcraft.config.error.SchemaCreationException;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ public class DictionarySchemaBuilderTest {
     schemaBuilder.addProperty("age", p -> p.withNames("age", "name").withType(int.class));
     schemaBuilder.addProperty("name", p -> p.withType(String.class));
     schemaBuilder.addProperty("age", p -> p.withType(double.class));
-    assertThrows(UnsupportedSchemaException.class, schemaBuilder::build);
+    assertThrows(SchemaCreationException.class, schemaBuilder::build);
   }
 
   @Test

@@ -1,6 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.error.UnsupportedSchemaException;
+import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.type.ComplexTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +12,7 @@ public interface ClassSchemaScanner {
   /**
    * Scans the schema of the specified class.<br>
    * The schema is tested against {@link ComplexTypes#isNormalClassOrAbstract(Class)}. If fails, this method
-   * throws {@link UnsupportedSchemaException}.<br>
+   * throws {@link SchemaCreationException}.<br>
    * <b>The result is never cached.</b>
    * @param type the class
    * @return the schema
