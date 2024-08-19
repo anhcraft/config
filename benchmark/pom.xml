@@ -18,12 +18,12 @@
         <dependency>
             <groupId>dev.anhcraft.config</groupId>
             <artifactId>config-core</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.0-beta.1</version>
         </dependency>
         <dependency>
             <groupId>dev.anhcraft.config</groupId>
             <artifactId>config-json</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.0-beta.1</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
