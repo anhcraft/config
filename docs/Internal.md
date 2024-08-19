@@ -94,36 +94,25 @@ flowchart TD
 
 # Structure
 
-| Instance of `T` | Object     | Dictionary                       |
-|-----------------|------------|----------------------------------|
-| Data type       | `Class<T>` | Dictionary                       |
-| Model           | Schema     | Schemaless<br/>Dictionary schema |
-| Field           | Property   | Setting                          |
-
 ## Schema
 - The schema (or model) is an immutable top-down view of the structure of a configuration at runtime
 - The schema contains none, one or many properties
-- The schema is factory-dependent (see ConfigFactory below)
 
 ### Class schema
 - The schema inferred from a respective class in a _declarative_ manner
 - Depicts the **exposed** structure of a class
 - Provides the view of a class available at runtime
-- All classes have their own class schemas lazily generated using reflection
+- Class schema is created _on demand_
+- Class schema has identity depending on:
+  - The `Class` it represents
+  - The `ClassSchemaScanner` created it
+- Class schema is named by the associated class
 
 ### Dictionary schema
 - The schema is built dynamically in an _imperative_ manner
 - Provides the view of a _virtual_ class which does not exist at runtime
 - Represents a basic structural type system
-
-### Schema identity
-### Class schema
-- Identifier: The associated class
-- Name: The simple name of the associated class
-
-### Dictionary schema
-- Dictionary schema has no identity
-- Dictionary name is optional
+- Dictionary schema name is optional
 
 ### Schema construction
 
@@ -138,52 +127,94 @@ flowchart TD
 ## Property
 - A property belongs to a schema and represents an individual configuration setting
 - The type of property is the data type of the value it holds
-- The property is factory-dependent (see ConfigFactory below)
 
 ### Property in a class schema
+- A property in a class schema is called class property
 - Each property maps into exactly one field in the respective class
-- Each field in the class maps into one or _none_ property
+- Each field in the class maps into _none_ or one property
+- Each field in the class maps into _none_, one or many property **name(s)**
 - Transient fields, synthetic fields, native fields are excluded
   - `@Exclude` to explicitly exclude a field
-  - A **final** field may be a property if it does not violate rules above
+  - A **final** field might be a property if it does not violate rules above
 - By default, the property name is derived from the field name
   - Property name conversion is customizable (see Naming Policy)
-  - Property name can be customized (see Naming Strategy)
-- The property type equals to the type of the corresponding field
+- The property type is the type of the corresponding field
 
 #### Naming Policy
 - When `@Name` is absent, the field name is also the property name. It is possible to change the styling, for example, enforce property name to be kebab-case.
-- Field name is assumed to be **camelCase** (Java convention)
+- Field name is assumed to be **camelCase** (Java naming convention for _instance_ fields)
 - Built-in: default, PascalCase, snake_case, kebab-case
-- Naming policy can be manually-defined when constructing ConfigFactory
-- Custom naming policy must follow a bijective function, otherwise an exception is raised during schema creation (see: Naming Strategy)
+- Naming policy can be set when constructing ConfigFactory
+- Custom naming policy must follow a bijective function, otherwise an exception is raised during schema creation (see: Property List Resolution)
 
-#### Naming Strategy
-- First, each property is named as its corresponding field's name after applying Naming Policy. If naming collision happens, e.g. for two distinct properties, a custom naming policy outputs the same name, an exception throws.
-- It is initially guaranteed that at this stage naming follows a bijective function:
-  - Every property name in a schema is unique
-  - Two distinct properties must have two distinct names
-  - Two distinct names are mapped into two distinct properties
-  - The initial name of each property is called primary name
-- The schema scanner inspects `@Name` and `@Alias` attached to each property by source-code order:
-  - If `@Name` exists, the new primary name is the first valid name. A valid name is defined as *non-blank and unique to existing names*. The valid name does not apply Naming Policy since it is already a custom-defined name. The old primary name is discarded, and thus can be claimed later.
-  - If `@Name` exists with more than one valid name. From the second valid name, each one is considered an alias.
-  - Then, checks for `@Alias` with the same rule as above. All names defined in `@Alias` are considered as aliases. They also do not apply Naming Policy.
-- To conclude, naming in a schema must follow the following rules:
-  - Every name in a schema is unique
-  - Two distinct properties must have two set of unique names
-  - Two distinct names may be mapped to the same property
+#### Inheritance and embedding
+- Properties can be inherited as if fields are inherited
+- Properties can be composed of other schemas (see: Embedding)
+
+#### Property overriding
+- A field can override a property claim by prior fields. This supports inheritance and embedding.
+
+#### Property list
+- A list of declared properties is called _local property list_
+- A list of declared, inherited and embedded properties is called _effective property list_
+- Effective property list might be different from local property list in which:
+  - It might introduce additional properties due to inheritance and embedding
+  - It might have different mapping to fields due to property overriding
+
+#### Property List Resolution
+- The following steps is used to resolve a property list
+- The scanner scans the schema hierarchy in depth first order and the following cross-schema order:
+  - Parent schema (superclass)
+  - Embedded schema (order of relative embedded fields are guaranteed)
+  - Local properties (or _non-embedded declared fields_)
+- While traversing the property tree, it is permitted that a later field can re-claim the property belonging to prior fields
+```java
+public class Location {
+  private String aisle;
+  private int shelf;
+}
+
+public class MediaItem {
+  private String title;
+  private String author;
+}
+
+public class Book extends MediaItem {
+  private int numberOfPages;
+}
+
+public class DVD extends MediaItem {
+  private int duration;
+}
+
+public class LibraryItem {
+  private MediaItem mediaItem;
+  @Embedded private Location location;
+
+  // claim "shelf" property from Location
+  // and safely change data type int -> String
+  private String shelf;
+}
+```
+- To conclude, rules of property-field relationship:
+  - A field must have one or none property associated
+  - A property must bound to one field
+  - Two properties must bound to two distinct fields
+  - The relationship follows an injection function `Property → Field`
+- Rules of property naming:
+  - Two distinct properties must have two distinct set of names
+  - Two distinct names might be mapped to the same property
   - Each property must have a primary name and an optional set of aliases
-  - Naming in a schema follows an onto function `Name → Property`
+  - Naming in a schema follows a surjection function `Name → Property`
 
 #### Annotations
-- Annotations is the main approach to provide **class properties**
+- Annotations is used to provide **property metadata**
 - `@Name`: set the property primary name and aliases
   - `value` to define a list of possible names
-  - See: Naming Strategy
+  - See: Property List Resolution
 - `@Alias`: set the property aliases
   - `value` to define a list of possible aliases
-  - See: Naming Strategy
+  - See: Property List Resolution
 - `@Exclude`: exclude the field / let it no longer be a property
   - Transient fields, synthetic fields, native fields are always excluded by default
   - Prefer `@Exclude` over `transient` to avoid conflict since other serialization libraries (such as Gson, Jackson, etc.) ignore transient fields
@@ -201,12 +232,12 @@ flowchart TD
   - **Note:** A constant/final field maybe included in the schema and denormalizable. Using `@Constant` explicitly avoid denormalization
 
 ### Property in a dictionary schema
-- The dictionary schema is generated imperatively, so as its property
+- The dictionary schema is generated imperatively, so as its properties
 - Name and Type is defined when building the property
-- If a property type is not defined, the property can hold any simple value
+- If a property type is undefined, the property can hold any simple value
 - If the property type is Dictionary, it is optional to supply a dictionary schema to constrain the value
 
-#### Naming Strategy
+#### Property List
 - Dictionary properties have significant flexibility in naming compared to class properties
 - Dictionary properties may have duplicates in naming. When a dictionary schema is constructed, they are added **in bulk** and naming arrangement happens as follows:
   + For each property, its primary name is added to the lookup map. If a naming collision occurs, the schema construction fails
