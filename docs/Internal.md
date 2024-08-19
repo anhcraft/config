@@ -155,9 +155,9 @@ flowchart TD
 - A field can override a property claim by prior fields. This supports inheritance and embedding.
 
 #### Property list
-- A list of declared properties is called _local property list_
+- A list of declared properties is called _declared property list_
 - A list of declared, inherited and embedded properties is called _effective property list_
-- Effective property list might be different from local property list in which:
+- Effective property list might be different from declared property list in which:
   - It might introduce additional properties due to inheritance and embedding
   - It might have different mapping to fields due to property overriding
 
@@ -166,7 +166,7 @@ flowchart TD
 - The scanner scans the schema hierarchy in depth first order and the following cross-schema order:
   - Parent schema (superclass)
   - Embedded schema (order of relative embedded fields are guaranteed)
-  - Local properties (or _non-embedded declared fields_)
+  - Declared properties (or _non-embedded declared fields_)
 - While traversing the property tree, it is permitted that a later field can re-claim the property belonging to prior fields
 ```java
 public class Location {
