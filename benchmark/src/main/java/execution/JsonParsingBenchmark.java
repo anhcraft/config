@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import common.Store;
 import dev.anhcraft.config.ConfigDenormalizer;
 import dev.anhcraft.config.ConfigFactory;
+import dev.anhcraft.config.SettingFlag;
 import dev.anhcraft.config.json.JsonParser;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -28,7 +29,7 @@ public class JsonParsingBenchmark {
   @Setup
   public void setup() throws Exception {
     ConfigFactory fac = ConfigFactory.create()
-      .disableValidation(true)
+      .enableDenormalizerSetting(SettingFlag.Denormalizer.DISABLE_VALIDATION)
       .build();
     denormalizer = fac.getDenormalizer();
     gson = new Gson();
