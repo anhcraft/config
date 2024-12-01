@@ -12,6 +12,8 @@ import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
@@ -155,6 +157,8 @@ public final class ConfigFactory {
       typeAdapters.put(Double.class, DoubleAdapter.INSTANCE);
       typeAdapters.put(Character.class, CharacterAdapter.INSTANCE);
       typeAdapters.put(Boolean.class, BooleanAdapter.INSTANCE);
+      typeAdapters.put(BigInteger.class, BigIntegerAdapter.INSTANCE);
+      typeAdapters.put(BigDecimal.class, BigDecimalAdapter.INSTANCE);
 
       typeAdapters.put(byte.class, ByteAdapter.INSTANCE);
       typeAdapters.put(short.class, ShortAdapter.INSTANCE);
