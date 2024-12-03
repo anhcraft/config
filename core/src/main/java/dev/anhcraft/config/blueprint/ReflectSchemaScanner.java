@@ -35,7 +35,9 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
   public @NotNull ClassSchema getOrScanSchema(@NotNull Class<?> type) {
     ClassSchema schema = (ClassSchema) schemaCache.get(type);
     if (schema != null) return schema;
-    synchronized (this) {
+    synchronized (this) { // Double check
+      schema = (ClassSchema) schemaCache.get(type);
+      if (schema != null) return schema;
       schemaCache.put(type, schema = scanSchema(type));
     }
     return schema;
