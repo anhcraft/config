@@ -55,6 +55,11 @@ class ClassPropertyImpl extends AbstractProperty implements ClassProperty {
     return (modifier & MODIFIER_FALLBACK) == MODIFIER_FALLBACK;
   }
 
+  @Override
+  public boolean isDiscriminator() {
+    return (modifier & MODIFIER_DISCRIMINATOR) == MODIFIER_DISCRIMINATOR;
+  }
+
   @Nullable public Processor normalizer() {
     return normalizer;
   }

@@ -128,7 +128,7 @@ public class ConfigDenormalizer {
       throws Exception {
     validateSimpleType(ctx, simple);
     validateComplexType(ctx, instance, targetType);
-    _denormalizeToInstance(ctx, simple, targetType, instance);
+    _denormalizeToInstance(ctx, simple, targetType, instance, PropertyList.ALL);
   }
 
   // ======== Internal implementations ========
@@ -170,10 +170,9 @@ public class ConfigDenormalizer {
       }
       return result;
     }
-    if (!(simple instanceof Dictionary)) return null;
-    Object object = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
-    _denormalizeToInstance(ctx, (Dictionary) simple, targetType, object);
-    return object;
+    if (simple instanceof Dictionary)
+      return _denormalizeInstance(ctx, (Dictionary) simple, targetType);
+    return null;
   }
 
   private <T> Object _denormalizeToArray(Context ctx, Type targetType, T simple) throws Exception {
@@ -195,13 +194,56 @@ public class ConfigDenormalizer {
     return object;
   }
 
+  private Object _denormalizeInstance(Context ctx, Dictionary simple, Type targetType)
+      throws Exception {
+    /*
+
+      Built-in instance deserialization algorithm:
+
+      1. If the type has no discriminators -> no shape could be linked
+      - Deserialize all properties including "declared" and "inherited"
+      2. If the type has at least one discriminator -> shape can be linked; however, their existence is unknown
+      - Deserialize only "discriminators" properties (either "declared" or "inherited")
+      - Look up a compatible shape given the partial instance
+      - If a shape exists, deserialize the shape from scratch
+      - If a shape does not exist, deserialize the instance again from scratch
+       * The reason that we start from scratch is that processors, context and scopes could be different
+    */
+
+    Class<?> erasureType = ComplexTypes.erasure(targetType);
+    ClassSchema schema = configFactory.getSchema(erasureType);
+
+    if (!schema.getDiscriminators().isEmpty()) {
+      Object base = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
+      _denormalizeToInstance(ctx, simple, targetType, base, PropertyList.VALID_DISCRIMINATOR_ONLY);
+      Class<?> shape = configFactory.getShapeRegistry().solve(ctx, base);
+
+      if (shape != null && erasureType.isAssignableFrom(shape)) {
+        // TODO shape is type-erasure (no generic parameters support)
+        Object object = configFactory.getInstanceFactory().newInstance(ctx, shape);
+        _denormalizeToInstance(ctx, simple, shape, object, PropertyList.ALL);
+        return object;
+      }
+    }
+
+    Object object = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
+    _denormalizeToInstance(ctx, simple, targetType, object, PropertyList.ALL);
+    return object;
+  }
+
   private void _denormalizeToInstance(
-      Context ctx, Dictionary simple, Type targetType, Object instance) throws Exception {
+      Context ctx, Dictionary simple, Type targetType, Object instance, PropertyList propertyList)
+      throws Exception {
     TypeResolver resolver = TypeResolver.of(targetType);
     ClassSchema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
     Set<String> settingsProcessed = new HashSet<>();
 
-    for (ClassProperty property : schema.properties()) {
+    Collection<ClassProperty> classProperties =
+        propertyList == PropertyList.VALID_DISCRIMINATOR_ONLY
+            ? schema.getDiscriminators().values()
+            : schema.properties();
+
+    for (ClassProperty property : classProperties) {
       if (property.isConstant()) continue;
 
       String setting;
@@ -297,5 +339,10 @@ public class ConfigDenormalizer {
 
       settingsProcessed.add(setting);
     }
+  }
+
+  private enum PropertyList {
+    ALL,
+    VALID_DISCRIMINATOR_ONLY
   }
 }

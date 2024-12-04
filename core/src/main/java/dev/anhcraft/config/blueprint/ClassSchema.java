@@ -1,5 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
+import dev.anhcraft.config.meta.Discriminator;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +24,11 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final ClassProperty declaredFallback;
 
   private volatile ClassSchema parent;
+  private volatile Map<String, ClassProperty> discriminator;
 
   // 1st bit: whether the class has no parent
+  // 2nd bit: whether the discriminator was discovered
+
   private byte internalState;
 
   public ClassSchema(
@@ -139,6 +143,54 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
    */
   public @Nullable ClassProperty declaredFallback() {
     return declaredFallback;
+  }
+
+  /**
+   * Gets an immutable effective map of discriminator properties (discriminator-based polymorphism)<br>
+   * Some properties might not belong to this class but come from an ancestor.<br>
+   * Not all properties denoted as discriminator are included. The map includes only effective ones.
+   * @return the discriminator
+   * @see Discriminator
+   */
+  public @NotNull Map<String, ClassProperty> getDiscriminators() {
+    if ((internalState & 2) == 2) {
+      return discriminator;
+    }
+
+    synchronized (this) {
+      Map<String, ClassProperty> discriminatorRef = discriminator;
+
+      // When two concurrent accesses happen, and it is just discovered that there is no
+      // discriminator:
+      if ((internalState & 2) == 2) {
+        return discriminatorRef;
+      }
+
+      discriminatorRef = new HashMap<>();
+
+      // Attempt to find the discriminator locally
+      for (ClassProperty declaredProperty : declaredProperties) {
+        if (declaredProperty.isDiscriminator()) {
+          // Within a class, the later property overrides the previous
+          discriminatorRef.put(declaredProperty.name(), declaredProperty);
+        }
+      }
+
+      ClassSchema parent = parent();
+      if (parent != null) {
+        for (Map.Entry<String, ClassProperty> entry : parent.getDiscriminators().entrySet()) {
+          // Properties in subclasses override properties in superclasses
+          // As such, when going upstream, only take one(s) have not existed yet
+          discriminatorRef.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+      }
+
+      discriminatorRef = Collections.unmodifiableMap(discriminatorRef);
+      discriminator = discriminatorRef;
+      internalState |= 2;
+
+      return discriminatorRef;
+    }
   }
 
   @Override

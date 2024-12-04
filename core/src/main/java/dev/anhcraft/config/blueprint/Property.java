@@ -17,22 +17,28 @@ public interface Property {
   /**
    * Modifier to mark optional properties.
    */
-  byte MODIFIER_OPTIONAL = 1;
+  @SuppressWarnings("PointlessBitwiseExpression")
+  byte MODIFIER_OPTIONAL = 1 << 0;
 
   /**
    * Modifier to mark transient properties.
    */
-  byte MODIFIER_TRANSIENT = 2;
+  byte MODIFIER_TRANSIENT = 1 << 1;
 
   /**
    * Modifier to mark constant properties.
    */
-  byte MODIFIER_CONSTANT = 4;
+  byte MODIFIER_CONSTANT = 1 << 2;
 
   /**
    * Modifier to mark fallback properties.
    */
-  byte MODIFIER_FALLBACK = 8;
+  byte MODIFIER_FALLBACK = 1 << 3;
+
+  /**
+   * Modifier to mark discriminator properties.
+   */
+  byte MODIFIER_DISCRIMINATOR = 1 << 4;
 
   /**
    * Gets the primary name of this property.

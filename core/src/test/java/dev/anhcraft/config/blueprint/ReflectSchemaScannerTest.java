@@ -2,6 +2,7 @@ package dev.anhcraft.config.blueprint;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
@@ -482,6 +483,68 @@ public class ReflectSchemaScannerTest {
       assertEquals(Set.of("foo", "_trap"), schema.propertyNames());
       assertNotNull(schema.fallback());
       assertEquals("_trap", schema.fallback().name());
+    }
+  }
+
+  @Nested
+  public class DiscriminatorTest {
+    @Test
+    public void testInvalidTypeDiscriminatorProperty() {
+      class ConfigWithInvalidTypeDiscriminatorProperty {
+        @Discriminator public double foo;
+        @Discriminator public float bar;
+        @Discriminator public int[] baz;
+        @Discriminator public Dictionary qux;
+      }
+      assertThrows(
+          SchemaCreationException.class,
+          () -> scanner.scanSchema(ConfigWithInvalidTypeDiscriminatorProperty.class));
+    }
+
+    @Test
+    public void testDiscriminatorFallbackCannotCoexist() {
+      class ConfigWithDiscriminatorFallbackCoexistProperty {
+        @Discriminator @Fallback public double foo;
+      }
+      assertThrows(
+          SchemaCreationException.class,
+          () -> scanner.scanSchema(ConfigWithDiscriminatorFallbackCoexistProperty.class));
+    }
+
+    @Test
+    public void testDeclaredDiscriminatorPropertyExists() {
+      class Config {
+        @Discriminator public int foo;
+        @Discriminator public String bar;
+      }
+
+      ClassSchema schema = scanner.scanSchema(Config.class);
+      assertEquals(Set.of("foo", "bar"), schema.propertyNames());
+      assertNotNull(schema.getDiscriminators().get("foo"));
+      assertEquals("foo", schema.getDiscriminators().get("foo").name());
+      assertEquals(int.class, schema.getDiscriminators().get("foo").type());
+      assertNotNull(schema.getDiscriminators().get("bar"));
+      assertEquals("bar", schema.getDiscriminators().get("bar").name());
+      assertEquals(String.class, schema.getDiscriminators().get("bar").type());
+    }
+
+    @Test
+    public void testInheritedDiscriminatorPropertyExists() {
+      class Config {
+        @Discriminator public int foo;
+      }
+      class ConfigV2 extends Config {
+        @Discriminator public String bar;
+      }
+
+      ClassSchema schema = scanner.scanSchema(ConfigV2.class);
+      assertEquals(Set.of("foo", "bar"), schema.propertyNames());
+      assertNotNull(schema.getDiscriminators().get("foo"));
+      assertEquals("foo", schema.getDiscriminators().get("foo").name());
+      assertEquals(int.class, schema.getDiscriminators().get("foo").type());
+      assertNotNull(schema.getDiscriminators().get("bar"));
+      assertEquals("bar", schema.getDiscriminators().get("bar").name());
+      assertEquals(String.class, schema.getDiscriminators().get("bar").type());
     }
   }
 }

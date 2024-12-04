@@ -761,6 +761,75 @@ public class Inventory {
 }
 ```
 
+## Polymorphism
+### Discriminator-based polymorphism
+
+
+Discriminator can be inherited, but shape is not inheritable
+Order of shape registration does not affect the result of shape resolution
+
+
+- Given type `T` shaped by discriminator `X`:
+  - `T` is called the base
+  - `X` in `T` must be annotated as `@Discriminator(name = X)` where `X` is the discriminator name. If the name is omitted, it is auto-generated from the corresponding field name.
+  - For each shape of `T` (represented as a subtype of `T`), it must be annotated as `@Shape(discriminator = X, value = N)` where `N` is the discriminator value
+- The field annotated as `@Discriminator` must be of following types:
+  - `byte, short, int, long` or their wrapper types
+  - `String` (case-sensitive)
+  - `Enum` (case-insensitive)
+```java
+public class Item {
+  @Discriminator
+  public int version;
+}
+
+@Shape(discriminator = "version", value = "1")
+public class ItemV1 extends Item {
+  public String name;
+  public int stock;
+}
+
+@Shape(discriminator = "version", value = "2")
+public class ItemV2 extends Item {
+  public String name;
+  public int quantity;
+}
+```
+
+- Multi-discriminator per shape is **NOT** supported. However, it is permitted to declare multiple discriminators in the base type.
+- Discriminator registration: To signal that `T` has a shape `S`, register `S` with `ShapeRegistry`
+- Shape resolution:
+  - LinkedList-like Inheritance:
+    - When: `C` is a subtype of `P`, `P` is a subtype of `GP`. Assume in a deserialization of `GP`, both `P` and `C` can become shapes of `GP`
+    - Solution: `C` is picked over `P` because `C` is more detailed
+    - In other words, if in a deserialization of a type, there are more than one subtype that can become shapes, and they can be modelled as a linked list (one parent has none or one effective child), we pick the lowest descendant
+    - For example: In the following figure, the lowest descendant is `C`
+```mermaid
+graph TD
+    GGP --> GP["GP [version]"]
+    GP --> P["P [version=1]"]
+    P --> C["C [version=1]"]
+```
+  - Tree-like Inheritance:
+    - When: `A`, `B` inherits `P`. Assume in a deserialization of `P`, both `A` and `B` can become shapes of `P`
+    - Solution: there is ambiguity between `A` and `B`, so `P` is used
+    - In other words, if in a deserialization of a type, there are more than one subtype that can become shapes, and they can be modelled as a directed acyclic graph (one parent has none, one or many effective children), we pick the lowest common ancestor of the highest ambiguity point
+    - For example: In the following figure, the highest ambiguity point is `A -- B` and the lowest common ancestor of them is `P`
+```mermaid
+graph TD
+    GGP["GGP [version]"] --> GP["GP [version]"]
+    GP --> P["P [version]"]
+    P --> A
+    P --> B
+    B --> B1
+    B --> B2
+    B2 --> B3
+```
+- The shape resolution is deterministic
+
+### Dynamic polymorphism
+TODO
+
 ## Embedding
 - Embedding is a feature to compose and flatten fields from another schema in a schema without inheritance:
   - Composition: the composed schema is nested in the code

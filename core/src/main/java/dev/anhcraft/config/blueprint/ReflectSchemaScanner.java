@@ -193,6 +193,24 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
           new ClassPropertyImpl(
               propertyNaming, description, validator, field, modifier, normalizer, denormalizer);
 
+      if (property.isDiscriminator()) {
+        try {
+          if (!isDeterministicEquitableScalar(ComplexTypes.erasure(property.type())))
+            throw new SchemaCreationException(
+                String.format(
+                    "Field '%s' (declared in '%s') must has a scalar, deterministic-equality type",
+                    field.getName(), field.getDeclaringClass().getName()));
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+
+        if (property.isFallback())
+          throw new SchemaCreationException(
+              String.format(
+                  "Field '%s' (declared in '%s') cannot be both discriminator and fallback",
+                  field.getName(), field.getDeclaringClass().getName()));
+      }
+
       if (property.isFallback()) {
         if (fallback != null)
           throw new SchemaCreationException(
@@ -381,6 +399,8 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     modifier |= field.getAnnotation(Transient.class) != null ? Property.MODIFIER_TRANSIENT : 0;
     modifier |= field.getAnnotation(Constant.class) != null ? Property.MODIFIER_CONSTANT : 0;
     modifier |= field.getAnnotation(Fallback.class) != null ? Property.MODIFIER_FALLBACK : 0;
+    modifier |=
+        field.getAnnotation(Discriminator.class) != null ? Property.MODIFIER_DISCRIMINATOR : 0;
     return modifier;
   }
 
@@ -396,5 +416,21 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     List<ClassProperty> properties;
     Map<String, ClassProperty> propertyMap;
     ClassProperty fallback;
+  }
+
+  private boolean isDeterministicEquitableScalar(Class<?> type) {
+    return type == int.class
+        || type == Integer.class
+        || type == long.class
+        || type == Long.class
+        || type == short.class
+        || type == Short.class
+        || type == byte.class
+        || type == Byte.class
+        || type == char.class
+        || type == Character.class
+        || type == boolean.class
+        || type == Boolean.class
+        || type == String.class;
   }
 }

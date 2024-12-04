@@ -32,6 +32,7 @@ public final class ConfigFactory {
   private final ContextProvider contextProvider;
   private final AdapterProvider adapterProvider;
   private final InstanceFactory instanceFactory;
+  private final ShapeRegistry shapeRegistry;
 
   ConfigFactory(Builder builder) {
     this.schemaScanner =
@@ -41,6 +42,7 @@ public final class ConfigFactory {
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.contextProvider = builder.contextProvider;
     this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
+    this.shapeRegistry = new ShapeRegistry(this);
     try {
       this.adapterProvider =
           builder
@@ -115,6 +117,14 @@ public final class ConfigFactory {
    */
   @NotNull public InstanceFactory getInstanceFactory() {
     return instanceFactory;
+  }
+
+  /**
+   * Gets the shape registry.
+   * @return the shape registry
+   */
+  @NotNull public ShapeRegistry getShapeRegistry() {
+    return shapeRegistry;
   }
 
   /**
