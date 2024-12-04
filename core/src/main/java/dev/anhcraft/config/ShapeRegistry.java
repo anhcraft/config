@@ -53,7 +53,7 @@ public final class ShapeRegistry {
         && ComplexTypes.isNormalClassOrAbstract(node)
         && !shapeLookup.isEmpty()) {
       ClassSchema schema = factory.getSchema(node);
-      Map<String, ClassProperty> discriminatorProperties = schema.getDiscriminators();
+      Map<String, ClassProperty> discriminatorProperties = schema.effectiveDiscriminators();
 
       for (Map.Entry<String, ClassProperty> entry : discriminatorProperties.entrySet()) {
         String discriminatorName = entry.getKey();
@@ -103,7 +103,7 @@ public final class ShapeRegistry {
    */
   public @Nullable Class<?> solve(@NotNull Context ctx, @NotNull Object base) throws Exception {
     ClassSchema classSchema = factory.getSchema(base.getClass());
-    for (Map.Entry<String, ClassProperty> entry : classSchema.getDiscriminators().entrySet()) {
+    for (Map.Entry<String, ClassProperty> entry : classSchema.effectiveDiscriminators().entrySet()) {
       ShapeCollection collection = discriminatorPropertyShapes.get(entry.getValue());
       if (collection == null) continue;
       Object val = entry.getValue().field().get(base);

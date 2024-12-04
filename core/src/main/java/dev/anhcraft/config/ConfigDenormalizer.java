@@ -213,7 +213,7 @@ public class ConfigDenormalizer {
     Class<?> erasureType = ComplexTypes.erasure(targetType);
     ClassSchema schema = configFactory.getSchema(erasureType);
 
-    if (!schema.getDiscriminators().isEmpty()) {
+    if (!schema.effectiveDiscriminators().isEmpty()) {
       Object base = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
       _denormalizeToInstance(ctx, simple, targetType, base, PropertyList.VALID_DISCRIMINATOR_ONLY);
       Class<?> shape = configFactory.getShapeRegistry().solve(ctx, base);
@@ -240,7 +240,7 @@ public class ConfigDenormalizer {
 
     Collection<ClassProperty> classProperties =
         propertyList == PropertyList.VALID_DISCRIMINATOR_ONLY
-            ? schema.getDiscriminators().values()
+            ? schema.effectiveDiscriminators().values()
             : schema.properties();
 
     for (ClassProperty property : classProperties) {

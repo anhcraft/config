@@ -520,12 +520,12 @@ public class ReflectSchemaScannerTest {
 
       ClassSchema schema = scanner.scanSchema(Config.class);
       assertEquals(Set.of("foo", "bar"), schema.propertyNames());
-      assertNotNull(schema.getDiscriminators().get("foo"));
-      assertEquals("foo", schema.getDiscriminators().get("foo").name());
-      assertEquals(int.class, schema.getDiscriminators().get("foo").type());
-      assertNotNull(schema.getDiscriminators().get("bar"));
-      assertEquals("bar", schema.getDiscriminators().get("bar").name());
-      assertEquals(String.class, schema.getDiscriminators().get("bar").type());
+      assertNotNull(schema.effectiveDiscriminators().get("foo"));
+      assertEquals("foo", schema.effectiveDiscriminators().get("foo").name());
+      assertEquals(int.class, schema.effectiveDiscriminators().get("foo").type());
+      assertNotNull(schema.effectiveDiscriminators().get("bar"));
+      assertEquals("bar", schema.effectiveDiscriminators().get("bar").name());
+      assertEquals(String.class, schema.effectiveDiscriminators().get("bar").type());
     }
 
     @Test
@@ -539,12 +539,12 @@ public class ReflectSchemaScannerTest {
 
       ClassSchema schema = scanner.scanSchema(ConfigV2.class);
       assertEquals(Set.of("foo", "bar"), schema.propertyNames());
-      assertNotNull(schema.getDiscriminators().get("foo"));
-      assertEquals("foo", schema.getDiscriminators().get("foo").name());
-      assertEquals(int.class, schema.getDiscriminators().get("foo").type());
-      assertNotNull(schema.getDiscriminators().get("bar"));
-      assertEquals("bar", schema.getDiscriminators().get("bar").name());
-      assertEquals(String.class, schema.getDiscriminators().get("bar").type());
+      assertNotNull(schema.effectiveDiscriminators().get("foo"));
+      assertEquals("foo", schema.effectiveDiscriminators().get("foo").name());
+      assertEquals(int.class, schema.effectiveDiscriminators().get("foo").type());
+      assertNotNull(schema.effectiveDiscriminators().get("bar"));
+      assertEquals("bar", schema.effectiveDiscriminators().get("bar").name());
+      assertEquals(String.class, schema.effectiveDiscriminators().get("bar").type());
     }
   }
 }

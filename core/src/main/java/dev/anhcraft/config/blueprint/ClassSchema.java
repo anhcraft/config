@@ -152,7 +152,7 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
    * @return the discriminator
    * @see Discriminator
    */
-  public @NotNull Map<String, ClassProperty> getDiscriminators() {
+  public @NotNull Map<String, ClassProperty> effectiveDiscriminators() {
     if ((internalState & 2) == 2) {
       return discriminator;
     }
@@ -178,7 +178,7 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
 
       ClassSchema parent = parent();
       if (parent != null) {
-        for (Map.Entry<String, ClassProperty> entry : parent.getDiscriminators().entrySet()) {
+        for (Map.Entry<String, ClassProperty> entry : parent.effectiveDiscriminators().entrySet()) {
           // Properties in subclasses override properties in superclasses
           // As such, when going upstream, only take one(s) have not existed yet
           discriminatorRef.putIfAbsent(entry.getKey(), entry.getValue());
