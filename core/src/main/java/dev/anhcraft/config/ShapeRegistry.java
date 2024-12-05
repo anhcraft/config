@@ -3,31 +3,38 @@ package dev.anhcraft.config;
 import dev.anhcraft.config.blueprint.ClassProperty;
 import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.error.ShapeLinkingAmbiguityException;
 import dev.anhcraft.config.meta.Shape;
+import dev.anhcraft.config.meta.Shapes;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The shape registry is used to manage shapes.
+ * The shape registry is used to manage shapes including registration/linking and resolution.
  * @see Shape
  */
 public final class ShapeRegistry {
-  private static class ShapeCollection {
-    private final Map<String, Class<?>> discriminatorValueToSubtype = new HashMap<>();
-  }
-
   private final Map<ClassProperty, ShapeCollection> discriminatorPropertyShapes = new HashMap<>();
   private final ConfigFactory factory;
 
-  ShapeRegistry(ConfigFactory factory) {
+  public ShapeRegistry(@NotNull ConfigFactory factory) {
     this.factory = factory;
   }
 
   /**
-   * Registers a class to the shape registry.
-   * @param clazz the class
+   * Registers a shape to the shape registry.<br>
+   * In this process, the registry attempts to link the given shape with one or many effective
+   * discriminators existing in the ancestor(s) of the shape class.<br>
+   * If there exists an existing shape linked to a discriminator for a specific discriminator value:
+   * <ul>
+   *   <li>Prefer more detailed shape: If the new shape is a subtype of the existing shape because the new shape
+   *   is more detailed.</li>
+   *   <li>Ambiguity: If S1, S2 are eligible shapes and S1, S2 are siblings in the type hierarchy, there is no exact
+   *   decision on which one to keep; as such, {@link ShapeLinkingAmbiguityException} is thrown.</li>
+   * </ul>
+   * @param clazz the shape class annotated with {@link Shape} or {@link Shapes}
    */
   public void register(@NotNull Class<?> clazz) {
     Shape[] shapes = clazz.getAnnotationsByType(Shape.class);
@@ -53,22 +60,18 @@ public final class ShapeRegistry {
         && ComplexTypes.isNormalClassOrAbstract(node)
         && !shapeLookup.isEmpty()) {
       ClassSchema schema = factory.getSchema(node);
-      Map<String, ClassProperty> discriminatorProperties = schema.effectiveDiscriminators();
 
-      for (Map.Entry<String, ClassProperty> entry : discriminatorProperties.entrySet()) {
-        String discriminatorName = entry.getKey();
-        if (!shapeLookup.containsKey(discriminatorName)) continue;
+      for (String discriminatorName : schema.effectiveDiscriminatorNames()) {
+        ClassProperty discriminatorProperty = schema.property(discriminatorName);
+        if (!shapeLookup.containsKey(discriminatorName) || discriminatorProperty == null) continue;
 
-        String discriminatorVal = shapeLookup.get(entry.getKey());
-        ClassProperty discriminatorProperty = entry.getValue();
+        String discriminatorVal = shapeLookup.get(discriminatorName);
 
         // When we link shape S to property P for node N, P might not belong to N but to one of its
-        // ancestors
-        // as such, if we continue, property P might appear again; doing so, does not create
+        // ancestors. If we continue, property P might appear again; doing so, does not cause
         // duplication
         // Once we go past the node having P, we must continue since it is possible to have another
-        // property Q
-        // with the same discriminator name as P
+        // property Q with the same discriminator name as P
 
         discriminatorPropertyShapes
             .computeIfAbsent(discriminatorProperty, k -> new ShapeCollection())
@@ -80,7 +83,7 @@ public final class ShapeRegistry {
                   // new shape
                   if (v == null || v.isAssignableFrom(clazz)) return clazz;
                   if (clazz.isAssignableFrom(v)) return v;
-                  throw new IllegalArgumentException(
+                  throw new ShapeLinkingAmbiguityException(
                       "Ambiguous shape linking: "
                           + v.getName()
                           + " [existing] and "
@@ -97,21 +100,30 @@ public final class ShapeRegistry {
   }
 
   /**
-   * Solves the shape of the given base class.
+   * Solves the shape for the given base.<br>
+   * In this process, the registry looks at all effective discriminator properties in the base instance and tries to
+   * look up a compatible shape with matched value.<br>
+   * The first result is always chosen. The process is expected to be deterministic during the runtime unless there is
+   * new shape linking.
    * @param base the base
-   * @return the shape
+   * @return the shape class
    */
   public @Nullable Class<?> solve(@NotNull Context ctx, @NotNull Object base) throws Exception {
     ClassSchema classSchema = factory.getSchema(base.getClass());
-    for (Map.Entry<String, ClassProperty> entry : classSchema.effectiveDiscriminators().entrySet()) {
-      ShapeCollection collection = discriminatorPropertyShapes.get(entry.getValue());
+
+    // the following iteration is expected to be deterministic
+    for (ClassProperty discriminator : classSchema.effectiveDiscriminators()) {
+      ShapeCollection collection = discriminatorPropertyShapes.get(discriminator);
       if (collection == null) continue;
-      Object val = entry.getValue().field().get(base);
+      Object val = discriminator.field().get(base);
       String valStr = (String) factory.getDenormalizer().denormalize(ctx, val, String.class);
       Class<?> clazz = collection.discriminatorValueToSubtype.get(valStr);
-      // TODO current shape selection is indeterministic
-      if (clazz != null) return clazz;
+      if (clazz != null) return clazz; // return the first shape
     }
     return null;
+  }
+
+  private static class ShapeCollection {
+    private final Map<String, Class<?>> discriminatorValueToSubtype = new HashMap<>();
   }
 }

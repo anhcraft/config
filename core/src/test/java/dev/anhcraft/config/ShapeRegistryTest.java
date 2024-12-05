@@ -3,6 +3,7 @@ package dev.anhcraft.config;
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.error.ShapeLinkingAmbiguityException;
 import dev.anhcraft.config.meta.Discriminator;
 import dev.anhcraft.config.meta.Shape;
 import java.util.ArrayList;
@@ -61,14 +62,14 @@ public class ShapeRegistryTest {
 
     base = new Parent();
     base.majorVersion = "-1";
-    assertEquals(Parent.class, registry.solve(ctx, base));
+    assertNull(registry.solve(ctx, base));
   }
 
   @Test
   public void testShapeLinkingAmbiguousTwoSiblings() {
     ShapeRegistry registry = factory.getShapeRegistry();
     registry.register(Child1.class);
-    assertThrows(IllegalArgumentException.class, () -> registry.register(Child21A.class));
+    assertThrows(ShapeLinkingAmbiguityException.class, () -> registry.register(Child21A.class));
   }
 
   @Test

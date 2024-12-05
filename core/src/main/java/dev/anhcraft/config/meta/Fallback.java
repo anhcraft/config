@@ -10,7 +10,8 @@ import java.util.LinkedHashMap;
  * During denormalization, the property with {@link Fallback} catches all remaining unmapped settings including
  * its corresponding setting in the configuration.<br>
  * The property type must be {@link LinkedHashMap} or any of its supertypes.<br>
- * A schema can have at most one {@link Fallback} property.
+ * A schema can have at most one {@link Fallback} property.<br>
+ * It is <b>disallowed</b> to have both {@link Fallback} and {@link Discriminator} on the same property.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

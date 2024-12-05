@@ -504,7 +504,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDiscriminatorFallbackCannotCoexist() {
       class ConfigWithDiscriminatorFallbackCoexistProperty {
-        @Discriminator @Fallback public double foo;
+        @Discriminator @Fallback public int foo;
       }
       assertThrows(
           SchemaCreationException.class,
@@ -520,12 +520,8 @@ public class ReflectSchemaScannerTest {
 
       ClassSchema schema = scanner.scanSchema(Config.class);
       assertEquals(Set.of("foo", "bar"), schema.propertyNames());
-      assertNotNull(schema.effectiveDiscriminators().get("foo"));
-      assertEquals("foo", schema.effectiveDiscriminators().get("foo").name());
-      assertEquals(int.class, schema.effectiveDiscriminators().get("foo").type());
-      assertNotNull(schema.effectiveDiscriminators().get("bar"));
-      assertEquals("bar", schema.effectiveDiscriminators().get("bar").name());
-      assertEquals(String.class, schema.effectiveDiscriminators().get("bar").type());
+      assertTrue(schema.effectiveDiscriminatorNames().contains("foo"));
+      assertTrue(schema.effectiveDiscriminatorNames().contains("bar"));
     }
 
     @Test
@@ -539,12 +535,26 @@ public class ReflectSchemaScannerTest {
 
       ClassSchema schema = scanner.scanSchema(ConfigV2.class);
       assertEquals(Set.of("foo", "bar"), schema.propertyNames());
-      assertNotNull(schema.effectiveDiscriminators().get("foo"));
-      assertEquals("foo", schema.effectiveDiscriminators().get("foo").name());
-      assertEquals(int.class, schema.effectiveDiscriminators().get("foo").type());
-      assertNotNull(schema.effectiveDiscriminators().get("bar"));
-      assertEquals("bar", schema.effectiveDiscriminators().get("bar").name());
-      assertEquals(String.class, schema.effectiveDiscriminators().get("bar").type());
+      assertTrue(schema.effectiveDiscriminatorNames().contains("foo"));
+      assertTrue(schema.effectiveDiscriminatorNames().contains("bar"));
+    }
+
+    @Test
+    public void testDiscriminatorPropertyRemovedDueToInheritance() {
+      class Config {
+        @Discriminator public int foo;
+        @Discriminator public int bar;
+      }
+      class ConfigV2 extends Config {
+        public String foo;
+
+        @Name("bar")
+        public int _bar;
+      }
+
+      ClassSchema schema = scanner.scanSchema(ConfigV2.class);
+      assertFalse(schema.effectiveDiscriminatorNames().contains("foo"));
+      assertFalse(schema.effectiveDiscriminatorNames().contains("bar"));
     }
   }
 }

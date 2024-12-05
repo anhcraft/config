@@ -1,8 +1,8 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.meta.Discriminator;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,10 +24,10 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final ClassProperty declaredFallback;
 
   private volatile ClassSchema parent;
-  private volatile Map<String, ClassProperty> discriminator;
+  private volatile List<ClassProperty> discriminatorProperties;
+  private volatile Set<String> discriminatorPropertyNames;
 
   // 1st bit: whether the class has no parent
-  // 2nd bit: whether the discriminator was discovered
 
   private byte internalState;
 
@@ -146,51 +146,52 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   /**
-   * Gets an immutable effective map of discriminator properties (discriminator-based polymorphism)<br>
-   * Some properties might not belong to this class but come from an ancestor.<br>
-   * Not all properties denoted as discriminator are included. The map includes only effective ones.
-   * @return the discriminator
-   * @see Discriminator
+   * Gets all effective discriminator property names including primary names and aliases.<br>
+   * <b>Note:</b> Using this method to iterate over the properties may result in duplication
+   * of {@link Property} because a property may have more than one name.
+   * @return all "declared" and "inherited" effective discriminator property names
    */
-  public @NotNull Map<String, ClassProperty> effectiveDiscriminators() {
-    if ((internalState & 2) == 2) {
-      return discriminator;
-    }
-
-    synchronized (this) {
-      Map<String, ClassProperty> discriminatorRef = discriminator;
-
-      // When two concurrent accesses happen, and it is just discovered that there is no
-      // discriminator:
-      if ((internalState & 2) == 2) {
-        return discriminatorRef;
-      }
-
-      discriminatorRef = new HashMap<>();
-
-      // Attempt to find the discriminator locally
-      for (ClassProperty declaredProperty : declaredProperties) {
-        if (declaredProperty.isDiscriminator()) {
-          // Within a class, the later property overrides the previous
-          discriminatorRef.put(declaredProperty.name(), declaredProperty);
+  public @NotNull Set<String> effectiveDiscriminatorNames() {
+    if (discriminatorPropertyNames == null) {
+      synchronized (this) {
+        if (discriminatorPropertyNames == null) {
+          discoverEffectiveDiscriminators();
         }
       }
+    }
+    return discriminatorPropertyNames;
+  }
 
-      ClassSchema parent = parent();
-      if (parent != null) {
-        for (Map.Entry<String, ClassProperty> entry : parent.effectiveDiscriminators().entrySet()) {
-          // Properties in subclasses override properties in superclasses
-          // As such, when going upstream, only take one(s) have not existed yet
-          discriminatorRef.putIfAbsent(entry.getKey(), entry.getValue());
+  /**
+   * Returns all effective discriminator properties in the schema.
+   * @return all "declared" and "inherited" effective discriminator properties
+   */
+  public @NotNull List<ClassProperty> effectiveDiscriminators() {
+    if (discriminatorProperties == null) {
+      synchronized (this) {
+        if (discriminatorProperties == null) {
+          discoverEffectiveDiscriminators();
         }
       }
-
-      discriminatorRef = Collections.unmodifiableMap(discriminatorRef);
-      discriminator = discriminatorRef;
-      internalState |= 2;
-
-      return discriminatorRef;
     }
+    return discriminatorProperties;
+  }
+
+  private void discoverEffectiveDiscriminators() {
+    if (discriminatorProperties != null && discriminatorPropertyNames != null) return;
+
+    discriminatorProperties =
+        properties().stream()
+            .filter(ClassProperty::isDiscriminator)
+            .collect(Collectors.toUnmodifiableList());
+    discriminatorPropertyNames =
+        propertyNames().stream()
+            .filter(
+                propertyName -> {
+                  ClassProperty p = property(propertyName);
+                  return p != null && p.isDiscriminator();
+                })
+            .collect(Collectors.toUnmodifiableSet());
   }
 
   @Override
