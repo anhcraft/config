@@ -1,9 +1,6 @@
 package dev.anhcraft.config.blueprint;
 
-import dev.anhcraft.config.meta.Constant;
-import dev.anhcraft.config.meta.Fallback;
-import dev.anhcraft.config.meta.Optional;
-import dev.anhcraft.config.meta.Transient;
+import dev.anhcraft.config.meta.*;
 import java.lang.reflect.Field;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +42,12 @@ public interface ClassProperty extends Property {
    * @return whether the property is fallback
    */
   boolean isFallback();
+
+  /**
+   * Checks if this property is annotated as {@link Discriminator}
+   * @return whether the property is discriminator
+   */
+  boolean isDiscriminator();
 
   /**
    * Gets the normalization processor.

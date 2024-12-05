@@ -2,6 +2,7 @@ package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,8 +24,11 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final ClassProperty declaredFallback;
 
   private volatile ClassSchema parent;
+  private volatile List<ClassProperty> discriminatorProperties;
+  private volatile Set<String> discriminatorPropertyNames;
 
   // 1st bit: whether the class has no parent
+
   private byte internalState;
 
   public ClassSchema(
@@ -139,6 +143,55 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
    */
   public @Nullable ClassProperty declaredFallback() {
     return declaredFallback;
+  }
+
+  /**
+   * Gets all effective discriminator property names including primary names and aliases.<br>
+   * <b>Note:</b> Using this method to iterate over the properties may result in duplication
+   * of {@link Property} because a property may have more than one name.
+   * @return all "declared" and "inherited" effective discriminator property names
+   */
+  public @NotNull Set<String> effectiveDiscriminatorNames() {
+    if (discriminatorPropertyNames == null) {
+      synchronized (this) {
+        if (discriminatorPropertyNames == null) {
+          discoverEffectiveDiscriminators();
+        }
+      }
+    }
+    return discriminatorPropertyNames;
+  }
+
+  /**
+   * Returns all effective discriminator properties in the schema.
+   * @return all "declared" and "inherited" effective discriminator properties
+   */
+  public @NotNull List<ClassProperty> effectiveDiscriminators() {
+    if (discriminatorProperties == null) {
+      synchronized (this) {
+        if (discriminatorProperties == null) {
+          discoverEffectiveDiscriminators();
+        }
+      }
+    }
+    return discriminatorProperties;
+  }
+
+  private void discoverEffectiveDiscriminators() {
+    if (discriminatorProperties != null && discriminatorPropertyNames != null) return;
+
+    discriminatorProperties =
+        properties().stream()
+            .filter(ClassProperty::isDiscriminator)
+            .collect(Collectors.toUnmodifiableList());
+    discriminatorPropertyNames =
+        propertyNames().stream()
+            .filter(
+                propertyName -> {
+                  ClassProperty p = property(propertyName);
+                  return p != null && p.isDiscriminator();
+                })
+            .collect(Collectors.toUnmodifiableSet());
   }
 
   @Override

@@ -761,6 +761,97 @@ public class Inventory {
 }
 ```
 
+## Polymorphism
+### Discriminator-based polymorphism
+#### Terminologies
+- Shape: A type can have none, one or many shapes. A shape of type `T` is represented as a subtype of `T`.
+- Discriminator: A discriminator property declared in type `T` or inherited into type `T` is used to distinguish shapes of `T`. When an instance of `T` is deserialized, we look at the value of discriminator properties to determine the compatible shape.
+- Shape linking: Register a shape with the shape registry; doing so, the shape is linked into one or many supertype(s) with matched and compatible discriminator(s)
+- Effective discriminator: Since discriminator is inheritable and overridable, a type has a list of effective discriminator(s) which was shortlisted from the list of all declared and inherited discriminator(s). Only effective discriminator(s) are used in shape resolution
+- Config-polymorphism: Specifically refer to the `polymorphism` feature introduced by Config; not related to `polymorphism` in Java or other programming languages
+
+```java
+public class Item {
+  @Discriminator
+  public int version;
+}
+
+@Shape(discriminator = "version", value = "1")
+public class ItemV1 extends Item {
+  public String name;
+  public int stock;
+}
+
+@Shape(discriminator = "version", value = "2")
+public class ItemV2 extends Item {
+  public String name;
+  public int quantity;
+}
+```
+
+#### Discriminators
+- A property annotated as `@Discriminator` must meet following conditions, otherwise, the schema creation process results in `SchemaCreationException`:
+  - Has a deterministic, equitable, scalar type: `byte, short, int, long`, `char`, `boolean` or their wrapper types; and `String`
+  - Must not be a fallback property
+- A discriminator property is similar to normal properties:
+  - Inheritable and overridable
+    - For example, a discriminator property from a parent class is overridden by a non-discriminator property from a child class
+    - For example, a prior-declared, non-discriminator property is overridden by a discriminator property from the same class
+  - Eligible to own multiple names (primary name and aliases)
+- Only effective discriminator(s) are considered in the process
+- A type is allowed to have multiple discriminators (either declared or inherited)
+- A type is allowed to have multiple **effective** discriminators (either declared or inherited)
+  - As a result, there is disjunction support. For example, `S1` is a shape of `T` due to discriminator `d1`, and `S2` is also a shape of `T` due to discriminator `d2`
+
+#### Shapes
+- A type is allowed to have multiple shapes by annotating `@Shape` multiple times:
+  - Discriminator: the primary name or an alias of the discriminator in any ancestor type
+  - Value: the value of the discriminator
+- The shape of type `T` must be a subtype of `T`
+- Two shapes of the same type can be distinct by:
+  - Two different values of the same discriminator
+  - Two different discriminator(s)
+- Each pair of discriminator and value links to one shape `(D, v) <-> S`
+- A shape can be linked into multiple pairs of discriminator and value `[(Di, vj)... for each i, j] <-> S`
+- Shape is **NOT** inheritable: If `S` is a shape of `T`, any subtypes of `S` cannot become shapes of `T` unless there is explicit `@Shape` annotation and registration
+
+#### Shape linking
+- Explicit registration is required to make a shape discoverable
+- A list of effective `@Shape` is made. If a type has two `@Shape` annotated pointing to the same discriminator, the later one overrides the prior
+- Assume we register type `T`, we start linking from the parent of `T` towards the root:
+  - Assume the current type is `P`
+  - For each effective discriminator `D` in `P`: **(1)**
+    - Check whether there exists `@Shape` pointing to `D`
+    - Assume, it exists, and the value is `v`
+    - If `D` has no shape linked with value `v`, link `T --> D [in P]`
+    - If `D` has an existing shape (`eS`) linked with value `v` **(2)**
+      - If `eS` is a supertype of `T`, replace `eS` with `T` (`T --> D [in P]`)
+      - If `eS` is a subtype of `T`, keep `eS`, reject `T`
+      - Otherwise, `ShapeLinkingAmbiguityException` is thrown
+- Notes:
+  - `(1)`: If `D` is an effective discriminator in `P`, it might re-appear again in a supertype of `P`. As such, if `D` is linked once, we still continue the process
+  - `(2)`: The argumentation of the process is that: 
+    - Prefer more detailed shape: If the new shape is a subtype of the existing shape, it means the new shape is more detailed, thus we choose the new shape and discard the old. 
+    - Ambiguity: If `S1`, `S2` are eligible shapes of type `T` and `S1, S2` are siblings, there is no exact decision on which one to keep
+- It is guaranteed that the order in registering multiple shapes does not affect the result of shape resolution
+
+#### Shape resolution
+- To solve the shape for type `T`, an instance of `T` must be provided to check out the values of discriminator properties
+  - For denormalizer implementation, to optimize the process, partial denormalization is encouraged - that is, only denormalize all effective discriminator properties
+  - For each discriminator property, we look up the shape by the value currently existing in the instance
+  - The first shape is always chosen
+- The shape resolution must be deterministic during the entire runtime (unless there is new shape registration)
+- The shape resolution is currently non-customizable
+
+#### Limitations
+- Shape discovery requires explicit registration; there is no built-in auto discovery (due to limitation of Java Reflections)
+- There is no conjunction multi-discriminator support
+  - For example: `S` is an eligible shape of `T` if two discriminator `d1` **AND** `d2` match `d1 = x, d2 = y`
+  - Only disjunction is supported (**OR** operator)
+
+### Dynamic polymorphism
+TODO
+
 ## Embedding
 - Embedding is a feature to compose and flatten fields from another schema in a schema without inheritance:
   - Composition: the composed schema is nested in the code
