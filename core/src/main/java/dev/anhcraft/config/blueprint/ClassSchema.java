@@ -211,12 +211,9 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
             .filter(ClassProperty::isDiscriminator)
             .collect(Collectors.toUnmodifiableList());
     discriminatorPropertyNames =
-        propertyNames().stream()
-            .filter(
-                propertyName -> {
-                  ClassProperty p = property(propertyName);
-                  return p != null && p.isDiscriminator();
-                })
+        properties().stream()
+            .filter(ClassProperty::isDiscriminator)
+            .map(p -> p.field().getName())
             .collect(Collectors.toUnmodifiableSet());
   }
 

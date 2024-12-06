@@ -62,6 +62,8 @@ public final class ShapeRegistry {
       ClassSchema schema = factory.getSchema(node);
 
       for (String fieldName : shapeLookup.keySet()) {
+        if (!schema.effectiveDiscriminatorNames().contains(fieldName)) continue;
+
         ClassProperty discriminatorProperty = schema.declaredPropertyByField(fieldName);
         if (discriminatorProperty == null) continue;
 
@@ -110,7 +112,8 @@ public final class ShapeRegistry {
    * @return the shape class
    */
   public @Nullable Class<?> solve(@NotNull Context ctx, @NotNull Object base) throws Exception {
-    ClassSchema classSchema = factory.getSchema(base.getClass());
+    Class<?> baseClass = base.getClass();
+    ClassSchema classSchema = factory.getSchema(baseClass);
 
     // the following iteration is expected to be deterministic
     for (ClassProperty discriminator : classSchema.effectiveDiscriminators()) {
@@ -121,10 +124,14 @@ public final class ShapeRegistry {
       String valStr = (String) factory.getDenormalizer().denormalize(ctx, val, String.class);
       Class<?> clazz = collection.discriminatorValueToSubtype.get(valStr);
 
-      if (clazz != null) {
+      // An edge case is that: P is a subtype of GP; P is the shape of GP for discriminator D
+      // declared in GP.
+      // As such, D is inherited into P, and solving base=P for D will return P --> invalid
+      if (clazz != null && baseClass != clazz && baseClass.isAssignableFrom(clazz)) {
         return clazz; // return the first shape
       }
     }
+
     return null;
   }
 
