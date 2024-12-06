@@ -37,7 +37,10 @@ public final class ConfigFactory {
   ConfigFactory(Builder builder) {
     this.schemaScanner =
         new ReflectSchemaScanner(
-            builder.namingPolicy, builder.validationRegistry, builder.schemaCacheProvider);
+            builder.namingPolicy,
+            builder.validationRegistry,
+            builder.schemaCacheProvider,
+            builder.encapsulationEnforced);
     this.normalizer = new ConfigNormalizer(this, builder.normalizerSettings);
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.contextProvider = builder.contextProvider;
@@ -135,6 +138,7 @@ public final class ConfigFactory {
    *   <li>Default naming policy</li>
    *   <li>{@link CacheableAdapterProvider}</li>
    *   <li>Normalizer settings: {@link SettingFlag.Normalizer#IGNORE_DEFAULT_VALUES}</li>
+   *   <li>Encapsulation enforcement</li>
    * </ul>
    */
   public static class Builder {
@@ -157,6 +161,7 @@ public final class ConfigFactory {
         EnumSet.of(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES);
     private Set<SettingFlag.Denormalizer> denormalizerSettings =
         EnumSet.noneOf(SettingFlag.Denormalizer.class);
+    private boolean encapsulationEnforced = true;
 
     public Builder() {
       typeAdapters.put(Byte.class, ByteAdapter.INSTANCE);
@@ -298,6 +303,22 @@ public final class ConfigFactory {
       if (flags.length == 0) return this;
       if (flags.length == 1) denormalizerSettings.add(flags[0]);
       else denormalizerSettings.addAll(Arrays.asList(flags));
+      return this;
+    }
+
+    /**
+     * Enforces encapsulation by performing additional checks:
+     * <ul>
+     *   <li>Field visibility in schema scanning</li>
+     *   <li>Method visibility in schema scanning</li>
+     * </ul>
+     * Enables this setting does <b>not</b> avoid the use of {@code #setAccessible(true)}.<br>
+     * This setting is enabled by default.
+     * @param value {@code true} if encapsulation should be enforced
+     * @return this
+     */
+    public @NotNull Builder enforceEncapsulation(boolean value) {
+      encapsulationEnforced = value;
       return this;
     }
 

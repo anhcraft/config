@@ -21,14 +21,24 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
   private final Map<Class<?>, Schema<?>> schemaCache;
+  final boolean encapsulationEnforced;
 
   public ReflectSchemaScanner(
       @NotNull UnaryOperator<String> namingPolicy,
       @NotNull ValidationRegistry validationRegistry,
       @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
+    this(namingPolicy, validationRegistry, schemaCacheProvider, true);
+  }
+
+  public ReflectSchemaScanner(
+      @NotNull UnaryOperator<String> namingPolicy,
+      @NotNull ValidationRegistry validationRegistry,
+      @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider,
+      boolean encapsulationEnforced) {
     this.namingPolicy = namingPolicy;
     this.validationRegistry = validationRegistry;
     this.schemaCache = schemaCacheProvider.get();
+    this.encapsulationEnforced = encapsulationEnforced;
   }
 
   @Override
