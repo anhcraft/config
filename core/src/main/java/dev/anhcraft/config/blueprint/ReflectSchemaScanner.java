@@ -78,6 +78,17 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
                     method.invoke(
                         effectivePropertyResult.getPropertyListResult().propertyMap, args));
 
+    //noinspection unchecked
+    Map<String, ClassProperty> fieldName2EffectivePropertyMap =
+        (Map<String, ClassProperty>)
+            Proxy.newProxyInstance(
+                ReflectSchemaScanner.class.getClassLoader(),
+                new Class[] {Map.class},
+                (proxy, method, args) ->
+                    method.invoke(
+                        effectivePropertyResult.getPropertyListResult().fieldName2EffectiveProperty,
+                        args));
+
     ClassProperty effectiveFallback =
         (ClassProperty)
             Proxy.newProxyInstance(
@@ -91,9 +102,11 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
         type,
         effectivePropertyList,
         effectivePropertyMap,
+        fieldName2EffectivePropertyMap,
         effectiveFallback,
         propertyListResult.properties,
         propertyListResult.propertyMap,
+        propertyListResult.fieldName2EffectiveProperty,
         propertyListResult.fallback);
   }
 
@@ -170,6 +183,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
 
     List<ClassProperty> propertyList = new ArrayList<>();
     Map<String, ClassProperty> propertyMap = new LinkedHashMap<>();
+    Map<String, ClassProperty> fieldName2EffectiveProperty = new LinkedHashMap<>();
 
     // normalizer and denormalizer bounds to fields
     Map<String, Processor> normalizers = normalizerSupplier.get();
@@ -233,6 +247,8 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
         propertyMap.put(name, property);
       }
 
+      fieldName2EffectiveProperty.put(fieldName, property);
+
       if (!property.isFallback()) { // fallback must be at the end
         propertyList.add(property);
       }
@@ -244,6 +260,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     result.fallback = fallback;
     result.properties = propertyList;
     result.propertyMap = propertyMap;
+    result.fieldName2EffectiveProperty = fieldName2EffectiveProperty;
 
     return result;
   }
@@ -415,6 +432,7 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
   static class PropertyScanResult {
     List<ClassProperty> properties;
     Map<String, ClassProperty> propertyMap;
+    Map<String, ClassProperty> fieldName2EffectiveProperty;
     ClassProperty fallback;
   }
 

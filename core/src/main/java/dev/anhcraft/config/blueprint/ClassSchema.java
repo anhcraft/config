@@ -18,9 +18,11 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   private final ClassSchemaScanner scanner;
   private final int scannerIdentity;
   private final Class<?> type;
+  private final Map<String, ClassProperty> fieldName2Property;
   private final ClassProperty fallback;
   private final List<ClassProperty> declaredProperties;
   private final Map<String, ClassProperty> declaredPropertyLookup;
+  private final Map<String, ClassProperty> declaredFieldName2Property;
   private final ClassProperty declaredFallback;
 
   private volatile ClassSchema parent;
@@ -36,18 +38,22 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
       @NotNull Class<?> type,
       @NotNull List<ClassProperty> properties,
       @NotNull Map<String, ClassProperty> lookup,
+      @NotNull Map<String, ClassProperty> fieldName2Property,
       @Nullable ClassProperty fallback,
       @NotNull List<ClassProperty> declaredProperties,
       @NotNull Map<String, ClassProperty> declaredPropertyLookup,
+      @NotNull Map<String, ClassProperty> declaredFieldName2Property,
       @Nullable ClassProperty declaredFallback) {
     super(properties, lookup);
     this.scanner = scanner;
     this.scannerIdentity =
         System.identityHashCode(scanner); // avoid GC relocation and custom-defined #hashCode
     this.type = type;
+    this.fieldName2Property = Collections.unmodifiableMap(fieldName2Property);
     this.fallback = fallback;
     this.declaredProperties = Collections.unmodifiableList(declaredProperties);
     this.declaredPropertyLookup = Collections.unmodifiableMap(declaredPropertyLookup);
+    this.declaredFieldName2Property = Collections.unmodifiableMap(declaredFieldName2Property);
     this.declaredFallback = declaredFallback;
 
     // setup internal state
@@ -95,6 +101,16 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
   }
 
   /**
+   * Looks up a property by the field name.
+   * @param fieldName field name
+   * @return property
+   * @see ClassProperty
+   */
+  public @Nullable ClassProperty propertyByField(@Nullable String fieldName) {
+    return fieldName2Property.get(fieldName);
+  }
+
+  /**
    * Gets the effective fallback property.
    * @return the fallback
    */
@@ -134,6 +150,16 @@ public class ClassSchema extends AbstractSchema<ClassProperty> {
    */
   public @Nullable ClassProperty declaredProperty(@Nullable String name) {
     return declaredPropertyLookup.get(name);
+  }
+
+  /**
+   * Looks up a declared property by the field name.
+   * @param fieldName declared field name
+   * @return property
+   * @see ClassProperty
+   */
+  public @Nullable ClassProperty declaredPropertyByField(@Nullable String fieldName) {
+    return declaredFieldName2Property.get(fieldName);
   }
 
   /**

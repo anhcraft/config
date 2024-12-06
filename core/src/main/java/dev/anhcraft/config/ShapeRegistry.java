@@ -61,11 +61,12 @@ public final class ShapeRegistry {
         && !shapeLookup.isEmpty()) {
       ClassSchema schema = factory.getSchema(node);
 
-      for (String discriminatorName : schema.effectiveDiscriminatorNames()) {
-        ClassProperty discriminatorProperty = schema.property(discriminatorName);
-        if (!shapeLookup.containsKey(discriminatorName) || discriminatorProperty == null) continue;
+      for (String fieldName : shapeLookup.keySet()) {
+        ClassProperty discriminatorProperty = schema.declaredPropertyByField(fieldName);
+        if (discriminatorProperty == null) continue;
 
-        String discriminatorVal = shapeLookup.get(discriminatorName);
+        String discriminatorVal = shapeLookup.get(fieldName);
+        if (discriminatorVal == null) continue;
 
         // When we link shape S to property P for node N, P might not belong to N but to one of its
         // ancestors. If we continue, property P might appear again; doing so, does not cause
@@ -89,7 +90,7 @@ public final class ShapeRegistry {
                           + " [existing] and "
                           + clazz.getName()
                           + " [new] ---> "
-                          + discriminatorName
+                          + fieldName
                           + " [discriminator] from "
                           + discriminatorProperty.field().getDeclaringClass().getName());
                 });
@@ -115,10 +116,14 @@ public final class ShapeRegistry {
     for (ClassProperty discriminator : classSchema.effectiveDiscriminators()) {
       ShapeCollection collection = discriminatorPropertyShapes.get(discriminator);
       if (collection == null) continue;
+
       Object val = discriminator.field().get(base);
       String valStr = (String) factory.getDenormalizer().denormalize(ctx, val, String.class);
       Class<?> clazz = collection.discriminatorValueToSubtype.get(valStr);
-      if (clazz != null) return clazz; // return the first shape
+
+      if (clazz != null) {
+        return clazz; // return the first shape
+      }
     }
     return null;
   }

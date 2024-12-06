@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * When type <b>T</b> is annotated as <code>@Shape(discriminator = D, value = v)</code>:
  * <ul>
  *  <li><b>T</b> becomes the shape of a supertype <b>U</b> if <b>U</b> has an <i>effective</i> discriminator
- *  named <b>D</b></li>
+ *  whose field name is <b>D</b></li>
  *  <li>An instance of <b>U</b> has a shape of <b>T</b> if the discriminator field <b>D</b> matches the
  *  value <b>v</b></li>
  * </ul>
@@ -33,10 +33,15 @@ import org.jetbrains.annotations.NotNull;
 @Target(ElementType.TYPE)
 @Repeatable(Shapes.class)
 public @interface Shape {
+  // The decision that let #discriminator() bound to field names due to: property overriding,
+  // customizable naming
+  // mapping from field names into property names
   /**
-   * Returns the name of the discriminator (either primary name or alias)<br>
-   * The target discriminator can exist in any supertypes.
-   * @return the discriminator name
+   * Returns the <b>field</b> name of the discriminator<br>
+   * The target discriminator can exist in any supertypes.<br>
+   * <b>Note:</b> Field name is preferred because it is predictable and constant; while property name could be
+   * customizable by the user.
+   * @return the discriminator field name
    */
   @NotNull String discriminator();
 

@@ -82,7 +82,7 @@ public class ConfigDenormalizerPolymorphismTest {
     }
 
     @Shape(discriminator = "version", value = "1")
-    @Shape(discriminator = "type", value = "next")
+    @Shape(discriminator = "versionType", value = "next")
     class ConfigV1 extends BaseConfig {
       public String name;
     }
@@ -212,8 +212,8 @@ public class ConfigDenormalizerPolymorphismTest {
       public int type;
     }
 
-    @Shape(discriminator = "version", value = "2")
     @Shape(discriminator = "type", value = "1")
+    @Shape(discriminator = "version", value = "2")
     class ConfigV2 extends ConfigV1 {}
 
     @Shape(discriminator = "version", value = "3")
@@ -240,7 +240,7 @@ public class ConfigDenormalizerPolymorphismTest {
         ConfigV2.class,
         factory
             .getDenormalizer()
-            .denormalize(SchemalessDictionary.create().put("version", 2).build(), ConfigV1.class));
+            .denormalize(SchemalessDictionary.create().put("version", 1).build(), ConfigV1.class));
     assertInstanceOf(
         ConfigV1.class,
         factory

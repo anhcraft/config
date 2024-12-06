@@ -209,14 +209,25 @@ public class ReflectSchemaScannerTest {
               ps.type(),
               ps.properties(),
               Map.of(),
+              Map.of(),
               null,
               ps.properties(),
+              Map.of(),
               Map.of(),
               null),
           ps);
       assertEquals(
           new ClassSchema(
-              scanner, ps.type(), ps.properties(), Map.of(), null, ps.properties(), Map.of(), null),
+              scanner,
+              ps.type(),
+              ps.properties(),
+              Map.of(),
+              Map.of(),
+              null,
+              ps.properties(),
+              Map.of(),
+              Map.of(),
+              null),
           ps);
     }
 

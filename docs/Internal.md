@@ -805,8 +805,9 @@ public class ItemV2 extends Item {
 
 #### Shapes
 - A type is allowed to have multiple shapes by annotating `@Shape` multiple times:
-  - Discriminator: the primary name or an alias of the discriminator in any ancestor type
+  - Discriminator: the field name of a discriminator property in any ancestor type
   - Value: the value of the discriminator
+- Field name is preferred because it is predictable and constant; while property name could be customizable by the user
 - The shape of type `T` must be a subtype of `T`
 - Two shapes of the same type can be distinct by:
   - Two different values of the same discriminator
