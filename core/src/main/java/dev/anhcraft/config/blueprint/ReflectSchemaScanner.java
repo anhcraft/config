@@ -205,7 +205,14 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
 
       ClassProperty property =
           new ClassPropertyImpl(
-              propertyNaming, description, validator, field, modifier, normalizer, denormalizer);
+              this,
+              propertyNaming,
+              description,
+              validator,
+              field,
+              modifier,
+              normalizer,
+              denormalizer);
 
       if (property.isDiscriminator()) {
         try {
