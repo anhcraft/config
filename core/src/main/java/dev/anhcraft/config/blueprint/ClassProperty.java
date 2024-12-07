@@ -7,7 +7,12 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a property in a {@link ClassSchema}.<br/>
- * A declared property is one declared in the class schema, not from inheritance or embedding.
+ * A declared property is one declared in the class schema, not from inheritance or embedding.<br/>
+ * Class property is read-only and identifiable. The identity of a class property depends on the {@link Field} it represents
+ * and the {@link ClassSchemaScanner} creates it. If two class properties represent the same class but coming from different
+ * {@link ClassSchemaScanner}, they are considered different.<br>
+ * Note: Two {@link Field} might have the same class path but different identity due to being loaded by two different
+ * class loaders. Inherently, {@link ClassProperty} also depends on the class loader.
  */
 public interface ClassProperty extends Property {
 
