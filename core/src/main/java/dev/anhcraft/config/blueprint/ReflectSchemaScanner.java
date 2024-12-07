@@ -168,8 +168,12 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     for (Field field : fields) {
       try {
         field.setAccessible(true);
-      } catch (Exception e) { // TODO is there better way to check accessibility?
-        continue;
+      } catch (InaccessibleObjectException | SecurityException e) {
+        throw new SchemaCreationException(
+            "Cannot setAccessible to field "
+                + field.getName()
+                + " in "
+                + field.getDeclaringClass().getName());
       }
       if (isExcluded(field)) continue;
 
@@ -288,8 +292,12 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     for (Method method : methods) {
       try {
         method.setAccessible(true);
-      } catch (Exception e) { // TODO is there better way to check accessibility?
-        continue;
+      } catch (InaccessibleObjectException | SecurityException e) {
+        throw new SchemaCreationException(
+            "Cannot setAccessible to method "
+                + method.getName()
+                + " in "
+                + method.getDeclaringClass().getName());
       }
       if (isExcluded(method) || !method.isAnnotationPresent(Normalizer.class)) continue;
       if (method.getReturnType() == Void.TYPE) continue;
@@ -328,8 +336,12 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
     for (Method method : methods) {
       try {
         method.setAccessible(true);
-      } catch (Exception e) { // TODO is there better way to check accessibility?
-        continue;
+      } catch (InaccessibleObjectException | SecurityException e) {
+        throw new SchemaCreationException(
+            "Cannot setAccessible to method "
+                + method.getName()
+                + " in "
+                + method.getDeclaringClass().getName());
       }
       if (isExcluded(method) || !method.isAnnotationPresent(Denormalizer.class)) continue;
 

@@ -1,9 +1,11 @@
 package dev.anhcraft.config;
 
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +66,12 @@ public final class InstanceFactory implements InstanceAssembler {
 
     try {
       Constructor<T> c = clazz.getDeclaredConstructor();
-      c.setAccessible(true);
+      try {
+        c.setAccessible(true);
+      } catch (InaccessibleObjectException | SecurityException e) {
+        throw new SchemaCreationException(
+            "Cannot setAccessible to constructor in " + c.getDeclaringClass().getName());
+      }
       ic =
           new InstanceAssembler() {
             @Override
