@@ -7,18 +7,31 @@ import java.util.List;
 
 public class Storage<T> {
   @Describe("The type of the storage")
-  public StorageType type;
+  private final StorageType type;
 
+  @SuppressWarnings("UnusedAssignment")
   @Describe("The items in the storage")
   @Optional
-  public List<T> items = Collections.emptyList();
+  private List<T> items = Collections.emptyList();
 
   @Describe("The location of the storage")
-  public Location location;
+  private final Location location;
 
   public Storage(StorageType type, List<T> items, Location location) {
     this.type = type;
     this.items = items;
     this.location = location;
+  }
+
+  public StorageType getType() {
+    return type;
+  }
+
+  public List<T> getItems() {
+    return items;
+  }
+
+  public Location getLocation() {
+    return location;
   }
 }

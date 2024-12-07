@@ -11,8 +11,21 @@ public class Warehouse<T> {
   })
   @Alias("id")
   @Validate("not-null, size=3|")
-  public String name;
+  private final String name;
 
   @Describe("The storages of the warehouse")
-  public Storage<T>[] storages;
+  private final Storage<T>[] storages;
+
+  public Warehouse(String name, Storage<T>[] storages) {
+    this.name = name;
+    this.storages = storages;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Storage<T>[] getStorages() {
+    return storages;
+  }
 }

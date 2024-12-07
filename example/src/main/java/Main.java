@@ -16,62 +16,78 @@ public class Main {
   public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
   public static void main(String[] args) throws Exception {
-    Warehouse<Item<String>> item = new Warehouse<>();
-    item.name = "test";
-    item.storages =
-        new Storage[] {
-          new Storage<>(
-              StorageType.FRUIT,
-              List.of(
-                  new Item<>("orange", 12, UUID.randomUUID()),
-                  new Item<>("apple", 16, UUID.randomUUID())),
-              new Location(1, 2)),
-          new Storage<>(
-              StorageType.FOOD,
-              List.of(
-                  new Item<>("bread", 10, UUID.randomUUID()),
-                  new Item<>("cake", 6, UUID.randomUUID())),
-              new Location(0, 1)),
-          new Storage<>(
-              StorageType.VEGETABLE,
-              List.of(
-                  new Item<>("carrot", 7, UUID.randomUUID()),
-                  new Item<>("potato", 10, UUID.randomUUID()),
-                  new Item<>("tomato", 5, UUID.randomUUID())),
-              new Location(2, 1)),
-          new Storage<>(
-              StorageType.WEAPON,
-              List.of(new Weapon<>("desert_eagle", 2, UUID.randomUUID(), 5)),
-              new Location(3, 0))
-        };
+    // Sample data
+    Warehouse<Item<String>> item =
+        new Warehouse<Item<String>>(
+            "test",
+            new Storage[] {
+              new Storage<>(
+                  StorageType.FRUIT,
+                  List.of(
+                      new Item<>("orange", 12, UUID.randomUUID()),
+                      new Item<>("apple", 16, UUID.randomUUID())),
+                  new Location(1, 2)),
+              new Storage<>(
+                  StorageType.FOOD,
+                  List.of(
+                      new Item<>("bread", 10, UUID.randomUUID()),
+                      new Item<>("cake", 6, UUID.randomUUID())),
+                  new Location(0, 1)),
+              new Storage<>(
+                  StorageType.VEGETABLE,
+                  List.of(
+                      new Item<>("carrot", 7, UUID.randomUUID()),
+                      new Item<>("potato", 10, UUID.randomUUID()),
+                      new Item<>("tomato", 5, UUID.randomUUID())),
+                  new Location(2, 1)),
+              new Storage<>(
+                  StorageType.WEAPON,
+                  List.of(new Weapon<>("desert_eagle", 2, UUID.randomUUID(), 5)),
+                  new Location(3, 0))
+            });
 
+    // Create the factory
     ConfigFactory factory =
         ConfigFactory.create()
+            // Use custom type adapters
             .adaptType(Location.class, new LocationAdapter())
+            // Enable additional settings
             .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
             .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
+            // Prefer kebab case naming (camelCase in code <---> kebab-case in config)
             .useNamingPolicy(NamingPolicy.KEBAB_CASE)
             .build();
+
+    // Weapon is a special type of item that has dedicated class; here we register that Weapon is a
+    // shape of Item
+    factory.getShapeRegistry().register(Weapon.class);
+
+    // Normalize the data into a Dictionary
+    // From there, you can use any 3rd library to serialize/deserialize the Dictionary
     Dictionary wrapper = (Dictionary) factory.getNormalizer().normalize(item);
-    System.out.println(GSON.toJson(wrapper));
+    System.out.println(GSON.toJson(wrapper)); // Print the JSON
     System.out.println();
 
+    // Denormalize the Dictionary with full generics information
     //noinspection unchecked
     Warehouse<Item<String>> warehouse =
         (Warehouse<Item<String>>)
             factory
                 .getDenormalizer()
                 .denormalize(wrapper, new TypeToken<Warehouse<Item<String>>>() {});
-    System.out.println("Name: " + warehouse.name);
-    for (Storage<Item<String>> storage : warehouse.storages) {
-      System.out.println("Storage Type: " + storage.type);
-      System.out.println("Location: " + storage.location);
-      for (Item<String> it : storage.items) {
+
+    // Print the denormalized data
+    System.out.println("Name: " + warehouse.getName());
+    for (Storage<Item<String>> storage : warehouse.getStorages()) {
+      System.out.println("Storage Type: " + storage.getType());
+      System.out.println("Location: " + storage.getLocation());
+      for (Item<String> it : storage.getItems()) {
         System.out.println(" * Item: " + it);
       }
     }
     System.out.println();
 
+    // Generate config documentation
     new ConfigDocBuilder()
         .withSchema(factory.getSchema(Warehouse.class))
         .withSchema(factory.getSchema(Item.class))
