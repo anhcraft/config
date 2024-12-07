@@ -2,6 +2,7 @@ package dev.anhcraft.config.type;
 
 import dev.anhcraft.config.Dictionary;
 import java.lang.reflect.Array;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -125,7 +126,8 @@ public final class SimpleTypes {
    * @param <T> The value type
    */
   @SuppressWarnings("unchecked")
-  @Nullable public static <T> T deepClone(@Nullable T value) {
+  @Contract("null -> null")
+  public static <T> T deepClone(@Nullable T value) {
     if (value == null) return null;
     if (value instanceof String
         || value instanceof Number
