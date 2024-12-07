@@ -10,6 +10,7 @@ import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
+import dev.anhcraft.config.internal.ShapeRegistryImpl;
 import dev.anhcraft.config.internal.blueprint.ReflectSchemaScannerImpl;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
@@ -46,7 +47,7 @@ public final class ConfigFactory {
     this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
     this.contextProvider = builder.contextProvider;
     this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
-    this.shapeRegistry = new ShapeRegistry(this);
+    this.shapeRegistry = builder.shapeRegistryProvider.provide(this);
     try {
       this.adapterProvider =
           builder
@@ -149,6 +150,7 @@ public final class ConfigFactory {
     private ValidationRegistry validationRegistry = ValidationRegistry.DEFAULT;
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = new ContextProvider() {};
+    private ServiceProvider<ShapeRegistry> shapeRegistryProvider = ShapeRegistryImpl::new; // use
     private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
             new LinkedHashMap<>() {
@@ -224,6 +226,17 @@ public final class ConfigFactory {
     public @NotNull <T> Builder useInstanceAssembler(
         @NotNull Class<T> type, @NotNull InstanceAssembler instanceAssembler) {
       instanceAssemblers.put(type, instanceAssembler);
+      return this;
+    }
+
+    /**
+     * Sets the provider for the shape registry.<br>
+     * @param shapeRegistryProvider the shape registry provider
+     * @return this
+     */
+    public @NotNull Builder useShapeRegistry(
+        @NotNull ServiceProvider<ShapeRegistry> shapeRegistryProvider) {
+      this.shapeRegistryProvider = shapeRegistryProvider;
       return this;
     }
 
@@ -344,4 +357,17 @@ public final class ConfigFactory {
    * Returns the schema cache.
    */
   public interface SchemaCacheProvider extends Supplier<Map<Class<?>, Schema<?>>> {}
+
+  /**
+   * A service provider.
+   */
+  public interface ServiceProvider<T> {
+    /**
+     * Provides an instance of the service.<br>
+     * Depends on the contextual requirement, pre-computed/reused instances might be provided.
+     * @param factory the config factory (not guaranteed to be ready)
+     * @return the instance
+     */
+    @NotNull T provide(@NotNull ConfigFactory factory);
+  }
 }
