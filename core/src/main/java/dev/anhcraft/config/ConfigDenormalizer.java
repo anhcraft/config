@@ -19,7 +19,6 @@ import dev.anhcraft.config.type.TypeToken;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.*;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,10 +47,6 @@ public class ConfigDenormalizer {
   private final ConfigFactory configFactory;
   private final Set<SettingFlag.Denormalizer> settings;
 
-  /**
-   * Use {@link ConfigFactory#getDenormalizer()}
-   */
-  @ApiStatus.Internal
   public ConfigDenormalizer(ConfigFactory configFactory, Set<SettingFlag.Denormalizer> settings) {
     this.configFactory = configFactory;
     this.settings = Collections.unmodifiableSet(settings);

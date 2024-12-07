@@ -1,9 +1,12 @@
-package dev.anhcraft.config.blueprint;
+package dev.anhcraft.config.internal.blueprint;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.NamingPolicy;
+import dev.anhcraft.config.blueprint.ClassSchema;
+import dev.anhcraft.config.blueprint.Processor;
+import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
 import dev.anhcraft.config.error.ProcessorInvocationException;
@@ -20,13 +23,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-public class ReflectSchemaScannerTest {
+public class ReflectSchemaScannerImplTest {
   private static ReflectSchemaScanner scanner;
 
   @BeforeAll
   public static void setUp() {
     scanner =
-        new ReflectSchemaScanner(
+        new ReflectSchemaScannerImpl(
             NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
   }
 
@@ -46,7 +49,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDefaultNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("fooBar", "barFoo"), schema.propertyNames());
@@ -59,7 +62,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testKebabCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.KEBAB_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo-bar", "bar-foo"), schema.propertyNames());
@@ -72,7 +75,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testSnakeCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.SNAKE_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("foo_bar", "bar_foo"), schema.propertyNames());
@@ -85,7 +88,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testPascalCaseNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.PASCAL_CASE, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(FooBar.class);
       assertEquals(Set.of("FooBar", "BarFoo"), schema.propertyNames());
@@ -106,7 +109,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDefaultNamingPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(Container.class);
       assertEquals(
@@ -133,7 +136,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testDefaultCustomPolicy() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               s -> s.length() > 2 ? s.substring(0, 2) : s,
               ValidationRegistry.DEFAULT,
               LinkedHashMap::new);
@@ -175,7 +178,7 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testAliasDuplicateCustomPrimaryName() {
       ReflectSchemaScanner custom =
-          new ReflectSchemaScanner(
+          new ReflectSchemaScannerImpl(
               NamingPolicy.DEFAULT, ValidationRegistry.DEFAULT, LinkedHashMap::new);
       ClassSchema schema = custom.scanSchema(HelloGreet.class);
       assertEquals(Set.of("greet", "hiya"), schema.propertyNames());
@@ -203,8 +206,8 @@ public class ReflectSchemaScannerTest {
     @Test
     public void testSchemaIdentity() {
       assertNotEquals(
-          new ClassSchema(
-              new ReflectSchemaScanner(
+          new ClassSchemaImpl(
+              new ReflectSchemaScannerImpl(
                   UnaryOperator.identity(), ValidationRegistry.DEFAULT, LinkedHashMap::new),
               ps.type(),
               ps.properties(),
@@ -217,7 +220,7 @@ public class ReflectSchemaScannerTest {
               null),
           ps);
       assertEquals(
-          new ClassSchema(
+          new ClassSchemaImpl(
               scanner,
               ps.type(),
               ps.properties(),

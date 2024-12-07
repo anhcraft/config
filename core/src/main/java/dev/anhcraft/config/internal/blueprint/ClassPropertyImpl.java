@@ -1,5 +1,6 @@
-package dev.anhcraft.config.blueprint;
+package dev.anhcraft.config.internal.blueprint;
 
+import dev.anhcraft.config.blueprint.*;
 import dev.anhcraft.config.validate.Validator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-class ClassPropertyImpl extends AbstractProperty implements ClassProperty {
+public class ClassPropertyImpl extends AbstractProperty implements ClassProperty {
   private final int scannerIdentity;
   private final Field field;
   private final byte modifier; // optional, transient, constant

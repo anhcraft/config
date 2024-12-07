@@ -1,5 +1,6 @@
 package dev.anhcraft.config.type;
 
+import dev.anhcraft.config.internal.type.TypeImpl;
 import java.lang.reflect.*;
 import java.util.Collections;
 import java.util.HashMap;

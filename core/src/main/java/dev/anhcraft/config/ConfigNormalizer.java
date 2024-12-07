@@ -15,7 +15,6 @@ import dev.anhcraft.config.type.SimpleTypes;
 import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.Set;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,10 +39,6 @@ public final class ConfigNormalizer {
   private final ConfigFactory configFactory;
   private final Set<SettingFlag.Normalizer> settings;
 
-  /**
-   * Use {@link ConfigFactory#getNormalizer()}
-   */
-  @ApiStatus.Internal
   public ConfigNormalizer(ConfigFactory configFactory, Set<SettingFlag.Normalizer> settings) {
     this.configFactory = configFactory;
     this.settings = Collections.unmodifiableSet(settings);

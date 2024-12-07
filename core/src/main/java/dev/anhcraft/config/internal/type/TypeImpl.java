@@ -1,4 +1,4 @@
-package dev.anhcraft.config.type;
+package dev.anhcraft.config.internal.type;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
@@ -7,9 +7,10 @@ import java.lang.reflect.WildcardType;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-final class TypeImpl {
+public final class TypeImpl {
 
-  static final class WildcardTypeImpl implements WildcardType {
+  @ApiStatus.Internal
+  public static final class WildcardTypeImpl implements WildcardType {
     private final Type[] upperBounds;
     private final Type[] lowerBounds;
 
@@ -29,7 +30,8 @@ final class TypeImpl {
     }
   }
 
-  static final class GenericArrayTypeImpl implements GenericArrayType {
+  @ApiStatus.Internal
+  public static final class GenericArrayTypeImpl implements GenericArrayType {
     private final Type componentType;
 
     public GenericArrayTypeImpl(Type componentType) {
@@ -42,7 +44,8 @@ final class TypeImpl {
     }
   }
 
-  static final class ParameterizedTypeImpl implements ParameterizedType {
+  @ApiStatus.Internal
+  public static final class ParameterizedTypeImpl implements ParameterizedType {
     private final Type ownerType;
     private final Type rawType;
     private final Type[] actualTypeArguments;

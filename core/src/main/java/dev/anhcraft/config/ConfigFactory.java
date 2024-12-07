@@ -10,6 +10,7 @@ import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
+import dev.anhcraft.config.internal.blueprint.ReflectSchemaScannerImpl;
 import dev.anhcraft.config.validate.ValidationRegistry;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
  * The config factory centralizes facilities for normalization and denormalization.
  */
 public final class ConfigFactory {
-  private final ReflectSchemaScanner schemaScanner;
+  private final ReflectSchemaScanner reflectSchemaScanner;
   private final ConfigNormalizer normalizer;
   private final ConfigDenormalizer denormalizer;
   private final ContextProvider contextProvider;
@@ -35,8 +36,8 @@ public final class ConfigFactory {
   private final ShapeRegistry shapeRegistry;
 
   ConfigFactory(Builder builder) {
-    this.schemaScanner =
-        new ReflectSchemaScanner(
+    this.reflectSchemaScanner =
+        new ReflectSchemaScannerImpl(
             builder.namingPolicy,
             builder.validationRegistry,
             builder.schemaCacheProvider,
@@ -87,7 +88,7 @@ public final class ConfigFactory {
    * @return the schema
    */
   @NotNull public ClassSchema getSchema(@NotNull Class<?> type) {
-    return schemaScanner.getOrScanSchema(type);
+    return reflectSchemaScanner.getOrScanSchema(type);
   }
 
   /**
