@@ -11,9 +11,11 @@ import dev.anhcraft.config.meta.Shape;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.HashMap;
 import java.util.Map;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Internal
 public class ShapeRegistryImpl implements ShapeRegistry {
   private final Map<ClassProperty, ShapeCollection> discriminatorPropertyShapes = new HashMap<>();
   private final ConfigFactory factory;
