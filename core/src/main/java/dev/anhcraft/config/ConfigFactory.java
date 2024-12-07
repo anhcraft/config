@@ -156,7 +156,7 @@ public final class ConfigFactory {
     private ServiceProvider<ConfigNormalizer> normalizerProvider;
     private ServiceProvider<ConfigDenormalizer> denormalizerProvider;
     private ServiceProvider<InstanceFactory> instanceFactoryProvider;
-    private ServiceProvider<ShapeRegistry> shapeRegistryProvider = ShapeRegistryImpl::new; // use
+    private ServiceProvider<ShapeRegistry> shapeRegistryProvider;
     private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
             new LinkedHashMap<>() {
@@ -369,22 +369,32 @@ public final class ConfigFactory {
      * @return the config factory
      */
     @NotNull public ConfigFactory build() {
-      if (normalizerProvider == null)
+      if (shapeRegistryProvider == null)
+        shapeRegistryProvider = ShapeRegistryImpl::new;
+
+      if (normalizerProvider == null) {
+        final Set<SettingFlag.Normalizer> _normalizerSettings = new HashSet<>(normalizerSettings);
         normalizerProvider =
             new ServiceProvider<>() {
               @Override
               public @NotNull ConfigNormalizer provide(@NotNull ConfigFactory factory) {
-                return new ConfigNormalizerImpl(factory, normalizerSettings);
+                return new ConfigNormalizerImpl(factory, _normalizerSettings);
               }
             };
-      if (denormalizerProvider == null)
+      }
+
+      if (denormalizerProvider == null) {
+        final Set<SettingFlag.Denormalizer> _denormalizerSettings =
+            new HashSet<>(denormalizerSettings);
         denormalizerProvider =
             new ServiceProvider<>() {
               @Override
               public @NotNull ConfigDenormalizer provide(@NotNull ConfigFactory factory) {
-                return new ConfigDenormalizerImpl(factory, denormalizerSettings);
+                return new ConfigDenormalizerImpl(factory, _denormalizerSettings);
               }
             };
+      }
+
       if (instanceFactoryProvider == null) {
         final Map<Class<?>, InstanceAssembler> _instanceAssemblers =
             new HashMap<>(instanceAssemblers);
