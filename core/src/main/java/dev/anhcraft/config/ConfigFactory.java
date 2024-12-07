@@ -369,8 +369,7 @@ public final class ConfigFactory {
      * @return the config factory
      */
     @NotNull public ConfigFactory build() {
-      if (shapeRegistryProvider == null)
-        shapeRegistryProvider = ShapeRegistryImpl::new;
+      if (shapeRegistryProvider == null) shapeRegistryProvider = ShapeRegistryImpl::new;
 
       if (normalizerProvider == null) {
         final Set<SettingFlag.Normalizer> _normalizerSettings = new HashSet<>(normalizerSettings);
