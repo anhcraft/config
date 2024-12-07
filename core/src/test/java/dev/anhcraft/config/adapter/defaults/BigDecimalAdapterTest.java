@@ -25,7 +25,7 @@ public class BigDecimalAdapterTest {
   }
 
   @Test
-  public void testSimplify() throws Exception {
+  public void testSimplify() {
     assertEquals(
         "12345.6789", adapter.simplify(context, BigDecimal.class, new BigDecimal("12345.6789")));
     assertEquals(
@@ -34,7 +34,7 @@ public class BigDecimalAdapterTest {
   }
 
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertBigDecimalEquals(
         new BigDecimal("12345.6789", MathContext.DECIMAL128),
         adapter.complexify(context, 12345.6789, BigDecimal.class));
@@ -45,7 +45,7 @@ public class BigDecimalAdapterTest {
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertBigDecimalEquals(
         new BigDecimal("12345.6789"), adapter.complexify(context, "12345.6789", BigDecimal.class));
     assertBigDecimalEquals(
@@ -60,7 +60,7 @@ public class BigDecimalAdapterTest {
   }
 
   @Test
-  public void testComplexifyUnsupportedType() throws Exception {
+  public void testComplexifyUnsupportedType() {
     assertNull(adapter.complexify(context, new Object(), BigDecimal.class));
     assertNull(adapter.complexify(context, true, BigDecimal.class));
   }

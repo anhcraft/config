@@ -13,7 +13,7 @@ public class FloatAdapter implements TypeAnnotator<Float> {
 
   @Override
   public @Nullable Float complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).floatValue();
     else if (value instanceof String) {
       try {

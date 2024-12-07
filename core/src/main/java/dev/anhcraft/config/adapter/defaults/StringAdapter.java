@@ -11,7 +11,7 @@ public class StringAdapter implements TypeAnnotator<String> {
 
   @Override
   public @Nullable String complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     return String.valueOf(value);
   }
 }

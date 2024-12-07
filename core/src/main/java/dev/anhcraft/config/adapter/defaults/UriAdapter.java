@@ -14,14 +14,13 @@ public class UriAdapter implements TypeAdapter<URI> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends URI> sourceType, @NotNull URI value)
-      throws Exception {
+      @NotNull Context ctx, @NotNull Class<? extends URI> sourceType, @NotNull URI value) {
     return value.toString();
   }
 
   @Override
   public @Nullable URI complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (!(value instanceof String)) {
       return null;
     }

@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface TypeInferencer<ComplexT> extends TypeAdapter<ComplexT> {
 
-  @Nullable default ComplexT complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
-      throws Exception {
+  @Nullable default ComplexT complexify(
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     throw new UnsupportedOperationException();
   }
 }

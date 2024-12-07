@@ -18,11 +18,9 @@ public interface TypeAdapter<ComplexT> {
    * @param sourceType the source type
    * @param value the complex object
    * @return the simple object
-   * @throws Exception if something goes wrong
    */
   @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends ComplexT> sourceType, @NotNull ComplexT value)
-      throws Exception;
+      @NotNull Context ctx, @NotNull Class<? extends ComplexT> sourceType, @NotNull ComplexT value);
 
   /**
    * Complexify a simple object to a complex object.
@@ -30,8 +28,6 @@ public interface TypeAdapter<ComplexT> {
    * @param value the simple object
    * @param targetType the target type
    * @return the complex object
-   * @throws Exception if something goes wrong
    */
-  @Nullable ComplexT complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
-      throws Exception;
+  @Nullable ComplexT complexify(@NotNull Context ctx, @NotNull Object value, @NotNull Type targetType);
 }

@@ -28,7 +28,7 @@ public class StringAdapterTest {
   }
 
   @Test
-  public void testComplexify() throws Exception {
+  public void testComplexify() {
     assertEquals("2.001", adapter.complexify(context, 2.001f, String.class));
     assertEquals("-Infinity", adapter.complexify(context, Float.NEGATIVE_INFINITY, String.class));
     assertEquals("NaN", adapter.complexify(context, Double.NaN, String.class));

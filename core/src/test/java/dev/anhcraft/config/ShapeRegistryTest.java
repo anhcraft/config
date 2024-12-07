@@ -24,7 +24,7 @@ public class ShapeRegistryTest {
 
   @ParameterizedTest
   @MethodSource("provideC1_C2_P")
-  public void testDiscriminator(List<Class<?>> classes) throws Exception {
+  public void testDiscriminator(List<Class<?>> classes) {
     ShapeRegistry registry = factory.getShapeRegistry();
     for (Class<?> clazz : classes) {
       registry.register(clazz);
@@ -48,7 +48,7 @@ public class ShapeRegistryTest {
 
   @ParameterizedTest
   @MethodSource("provideC1_C2_P")
-  public void testAdjacentDiscriminator(List<Class<?>> classes) throws Exception {
+  public void testAdjacentDiscriminator(List<Class<?>> classes) {
     ShapeRegistry registry = factory.getShapeRegistry();
     for (Class<?> clazz : classes) {
       registry.register(clazz);
@@ -73,7 +73,7 @@ public class ShapeRegistryTest {
   }
 
   @Test
-  public void testShapeLinkingSubtypeReplaceSuperType() throws Exception {
+  public void testShapeLinkingSubtypeReplaceSuperType() {
     ShapeRegistry registry = factory.getShapeRegistry();
     registry.register(Child2.class);
     assertDoesNotThrow(() -> registry.register(Child21B.class));
@@ -85,7 +85,7 @@ public class ShapeRegistryTest {
   }
 
   @Test
-  public void testShapeLinkingSuperTypeDoesNotReplaceSubtype() throws Exception {
+  public void testShapeLinkingSuperTypeDoesNotReplaceSubtype() {
     ShapeRegistry registry = factory.getShapeRegistry();
     registry.register(Child21B.class);
     assertDoesNotThrow(() -> registry.register(Child2.class));
@@ -98,7 +98,7 @@ public class ShapeRegistryTest {
 
   @ParameterizedTest
   @MethodSource("provideC2_C21_C21A")
-  public void testOverlappedDiscriminator(List<Class<?>> classes) throws Exception {
+  public void testOverlappedDiscriminator(List<Class<?>> classes) {
     ShapeRegistry registry = factory.getShapeRegistry();
     for (Class<?> clazz : classes) {
       registry.register(clazz);

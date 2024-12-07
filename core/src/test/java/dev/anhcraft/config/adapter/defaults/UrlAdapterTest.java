@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import dev.anhcraft.config.ConfigFactory;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.InvalidValueException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +24,7 @@ public class UrlAdapterTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"https://google.com", "ftp://example.com", "file://localhost"})
-  public void testSimplify(String url) throws Exception {
+  public void testSimplify(String url) throws MalformedURLException {
     assertEquals(url, adapter.simplify(context, URL.class, new URL(url)));
   }
 
@@ -34,7 +35,7 @@ public class UrlAdapterTest {
         "ftp://example.com   ",
         "http://example.com/path/to/resource%zz"
       })
-  public void testComplexifyIsUrl(String url) throws Exception {
+  public void testComplexifyIsUrl(String url) throws MalformedURLException {
     assertEquals(new URL(url.trim()), adapter.complexify(context, url, URL.class));
   }
 

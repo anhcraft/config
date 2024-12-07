@@ -24,7 +24,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testSimplify1D() throws Exception {
+  public void testSimplify1D() {
     Map<Integer, String> vehicle = new HashMap<>();
     vehicle.put(0, "Car");
     vehicle.put(1, "Truck");
@@ -41,7 +41,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testSimplify1DCompoundKey() throws Exception {
+  public void testSimplify1DCompoundKey() {
     Map<int[], String> location = new HashMap<>();
     location.put(new int[] {0, 0}, "Home");
     location.put(new int[] {0, 1}, "Office");
@@ -50,7 +50,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testSimplify2D() throws Exception {
+  public void testSimplify2D() {
     Map<String, Map<String, Integer>> stock = new HashMap<>();
     stock.put("Bob", Map.of("Apple", 10, "Banana", 20));
     stock.put("Alice", Map.of("Apple", 5, "Banana", 15));
@@ -74,7 +74,7 @@ public class MapAdapterTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testComplexify() throws Exception {
+  public void testComplexify() {
     Dictionary dict =
         Dictionary.of(
             Map.of(
@@ -91,7 +91,7 @@ public class MapAdapterTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testComplexify2D() throws Exception {
+  public void testComplexify2D() {
     Dictionary dict =
         Dictionary.of(
             Map.of(
@@ -111,7 +111,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testComplexifyUseHashMap() throws Exception {
+  public void testComplexifyUseHashMap() {
     assertInstanceOf(
         HashMap.class,
         adapter.complexify(
@@ -121,7 +121,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testComplexifyUseTreeMap() throws Exception {
+  public void testComplexifyUseTreeMap() {
     assertInstanceOf(
         TreeMap.class,
         adapter.complexify(
@@ -131,7 +131,7 @@ public class MapAdapterTest {
   }
 
   @Test
-  public void testComplexifyUseLinkedHashMap() throws Exception {
+  public void testComplexifyUseLinkedHashMap() {
     assertInstanceOf(
         LinkedHashMap.class,
         adapter.complexify(

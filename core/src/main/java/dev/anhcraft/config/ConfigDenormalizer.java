@@ -7,6 +7,7 @@ import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.context.ValueScope;
+import dev.anhcraft.config.error.DenormalizationException;
 import dev.anhcraft.config.error.IllegalTypeException;
 import dev.anhcraft.config.error.InvalidValueException;
 import dev.anhcraft.config.meta.Denormalizer;
@@ -75,11 +76,9 @@ public class ConfigDenormalizer {
    * @param targetType the target complex type
    * @return the complex object or {@code null} if the object cannot be denormalized
    * @param <T> the type of the simple object
-   * @throws Exception may throw exceptions during denormalization
    * @see #denormalize(Context, Object, Type)
    */
-  public <T> @Nullable Object denormalize(@Nullable T simple, @NotNull Type targetType)
-      throws Exception {
+  public <T> @Nullable Object denormalize(@Nullable T simple, @NotNull Type targetType) {
     return denormalize(createContext(), simple, targetType);
   }
 
@@ -90,10 +89,9 @@ public class ConfigDenormalizer {
    * @param targetType the target complex type
    * @return the complex object or {@code null} if the object cannot be denormalized
    * @param <T> the type of the simple object
-   * @throws Exception may throw exceptions during denormalization
    */
   public <T> @Nullable Object denormalize(
-      @NotNull Context ctx, @Nullable T simple, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @Nullable T simple, @NotNull Type targetType) {
     validateSimpleType(ctx, simple);
     return _denormalize(ctx, simple, targetType);
   }
@@ -104,11 +102,9 @@ public class ConfigDenormalizer {
    * @param simple the dictionary
    * @param targetType the target complex type
    * @param instance the instance
-   * @throws Exception may throw exceptions during denormalization
    */
   public void denormalizeToInstance(
-      @NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance)
-      throws Exception {
+      @NotNull Dictionary simple, @NotNull Type targetType, @NotNull Object instance) {
     denormalizeToInstance(createContext(), simple, targetType, instance);
   }
 
@@ -118,14 +114,12 @@ public class ConfigDenormalizer {
    * @param simple the dictionary
    * @param targetType the target complex type
    * @param instance the instance
-   * @throws Exception may throw exceptions during denormalization
    */
   public void denormalizeToInstance(
       @NotNull Context ctx,
       @NotNull Dictionary simple,
       @NotNull Type targetType,
-      @NotNull Object instance)
-      throws Exception {
+      @NotNull Object instance) {
     validateSimpleType(ctx, simple);
     validateComplexType(ctx, instance, targetType);
     _denormalizeToInstance(ctx, simple, targetType, instance, PropertyList.ALL);
@@ -151,12 +145,11 @@ public class ConfigDenormalizer {
   }
 
   @SuppressWarnings("rawtypes")
-  private <T> Object _denormalize(Context ctx, @Nullable T simple, @NotNull Type targetType)
-      throws Exception {
+  private <T> Object _denormalize(Context ctx, @Nullable T simple, @NotNull Type targetType) {
     if (simple == null) return null;
     if (targetType == Object.class) return simple;
     if (ComplexTypes.isArray(targetType)) return _denormalizeToArray(ctx, targetType, simple);
-    Class<?> erasureType = ComplexTypes.erasure(targetType);
+    Class<?> erasureType = erasureType(ctx, targetType);
     TypeAdapter adapter = configFactory.getTypeAdapter(erasureType);
     if (adapter != null && !(adapter instanceof TypeInferencer)) {
       Object result = adapter.complexify(ctx, simple, targetType);
@@ -175,10 +168,10 @@ public class ConfigDenormalizer {
     return null;
   }
 
-  private <T> Object _denormalizeToArray(Context ctx, Type targetType, T simple) throws Exception {
+  private <T> Object _denormalizeToArray(Context ctx, Type targetType, T simple) {
     Type elemType = ComplexTypes.getComponentType(targetType);
     if (elemType == null) return null;
-    Class<?> erasureElemType = ComplexTypes.erasure(elemType);
+    Class<?> erasureElemType = erasureType(ctx, elemType);
     int len = SimpleTypes.getContainerSize(simple);
     Object object = Array.newInstance(erasureElemType, len);
     for (int i = 0; i < len; i++) {
@@ -194,8 +187,7 @@ public class ConfigDenormalizer {
     return object;
   }
 
-  private Object _denormalizeInstance(Context ctx, Dictionary simple, Type targetType)
-      throws Exception {
+  private Object _denormalizeInstance(Context ctx, Dictionary simple, Type targetType) {
     /*
 
       Built-in instance deserialization algorithm:
@@ -210,33 +202,38 @@ public class ConfigDenormalizer {
        * The reason that we start from scratch is that processors, context and scopes could be different
     */
 
-    Class<?> erasureType = ComplexTypes.erasure(targetType);
+    Class<?> erasureType = erasureType(ctx, targetType);
     ClassSchema schema = configFactory.getSchema(erasureType);
 
-    if (!schema.effectiveDiscriminators().isEmpty()) {
-      Object base = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
-      _denormalizeToInstance(
-          ctx, simple, targetType, base, PropertyList.EFFECTIVE_DISCRIMINATOR_ONLY);
-      Class<?> shape = configFactory.getShapeRegistry().solve(ctx, base);
+    try {
+      if (!schema.effectiveDiscriminators().isEmpty()) {
+        Object base = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
+        _denormalizeToInstance(
+            ctx, simple, targetType, base, PropertyList.EFFECTIVE_DISCRIMINATOR_ONLY);
+        Class<?> shape = configFactory.getShapeRegistry().solve(ctx, base);
 
-      if (shape != null && erasureType.isAssignableFrom(shape)) {
-        // TODO shape is type-erasure (no generic parameters support)
-        Object object = configFactory.getInstanceFactory().newInstance(ctx, shape);
-        _denormalizeToInstance(ctx, simple, shape, object, PropertyList.ALL);
-        return object;
+        if (shape != null && erasureType.isAssignableFrom(shape)) {
+          // TODO shape is type-erasure (no generic parameters support)
+          Object object = configFactory.getInstanceFactory().newInstance(ctx, shape);
+          _denormalizeToInstance(ctx, simple, shape, object, PropertyList.ALL);
+          return object;
+        }
       }
-    }
 
-    Object object = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
-    _denormalizeToInstance(ctx, simple, targetType, object, PropertyList.ALL);
-    return object;
+      Object object = configFactory.getInstanceFactory().newInstance(ctx, erasureType);
+      _denormalizeToInstance(ctx, simple, targetType, object, PropertyList.ALL);
+      return object;
+
+    } catch (InstantiationException e) {
+      throw new DenormalizationException(
+          ctx, "Cannot create instance of " + erasureType.getName(), e);
+    }
   }
 
   private void _denormalizeToInstance(
-      Context ctx, Dictionary simple, Type targetType, Object instance, PropertyList propertyList)
-      throws Exception {
+      Context ctx, Dictionary simple, Type targetType, Object instance, PropertyList propertyList) {
     TypeResolver resolver = TypeResolver.of(targetType);
-    ClassSchema schema = configFactory.getSchema(ComplexTypes.erasure(targetType));
+    ClassSchema schema = configFactory.getSchema(erasureType(ctx, targetType));
     Set<String> settingsProcessed = new HashSet<>();
 
     Collection<ClassProperty> classProperties =
@@ -313,7 +310,7 @@ public class ConfigDenormalizer {
 
         if (property.isOptional() && value == null) break scope;
 
-        Class<?> propertyTypeErasure = ComplexTypes.erasure(property.type());
+        Class<?> propertyTypeErasure = erasureType(ctx, property.type());
 
         if (value == null && propertyTypeErasure.isPrimitive()) break scope;
 
@@ -333,12 +330,33 @@ public class ConfigDenormalizer {
         }
 
         ctx.enterScope(new ValueScope(value));
-        property.field().set(instance, value);
+        try {
+          property.field().set(instance, value);
+        } catch (IllegalAccessException e) {
+          throw new DenormalizationException(
+              ctx,
+              "Cannot access field "
+                  + property.field().getName()
+                  + " (representing property "
+                  + property.name()
+                  + ") declared in "
+                  + property.field().getDeclaringClass().getName(),
+              e);
+        }
         ctx.exitScope();
       }
       ctx.exitScope();
 
       settingsProcessed.add(setting);
+    }
+  }
+
+  private static Class<?> erasureType(Context ctx, Type type) {
+    try {
+      return ComplexTypes.erasure(type);
+    } catch (ClassNotFoundException e) {
+      throw new DenormalizationException(
+          ctx, "Cannot perform type-erasure on " + ComplexTypes.describe(type), e);
     }
   }
 

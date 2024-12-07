@@ -8,7 +8,7 @@ import org.junit.jupiter.api.*;
 
 public class ConfigDenormalizerPolymorphismTest {
   @Test
-  public void testUnregisteredShape() throws Exception {
+  public void testUnregisteredShape() {
     class BaseConfig {
       @Discriminator public int version;
     }
@@ -26,7 +26,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testMatchSingleTypeSingleShape() throws Exception {
+  public void testMatchSingleTypeSingleShape() {
     class BaseConfig {
       @Discriminator public int version;
     }
@@ -50,7 +50,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testUnmatchedShape() throws Exception {
+  public void testUnmatchedShape() {
     class BaseConfig {
       @Discriminator public int version;
     }
@@ -72,7 +72,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testMatchSingleTypeDualShape() throws Exception {
+  public void testMatchSingleTypeDualShape() {
     class BaseConfig {
       @Discriminator public int version;
 
@@ -112,7 +112,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testMatchingSingleDiscriminatorOverlappedShapes() throws Exception {
+  public void testMatchingSingleDiscriminatorOverlappedShapes() {
     class BaseConfig {
       @Discriminator public int version;
     }
@@ -152,7 +152,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testMatchingDualDiscriminatorOverlappedShapes() throws Exception {
+  public void testMatchingDualDiscriminatorOverlappedShapes() {
     class BaseConfig {
       @Discriminator public int version;
     }
@@ -200,7 +200,7 @@ public class ConfigDenormalizerPolymorphismTest {
   }
 
   @Test
-  public void testMatchingOverrideDiscriminatorOverlappedShapes() throws Exception {
+  public void testMatchingOverrideDiscriminatorOverlappedShapes() {
     class BaseConfig {
       @Discriminator public int version;
     }

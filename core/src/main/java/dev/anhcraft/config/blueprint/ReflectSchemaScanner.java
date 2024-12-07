@@ -1,6 +1,7 @@
 package dev.anhcraft.config.blueprint;
 
 import dev.anhcraft.config.context.Context;
+import dev.anhcraft.config.error.ProcessorInvocationException;
 import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
@@ -306,14 +307,29 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
 
       switch (method.getParameterCount()) {
         case 0:
-          invoker = (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance);
+          invoker =
+              (Processor.NormalizationInvoker)
+                  (ctx, instance) -> {
+                    try {
+                      return method.invoke(instance);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                      throw new ProcessorInvocationException("Failed to invoke Normalizer", e);
+                    }
+                  };
           break;
         case 1:
           if (!Context.class.isAssignableFrom(method.getParameterTypes()[0])) {
             continue;
           }
           invoker =
-              (Processor.NormalizationInvoker) (ctx, instance) -> method.invoke(instance, ctx);
+              (Processor.NormalizationInvoker)
+                  (ctx, instance) -> {
+                    try {
+                      return method.invoke(instance, ctx);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                      throw new ProcessorInvocationException("Failed to invoke Normalizer", e);
+                    }
+                  };
           break;
         default:
           continue;
@@ -353,26 +369,46 @@ public class ReflectSchemaScanner implements ClassSchemaScanner {
             invoker =
                 (Processor.VoidDenormalizationInvoker)
                     (ctx, instance, simple) -> {
-                      method.invoke(instance, simple);
+                      try {
+                        method.invoke(instance, simple);
+                      } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new ProcessorInvocationException("Failed to invoke Denormalizer", e);
+                      }
                       return null;
                     };
           else
             invoker =
                 (Processor.DenormalizationInvoker)
-                    (ctx, instance, simple) -> method.invoke(instance, simple);
+                    (ctx, instance, simple) -> {
+                      try {
+                        return method.invoke(instance, simple);
+                      } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new ProcessorInvocationException("Failed to invoke Denormalizer", e);
+                      }
+                    };
           break;
         case 2:
           if (method.getReturnType() == Void.TYPE)
             invoker =
                 (Processor.VoidDenormalizationInvoker)
                     (ctx, instance, simple) -> {
-                      method.invoke(instance, simple, ctx);
+                      try {
+                        method.invoke(instance, simple, ctx);
+                      } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new ProcessorInvocationException("Failed to invoke Denormalizer", e);
+                      }
                       return null;
                     };
           else
             invoker =
                 (Processor.DenormalizationInvoker)
-                    (ctx, instance, simple) -> method.invoke(instance, simple, ctx);
+                    (ctx, instance, simple) -> {
+                      try {
+                        return method.invoke(instance, simple, ctx);
+                      } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new ProcessorInvocationException("Failed to invoke Denormalizer", e);
+                      }
+                    };
           break;
         default:
           continue;

@@ -8,6 +8,7 @@ import dev.anhcraft.config.context.ElementScope;
 import dev.anhcraft.config.context.PropertyScope;
 import dev.anhcraft.config.context.ValueScope;
 import dev.anhcraft.config.error.IllegalTypeException;
+import dev.anhcraft.config.error.NormalizationException;
 import dev.anhcraft.config.meta.Normalizer;
 import dev.anhcraft.config.type.ComplexTypes;
 import dev.anhcraft.config.type.SimpleTypes;
@@ -66,10 +67,9 @@ public final class ConfigNormalizer {
    * @param complex the complex object
    * @return the simple object or {@code null} if the object cannot be normalized
    * @param <T> the type of the simple object
-   * @throws Exception may throw exceptions during normalization
    * @see #normalize(Context, Class, Object)
    */
-  public <T> @Nullable Object normalize(@NotNull T complex) throws Exception {
+  public <T> @Nullable Object normalize(@NotNull T complex) {
     return normalize(createContext(), complex);
   }
 
@@ -79,10 +79,9 @@ public final class ConfigNormalizer {
    * @param complex the complex object
    * @return the simple object or {@code null} if the object cannot be normalized
    * @param <T> the type of the simple object
-   * @throws Exception may throw exceptions during normalization
    * @see #normalize(Context, Class, Object)
    */
-  public <T> @Nullable Object normalize(@NotNull Context ctx, @NotNull T complex) throws Exception {
+  public <T> @Nullable Object normalize(@NotNull Context ctx, @NotNull T complex) {
     //noinspection unchecked
     return normalize(ctx, (Class<T>) complex.getClass(), complex);
   }
@@ -98,10 +97,9 @@ public final class ConfigNormalizer {
    * @return the simple object or {@code null} if the object cannot be normalized
    * @param <S> the type or supertype of the complex object
    * @param <T> the type of the simple object
-   * @throws Exception may throw exceptions during normalization
    */
   public <S, T extends S> @Nullable Object normalize(
-      @NotNull Context ctx, @NotNull Class<S> type, @NotNull T complex) throws Exception {
+      @NotNull Context ctx, @NotNull Class<S> type, @NotNull T complex) {
     validateType(ctx, type, complex);
     return _normalize(ctx, type, complex);
   }
@@ -112,11 +110,9 @@ public final class ConfigNormalizer {
    * @param complex the complex object
    * @param dictionary the dictionary
    * @param <T> the type of the complex object
-   * @throws Exception may throw exceptions during normalization
    * @see #normalize(Context, Class, Object)
    */
-  public <T> void normalizeToDictionary(@NotNull T complex, @NotNull Dictionary dictionary)
-      throws Exception {
+  public <T> void normalizeToDictionary(@NotNull T complex, @NotNull Dictionary dictionary) {
     //noinspection unchecked
     normalizeToDictionary(createContext(), (Class<T>) complex.getClass(), complex, dictionary);
   }
@@ -127,11 +123,10 @@ public final class ConfigNormalizer {
    * @param complex the complex object
    * @param dictionary the dictionary
    * @param <T> the type of the complex object
-   * @throws Exception may throw exceptions during normalization
    * @see #normalize(Context, Class, Object)
    */
   public <T> void normalizeToDictionary(
-      @NotNull Context ctx, @NotNull T complex, @NotNull Dictionary dictionary) throws Exception {
+      @NotNull Context ctx, @NotNull T complex, @NotNull Dictionary dictionary) {
     //noinspection unchecked
     normalizeToDictionary(ctx, (Class<T>) complex.getClass(), complex, dictionary);
   }
@@ -147,15 +142,13 @@ public final class ConfigNormalizer {
    * @param dictionary the dictionary
    * @param <S> the type or supertype of the complex object
    * @param <T> the type of the complex object
-   * @throws Exception may throw exceptions during normalization
    * @see #normalize(Context, Class, Object)
    */
   public <S, T extends S> void normalizeToDictionary(
       @NotNull Context ctx,
       @NotNull Class<S> type,
       @NotNull T complex,
-      @NotNull Dictionary dictionary)
-      throws Exception {
+      @NotNull Dictionary dictionary) {
     validateType(ctx, type, complex);
     _dynamicNormalize(ctx, type, complex, dictionary);
   }
@@ -171,7 +164,7 @@ public final class ConfigNormalizer {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"}) // generic sucks
-  private Object _normalize(Context ctx, Class<?> type, Object complex) throws Exception {
+  private Object _normalize(Context ctx, Class<?> type, Object complex) {
     if (SimpleTypes.test(complex)) {
       if (settings.contains(SettingFlag.Normalizer.DEEP_CLONE))
         return SimpleTypes.deepClone(complex);
@@ -195,7 +188,7 @@ public final class ConfigNormalizer {
     return container;
   }
 
-  private Object _normalizeArray(Context ctx, Object complex) throws Exception {
+  private Object _normalizeArray(Context ctx, Object complex) {
     int n = Array.getLength(complex);
     Object[] result = new Object[n];
     for (int i = 0; i < n; i++) {
@@ -213,8 +206,7 @@ public final class ConfigNormalizer {
     return result;
   }
 
-  private void _dynamicNormalize(Context ctx, Class<?> type, Object complex, Dictionary container)
-      throws Exception {
+  private void _dynamicNormalize(Context ctx, Class<?> type, Object complex, Dictionary container) {
     if (complex instanceof Dictionary) {
       if (settings.contains(SettingFlag.Normalizer.DEEP_CLONE)) { // TODO reduce allocations
         container.putAll(SimpleTypes.deepClone((Dictionary) complex));
@@ -245,7 +237,21 @@ public final class ConfigNormalizer {
         } else {
           if (processor != null && processor.strategy() == Normalizer.Strategy.BEFORE)
             value = ((Processor.NormalizationInvoker) processor.invoker()).invoke(ctx, complex);
-          else value = property.field().get(complex);
+          else {
+            try {
+              value = property.field().get(complex);
+            } catch (IllegalAccessException e) {
+              throw new NormalizationException(
+                  ctx,
+                  "Cannot access field "
+                      + property.field().getName()
+                      + " (representing property "
+                      + property.name()
+                      + ") declared in "
+                      + property.field().getDeclaringClass().getName(),
+                  e);
+            }
+          }
 
           if (value != null) value = _normalize(ctx, value.getClass(), value);
         }

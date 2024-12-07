@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 public class ConfigNormalizerTest {
   @Test
-  public void testNormalizeSimpleValue() throws Exception {
+  public void testNormalizeSimpleValue() {
     ConfigNormalizer normalizer = ConfigFactory.create().build().getNormalizer();
     assertEquals("abc", normalizer.normalize("abc"));
 
@@ -36,7 +36,7 @@ public class ConfigNormalizerTest {
   }
 
   @Test
-  public void testNormalizeSimpleValueDeep() throws Exception {
+  public void testNormalizeSimpleValueDeep() {
     ConfigNormalizer normalizer =
         ConfigFactory.create()
             .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)
@@ -56,7 +56,7 @@ public class ConfigNormalizerTest {
   }
 
   @Test
-  public void testNormalizeArray() throws Exception {
+  public void testNormalizeArray() {
     ConfigNormalizer normalizer = ConfigFactory.create().build().getNormalizer();
     UUID foo = UUID.randomUUID();
     UUID[] bar = new UUID[] {foo, null, foo};
@@ -67,7 +67,7 @@ public class ConfigNormalizerTest {
   }
 
   @Test
-  public void testIgnoreTypeAnnotator() throws Exception {
+  public void testIgnoreTypeAnnotator() {
     ConfigNormalizer normalizer =
         ConfigFactory.create()
             .adaptType(
@@ -75,8 +75,7 @@ public class ConfigNormalizerTest {
                 new TypeAnnotator<>() {
                   @Override
                   public @Nullable DummyYummy complexify(
-                      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
-                      throws Exception {
+                      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
                     return null;
                   }
                 })
@@ -96,15 +95,13 @@ public class ConfigNormalizerTest {
                   public @Nullable Object simplify(
                       @NotNull Context ctx,
                       @NotNull Class<? extends DummyYummy> sourceType,
-                      @NotNull DummyYummy value)
-                      throws Exception {
+                      @NotNull DummyYummy value) {
                     return new ArrayList<>();
                   }
 
                   @Override
                   public @Nullable DummyYummy complexify(
-                      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
-                      throws Exception {
+                      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
                     return null;
                   }
                 })
@@ -119,7 +116,7 @@ public class ConfigNormalizerTest {
   public class TestNormalizeIntoDictionary {
 
     @Test
-    public void testShallowCopyDictionary() throws Exception {
+    public void testShallowCopyDictionary() {
       ConfigFactory factory = ConfigFactory.create().build();
       String[] pet = new String[] {"dog"};
       Dictionary foo = new SchemalessDictionary();
@@ -134,7 +131,7 @@ public class ConfigNormalizerTest {
     }
 
     @Test
-    public void testDeepCloneDictionary() throws Exception {
+    public void testDeepCloneDictionary() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)
@@ -157,7 +154,7 @@ public class ConfigNormalizerTest {
   public class TestNormalizeInstanceUsingSchema {
 
     @Test
-    public void testSkipTransient() throws Exception {
+    public void testSkipTransient() {
       ConfigFactory factory = ConfigFactory.create().build();
       Transaction transaction = new Transaction();
       transaction.id = UUID.randomUUID();
@@ -167,7 +164,7 @@ public class ConfigNormalizerTest {
     }
 
     @Test
-    public void testIgnoreDefaultValue() throws Exception {
+    public void testIgnoreDefaultValue() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
@@ -179,7 +176,7 @@ public class ConfigNormalizerTest {
     }
 
     @Test
-    public void testIgnoreEmptyArray() throws Exception {
+    public void testIgnoreEmptyArray() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_ARRAY)
@@ -192,7 +189,7 @@ public class ConfigNormalizerTest {
     }
 
     @Test
-    public void testIgnoreEmptyDictionary() throws Exception {
+    public void testIgnoreEmptyDictionary() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_EMPTY_DICTIONARY)
@@ -205,7 +202,7 @@ public class ConfigNormalizerTest {
     }
 
     @Test
-    public void testDoNotIgnoreEmptyDictionaryInArray() throws Exception {
+    public void testDoNotIgnoreEmptyDictionaryInArray() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
@@ -234,7 +231,7 @@ public class ConfigNormalizerTest {
   @Nested
   public class TestNormalizationProcessors {
     @Test
-    public void testDefaultSyntax() throws Exception {
+    public void testDefaultSyntax() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)

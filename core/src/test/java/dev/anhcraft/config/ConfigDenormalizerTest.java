@@ -18,7 +18,7 @@ import org.junit.jupiter.api.*;
 
 public class ConfigDenormalizerTest {
   @Test
-  public void testDenormalizeScalar() throws Exception {
+  public void testDenormalizeScalar() {
     ConfigDenormalizer denormalizer = ConfigFactory.create().build().getDenormalizer();
     assertEquals("1.0001", denormalizer.denormalize("1.0001", String.class));
     assertEquals(1, denormalizer.denormalize("1.0001", Integer.class));
@@ -33,7 +33,7 @@ public class ConfigDenormalizerTest {
   }
 
   @Test
-  public void testDenormalizeArray() throws Exception {
+  public void testDenormalizeArray() {
     ConfigDenormalizer denormalizer = ConfigFactory.create().build().getDenormalizer();
     assertArrayEquals(
         new int[] {1, 2, 3},
@@ -47,7 +47,7 @@ public class ConfigDenormalizerTest {
   }
 
   @Test
-  public void testDenormalizeArray2D() throws Exception {
+  public void testDenormalizeArray2D() {
     ConfigDenormalizer denormalizer = ConfigFactory.create().build().getDenormalizer();
     assertArrayEquals(
         new int[][] {
@@ -66,7 +66,7 @@ public class ConfigDenormalizerTest {
   }
 
   @Test
-  public void testIgnoreTypeInferencer() throws Exception {
+  public void testIgnoreTypeInferencer() {
     ConfigDenormalizer denormalizer =
         ConfigFactory.create()
             .adaptType(
@@ -76,8 +76,7 @@ public class ConfigDenormalizerTest {
                   public @Nullable Object simplify(
                       @NotNull Context ctx,
                       @NotNull Class<? extends DummyYummy> sourceType,
-                      @NotNull DummyYummy value)
-                      throws Exception {
+                      @NotNull DummyYummy value) {
                     return null;
                   }
                 })
@@ -100,15 +99,15 @@ public class ConfigDenormalizerTest {
 
                       @Override
                       public @Nullable Object simplify(
-                          @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value)
-                          throws Exception {
+                          @NotNull Context ctx,
+                          @NotNull Class<?> sourceType,
+                          @NotNull Object value) {
                         return null;
                       }
 
                       @Override
                       public @Nullable Object complexify(
-                          @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType)
-                          throws Exception {
+                          @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
                         return new ArrayList<>();
                       }
                     })
@@ -144,7 +143,7 @@ public class ConfigDenormalizerTest {
 
     @Test
     @Order(1)
-    public void testSkipConstant() throws Exception {
+    public void testSkipConstant() {
       Transaction transaction = new Transaction();
       transaction.id = UUID.fromString("2733991b-6b66-4923-ac2e-76480f648cdc");
       factory.getDenormalizer().denormalizeToInstance(dict, Transaction.class, transaction);
@@ -153,7 +152,7 @@ public class ConfigDenormalizerTest {
 
     @Test
     @Order(2)
-    public void testDoNotOverrideOptional() throws Exception {
+    public void testDoNotOverrideOptional() {
       dict.remove("items");
       Transaction transaction = new Transaction();
       factory.getDenormalizer().denormalizeToInstance(dict, Transaction.class, transaction);
@@ -162,7 +161,7 @@ public class ConfigDenormalizerTest {
 
     @Test
     @Order(3)
-    public void testCheckNullPrimitive() throws Exception {
+    public void testCheckNullPrimitive() {
       dict.remove("worth");
       Transaction transaction = new Transaction();
       factory.getDenormalizer().denormalizeToInstance(dict, Transaction.class, transaction);
@@ -221,7 +220,7 @@ public class ConfigDenormalizerTest {
   @Nested
   public class TestDenormalizationProcessors {
     @Test
-    public void testDefaultSyntax() throws Exception {
+    public void testDefaultSyntax() {
       ConfigFactory factory =
           ConfigFactory.create()
               .enableNormalizerSetting(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES)
@@ -282,7 +281,7 @@ public class ConfigDenormalizerTest {
   @Nested
   public class TestDenormalizationFallback {
     @Test
-    public void testFallback() throws Exception {
+    public void testFallback() {
       class Bucket {
         public int foo;
 
@@ -306,7 +305,7 @@ public class ConfigDenormalizerTest {
     }
 
     @Test
-    public void testFallbackContainsItself() throws Exception {
+    public void testFallbackContainsItself() {
       class Bucket {
         public int foo;
 
@@ -332,7 +331,7 @@ public class ConfigDenormalizerTest {
     }
 
     @Test
-    public void testNameDistinctFallbackWhenPrimaryNameExists() throws Exception {
+    public void testNameDistinctFallbackWhenPrimaryNameExists() {
       class Bucket {
         @Alias({"a", "b"})
         public int foo;
@@ -362,7 +361,7 @@ public class ConfigDenormalizerTest {
     }
 
     @Test
-    public void testNameDistinctFallbackWhenPrimaryNameDoesNotExist() throws Exception {
+    public void testNameDistinctFallbackWhenPrimaryNameDoesNotExist() {
       class Bucket {
         @Alias({"a", "b"})
         public int foo;
@@ -391,7 +390,7 @@ public class ConfigDenormalizerTest {
   }
 
   @Test
-  public void testPropertyDistinctFallbackWhenPrimaryNameExists() throws Exception {
+  public void testPropertyDistinctFallbackWhenPrimaryNameExists() {
     class Bucket {
       @Alias({"a", "b"})
       public int foo;
@@ -420,7 +419,7 @@ public class ConfigDenormalizerTest {
   }
 
   @Test
-  public void testPropertyDistinctFallbackWhenPrimaryNameDoesNotExist() throws Exception {
+  public void testPropertyDistinctFallbackWhenPrimaryNameDoesNotExist() {
     class Bucket {
       @Alias({"a", "b"})
       public int foo;

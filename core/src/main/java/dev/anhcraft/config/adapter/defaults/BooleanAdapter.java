@@ -11,7 +11,7 @@ public class BooleanAdapter implements TypeAnnotator<Boolean> {
 
   @Override
   public @Nullable Boolean complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).intValue() > 0;
     else if (value instanceof String) {
       String s = (String) value;

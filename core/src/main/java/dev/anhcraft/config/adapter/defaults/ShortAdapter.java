@@ -13,7 +13,7 @@ public class ShortAdapter implements TypeAnnotator<Short> {
 
   @Override
   public @Nullable Short complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).shortValue();
     else if (value instanceof String) {
       try {

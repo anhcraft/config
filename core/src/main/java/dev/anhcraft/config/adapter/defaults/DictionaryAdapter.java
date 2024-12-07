@@ -13,7 +13,7 @@ public class DictionaryAdapter implements TypeAnnotator<Dictionary> {
 
   @Override
   public @Nullable Dictionary complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Dictionary) {
       if (ctx.getFactory()
           .getDenormalizer()

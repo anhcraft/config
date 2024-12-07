@@ -14,14 +14,13 @@ public class BigIntegerAdapter implements TypeAdapter<BigInteger> {
   public @Nullable Object simplify(
       @NotNull Context ctx,
       @NotNull Class<? extends BigInteger> sourceType,
-      @NotNull BigInteger value)
-      throws Exception {
+      @NotNull BigInteger value) {
     return value.toString();
   }
 
   @Override
   public @Nullable BigInteger complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) {
       return BigInteger.valueOf(((Number) value).longValue());
     } else if (value instanceof String) {

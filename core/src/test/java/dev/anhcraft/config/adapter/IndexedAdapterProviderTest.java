@@ -34,7 +34,7 @@ public class IndexedAdapterProviderTest {
     */
 
   @Test
-  public void test() throws Exception {
+  public void test() {
     LinkedHashMap<Class<?>, TypeAdapter<?>> typeAdapters = new LinkedHashMap<>();
     typeAdapters.put(DummyB.class, new TypeAdapter1());
     typeAdapters.put(Inf2.class, new TypeAdapter2());
@@ -80,14 +80,13 @@ public class IndexedAdapterProviderTest {
   private static class TypeAdapter1 implements TypeAdapter<Object> {
     @Override
     public @Nullable Object simplify(
-        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value)
-        throws Exception {
+        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value) {
       return null;
     }
 
     @Override
     public @Nullable Object complexify(
-        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
       return null;
     }
   }
@@ -95,14 +94,13 @@ public class IndexedAdapterProviderTest {
   private static class TypeAdapter2 implements TypeAdapter<Object> {
     @Override
     public @Nullable Object simplify(
-        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value)
-        throws Exception {
+        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value) {
       return null;
     }
 
     @Override
     public @Nullable Object complexify(
-        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
       return null;
     }
   }
@@ -110,14 +108,13 @@ public class IndexedAdapterProviderTest {
   private static class TypeAdapter3 implements TypeAdapter<Object> {
     @Override
     public @Nullable Object simplify(
-        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value)
-        throws Exception {
+        @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value) {
       return null;
     }
 
     @Override
     public @Nullable Object complexify(
-        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
       return null;
     }
   }

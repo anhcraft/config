@@ -39,7 +39,7 @@ public class ConfigDenormalizerKeyInjectTest {
   }
 
   @Test
-  public void testDenormalizeInjectKey() throws Exception {
+  public void testDenormalizeInjectKey() {
     SchemalessDictionary dict =
         SchemalessDictionary.create()
             .put("item1", SchemalessDictionary.create().put("name", "Laptop").build())

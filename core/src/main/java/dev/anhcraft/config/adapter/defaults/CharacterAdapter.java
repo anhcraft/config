@@ -11,7 +11,7 @@ public class CharacterAdapter implements TypeAnnotator<Character> {
 
   @Override
   public @Nullable Character complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return (char) ((Number) value).intValue();
     else if (value instanceof String)
       return ((String) value).isEmpty() ? '\0' : ((String) value).charAt(0);

@@ -20,7 +20,7 @@ class InstanceFactoryTest {
   }
 
   @Test
-  void testGetInstanceAssemblerWithDefaultConstructor() throws Exception {
+  void testGetInstanceAssemblerWithDefaultConstructor() throws InstantiationException {
     InstanceAssembler assembler =
         instanceFactory.getInstanceAssembler(TestClassWithDefaultConstructor.class);
     assertNotNull(assembler);
@@ -31,7 +31,7 @@ class InstanceFactoryTest {
   }
 
   @Test
-  void testGetInstanceAssemblerWithoutDefaultConstructor() throws Exception {
+  void testGetInstanceAssemblerWithoutDefaultConstructor() throws InstantiationException {
     InstanceAssembler assembler =
         instanceFactory.getInstanceAssembler(TestClassWithoutDefaultConstructor.class);
     assertNotNull(assembler);
@@ -48,7 +48,7 @@ class InstanceFactoryTest {
   }
 
   @Test
-  void testNewInstance() throws Exception {
+  void testNewInstance() throws InstantiationException {
     TestClassWithDefaultConstructor instance =
         instanceFactory.newInstance(new ContextStub(), TestClassWithDefaultConstructor.class);
     assertNotNull(instance);

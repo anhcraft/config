@@ -13,7 +13,7 @@ public class ByteAdapter implements TypeAnnotator<Byte> {
 
   @Override
   public @Nullable Byte complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).byteValue();
     else if (value instanceof String) {
       try {

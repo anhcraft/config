@@ -45,7 +45,7 @@ public class ConfigNormalizerPropertyDescriptionTest {
   }
 
   @Test
-  public void testNormalizeWithComment() throws Exception {
+  public void testNormalizeWithComment() {
     var message = "Hello";
     var uuid = UUID.randomUUID();
     var time = System.currentTimeMillis();

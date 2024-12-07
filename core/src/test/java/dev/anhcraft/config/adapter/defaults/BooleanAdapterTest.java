@@ -27,14 +27,14 @@ public class BooleanAdapterTest {
   }
 
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(true, adapter.complexify(context, 1, Boolean.class));
     assertEquals(false, adapter.complexify(context, 0, Boolean.class));
     assertEquals(false, adapter.complexify(context, -1, Boolean.class));
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals(true, adapter.complexify(context, "true", Boolean.class));
     assertEquals(true, adapter.complexify(context, "True", Boolean.class));
     assertEquals(true, adapter.complexify(context, "1", Boolean.class));
@@ -49,14 +49,14 @@ public class BooleanAdapterTest {
   }
 
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals(true, adapter.complexify(context, '1', Boolean.class));
     assertEquals(false, adapter.complexify(context, '0', Boolean.class));
     assertNull(adapter.complexify(context, '2', Boolean.class));
   }
 
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals(true, adapter.complexify(context, true, Boolean.class));
     assertEquals(false, adapter.complexify(context, false, Boolean.class));
   }

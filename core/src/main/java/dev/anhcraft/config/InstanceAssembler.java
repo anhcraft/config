@@ -13,7 +13,8 @@ public interface InstanceAssembler {
    * @param clazz the class
    * @return the new instance
    * @param <T> the type
-   * @throws Exception if the instance could not be created
+   * @throws InstantiationException if the instance could not be created
    */
-  <T> @NotNull T newInstance(@NotNull Context context, @NotNull Class<T> clazz) throws Exception;
+  <T> @NotNull T newInstance(@NotNull Context context, @NotNull Class<T> clazz)
+      throws InstantiationException;
 }

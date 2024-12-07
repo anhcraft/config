@@ -31,7 +31,7 @@ public class ByteAdapterTest {
 
   @SuppressWarnings("ConstantValue")
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(Byte.MAX_VALUE, adapter.complexify(context, Byte.MAX_VALUE, Byte.class));
     assertEquals((byte) Short.MIN_VALUE, adapter.complexify(context, Short.MIN_VALUE, Byte.class));
     assertEquals(
@@ -50,7 +50,7 @@ public class ByteAdapterTest {
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals((byte) 0, adapter.complexify(context, "0", Byte.class));
     assertEquals((byte) 1, adapter.complexify(context, "1.001", Byte.class));
     assertEquals((byte) -2, adapter.complexify(context, "-2.1", Byte.class));
@@ -62,7 +62,7 @@ public class ByteAdapterTest {
   }
 
   @Test
-  public void testComplexifyStringStrictly() throws Exception {
+  public void testComplexifyStringStrictly() {
     Context strict =
         ConfigFactory.create()
             .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
@@ -84,14 +84,14 @@ public class ByteAdapterTest {
   }
 
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals((byte) '1', adapter.complexify(context, '1', Byte.class));
     assertEquals((byte) '2', adapter.complexify(context, '2', Byte.class));
     assertEquals((byte) 'à', adapter.complexify(context, 'à', Byte.class));
   }
 
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals((byte) 0, adapter.complexify(context, false, Byte.class));
     assertEquals((byte) 1, adapter.complexify(context, true, Byte.class));
   }

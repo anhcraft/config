@@ -20,14 +20,13 @@ public class BigDecimalAdapter implements TypeAdapter<BigDecimal> {
   public @Nullable Object simplify(
       @NotNull Context ctx,
       @NotNull Class<? extends BigDecimal> sourceType,
-      @NotNull BigDecimal value)
-      throws Exception {
+      @NotNull BigDecimal value) {
     return value.toString();
   }
 
   @Override
   public @Nullable BigDecimal complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Double || value instanceof Float) {
       //noinspection UnpredictableBigDecimalConstructorCall
       return new BigDecimal(((Number) value).doubleValue(), mathContext);

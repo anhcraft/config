@@ -30,14 +30,14 @@ public class DictionaryAdapterTest {
   }
 
   @Test
-  public void testShallowComplexify() throws Exception {
+  public void testShallowComplexify() {
     Dictionary dict = new SchemalessDictionary();
     dict.put("foo", "bar");
     assertSame(dict, adapter.complexify(context, dict, Dictionary.class));
   }
 
   @Test
-  public void testDeepComplexify() throws Exception {
+  public void testDeepComplexify() {
     Context deepContext =
         ConfigFactory.create()
             .enableNormalizerSetting(SettingFlag.Normalizer.DEEP_CLONE)

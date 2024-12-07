@@ -28,7 +28,7 @@ public class CharacterAdapterTest {
   }
 
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals('1', adapter.complexify(context, 49, Character.class));
     assertEquals('1', adapter.complexify(context, 49.001, Character.class));
     assertEquals('2', adapter.complexify(context, 50, Character.class));
@@ -36,19 +36,19 @@ public class CharacterAdapterTest {
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals('H', adapter.complexify(context, "Hello World", Character.class));
     assertEquals('\0', adapter.complexify(context, "", Character.class));
   }
 
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals('1', adapter.complexify(context, '1', Character.class));
     assertEquals('0', adapter.complexify(context, '0', Character.class));
   }
 
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals('1', adapter.complexify(context, true, Character.class));
     assertEquals('0', adapter.complexify(context, false, Character.class));
   }

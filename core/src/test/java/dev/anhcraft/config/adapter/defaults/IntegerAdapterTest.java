@@ -31,7 +31,7 @@ public class IntegerAdapterTest {
 
   @SuppressWarnings("ConstantValue")
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(Integer.MAX_VALUE, adapter.complexify(context, Integer.MAX_VALUE, Integer.class));
     assertEquals(Short.MIN_VALUE, adapter.complexify(context, Short.MIN_VALUE, Integer.class));
     assertEquals(Integer.MIN_VALUE, adapter.complexify(context, Integer.MIN_VALUE, Integer.class));
@@ -50,7 +50,7 @@ public class IntegerAdapterTest {
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals(0, adapter.complexify(context, "0", Integer.class));
     assertEquals(1, adapter.complexify(context, "1.001", Integer.class));
     assertEquals(-2, adapter.complexify(context, "-2.1", Integer.class));
@@ -62,7 +62,7 @@ public class IntegerAdapterTest {
   }
 
   @Test
-  public void testComplexifyStringStrictly() throws Exception {
+  public void testComplexifyStringStrictly() {
     Context strict =
         ConfigFactory.create()
             .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
@@ -81,14 +81,14 @@ public class IntegerAdapterTest {
   }
 
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals('1', adapter.complexify(context, '1', Integer.class));
     assertEquals('2', adapter.complexify(context, '2', Integer.class));
     assertEquals('à', adapter.complexify(context, 'à', Integer.class));
   }
 
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals(0, adapter.complexify(context, false, Integer.class));
     assertEquals(1, adapter.complexify(context, true, Integer.class));
   }

@@ -6,12 +6,12 @@ import dev.anhcraft.config.Dictionary;
 import dev.anhcraft.config.NamingPolicy;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.PathType;
+import dev.anhcraft.config.error.ProcessorInvocationException;
 import dev.anhcraft.config.error.SchemaCreationException;
 import dev.anhcraft.config.meta.*;
 import dev.anhcraft.config.meta.Optional;
 import dev.anhcraft.config.type.TypeToken;
 import dev.anhcraft.config.validate.ValidationRegistry;
-import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -340,7 +340,7 @@ public class ReflectSchemaScannerTest {
   @Nested
   public class NormalizerProcessorTest {
     @Test
-    public void testNormalizerReplaceStrategy() throws Exception {
+    public void testNormalizerReplaceStrategy() {
       ClassSchema schema = scanner.scanSchema(Log.class);
       assertEquals(2, schema.properties().size());
       assertEquals("timestamp", schema.property("timestamp").field().getName());
@@ -354,7 +354,7 @@ public class ReflectSchemaScannerTest {
     }
 
     @Test
-    public void testNormalizerBeforeStrategy() throws Exception {
+    public void testNormalizerBeforeStrategy() {
       ClassSchema schema = scanner.scanSchema(Log.class);
       assertEquals(2, schema.properties().size());
 
@@ -369,7 +369,7 @@ public class ReflectSchemaScannerTest {
       assertNotNull(processor2);
       assertEquals(Normalizer.Strategy.BEFORE, processor2.strategy());
       assertThrows(
-          InvocationTargetException.class,
+          ProcessorInvocationException.class,
           () -> ((Processor.NormalizationInvoker) processor2.invoker()).invoke(null, new Log()));
     }
 
@@ -393,7 +393,7 @@ public class ReflectSchemaScannerTest {
   @Nested
   public class DenormalizerProcessorTest {
     @Test
-    public void testDenormalizerAfterStrategy() throws Exception {
+    public void testDenormalizerAfterStrategy() {
       ClassSchema schema = scanner.scanSchema(Package.class);
       assertEquals(2, schema.properties().size());
       assertEquals("items", schema.property("items").field().getName());
@@ -411,7 +411,7 @@ public class ReflectSchemaScannerTest {
     }
 
     @Test
-    public void testDenormalizerReplaceStrategy() throws Exception {
+    public void testDenormalizerReplaceStrategy() {
       ClassSchema schema = scanner.scanSchema(Item.class);
       assertEquals(2, schema.properties().size());
       assertEquals("id", schema.property("id").field().getName());

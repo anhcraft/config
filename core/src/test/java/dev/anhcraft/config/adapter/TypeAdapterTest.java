@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 public class TypeAdapterTest {
   @Test
-  public void test() throws Exception {
+  public void test() {
     ConfigFactory cf = ConfigFactory.create().adaptType(String.class, new CustomAdapter()).build();
     assertEquals(
         "foo", cf.getTypeAdapter(String.class).simplify(cf.createContext(), String.class, " foo "));
@@ -21,14 +21,13 @@ public class TypeAdapterTest {
 
     @Override
     public @Nullable Object simplify(
-        @NotNull Context ctx, @NotNull Class<? extends String> sourceType, @NotNull String value)
-        throws Exception {
+        @NotNull Context ctx, @NotNull Class<? extends String> sourceType, @NotNull String value) {
       return value.trim();
     }
 
     @Override
     public @Nullable String complexify(
-        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+        @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
       return String.valueOf(value);
     }
   }

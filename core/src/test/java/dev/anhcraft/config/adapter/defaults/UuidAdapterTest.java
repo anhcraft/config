@@ -24,14 +24,14 @@ public class UuidAdapterTest {
   @ParameterizedTest
   @ValueSource(
       strings = {"1a493939-49fe-457f-958f-69052a656d40   ", "00000000-0000-0000-0000-000000000000"})
-  public void testSimplify(String uuid) throws Exception {
+  public void testSimplify(String uuid) {
     assertEquals(uuid.trim(), adapter.simplify(context, UUID.class, UUID.fromString(uuid.trim())));
   }
 
   @ParameterizedTest
   @ValueSource(
       strings = {"1a493939-49fe-457f-958f-69052a656d40  ", "00000000-0000-0000-0000-000000000000"})
-  public void testComplexifyIsUri(String uuid) throws Exception {
+  public void testComplexifyIsUri(String uuid) {
     assertEquals(UUID.fromString(uuid.trim()), adapter.complexify(context, uuid, UUID.class));
   }
 

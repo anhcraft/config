@@ -4,6 +4,7 @@ import dev.anhcraft.config.blueprint.ClassProperty;
 import dev.anhcraft.config.blueprint.ClassSchema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.error.ShapeLinkingAmbiguityException;
+import dev.anhcraft.config.error.ShapeResolutionException;
 import dev.anhcraft.config.meta.Shape;
 import dev.anhcraft.config.meta.Shapes;
 import dev.anhcraft.config.type.ComplexTypes;
@@ -111,7 +112,7 @@ public final class ShapeRegistry {
    * @param base the base
    * @return the shape class
    */
-  public @Nullable Class<?> solve(@NotNull Context ctx, @NotNull Object base) throws Exception {
+  public @Nullable Class<?> solve(@NotNull Context ctx, @NotNull Object base) {
     Class<?> baseClass = base.getClass();
     ClassSchema classSchema = factory.getSchema(baseClass);
 
@@ -120,7 +121,13 @@ public final class ShapeRegistry {
       ShapeCollection collection = discriminatorPropertyShapes.get(discriminator);
       if (collection == null) continue;
 
-      Object val = discriminator.field().get(base);
+      Object val;
+      try {
+        val = discriminator.field().get(base);
+      } catch (IllegalAccessException e) {
+        throw new ShapeResolutionException(
+            ctx, "Cannot solve shape for type " + baseClass.getName(), e);
+      }
       String valStr = (String) factory.getDenormalizer().denormalize(ctx, val, String.class);
       Class<?> clazz = collection.discriminatorValueToSubtype.get(valStr);
 

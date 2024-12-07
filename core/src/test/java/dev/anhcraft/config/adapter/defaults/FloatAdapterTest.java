@@ -31,7 +31,7 @@ public class FloatAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(0.5f, adapter.complexify(context, 0.5f, Float.class), 1e-8);
     assertEquals(2.0000f, adapter.complexify(context, 2, Float.class), 1e-8);
     assertEquals(-0.0005f, adapter.complexify(context, -0.0005d, Float.class), 1e-8);
@@ -40,7 +40,7 @@ public class FloatAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals(3.005f, adapter.complexify(context, "3.005", Float.class), 1e-8);
     assertEquals(2f, adapter.complexify(context, "2 ", Float.class), 1e-8);
     assertEquals(12f, adapter.complexify(context, "0012", Float.class), 1e-8);
@@ -61,7 +61,7 @@ public class FloatAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyStringStrictly() throws Exception {
+  public void testComplexifyStringStrictly() {
     Context strict =
         ConfigFactory.create()
             .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
@@ -87,14 +87,14 @@ public class FloatAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals('1', adapter.complexify(context, '1', Float.class), 1e-8);
     assertEquals('2', adapter.complexify(context, '2', Float.class), 1e-8);
   }
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals(0f, adapter.complexify(context, false, Float.class), 1e-8);
     assertEquals(1f, adapter.complexify(context, true, Float.class), 1e-8);
   }

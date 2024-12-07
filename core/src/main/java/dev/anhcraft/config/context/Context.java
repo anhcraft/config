@@ -145,16 +145,14 @@ public class Context implements TypeAdapter<Object> {
   /**
    * @see #simplify(Context, Class, Object)
    */
-  public @Nullable Object simplify(@NotNull Class<?> sourceType, @NotNull Object value)
-      throws Exception {
+  public @Nullable Object simplify(@NotNull Class<?> sourceType, @NotNull Object value) {
     return simplify(this, sourceType, value);
   }
 
   /**
    * @see #complexify(Context, Object, Type)
    */
-  public @Nullable Object complexify(@NotNull Object value, @NotNull Type targetType)
-      throws Exception {
+  public @Nullable Object complexify(@NotNull Object value, @NotNull Type targetType) {
     return complexify(this, value, targetType);
   }
 
@@ -163,7 +161,7 @@ public class Context implements TypeAdapter<Object> {
    */
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value) throws Exception {
+      @NotNull Context ctx, @NotNull Class<?> sourceType, @NotNull Object value) {
     //noinspection unchecked,rawtypes
     return factory.getNormalizer().normalize(ctx, (Class) sourceType, value);
   }
@@ -173,7 +171,7 @@ public class Context implements TypeAdapter<Object> {
    */
   @Override
   public @Nullable Object complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     return factory.getDenormalizer().denormalize(ctx, value, targetType);
   }
 }

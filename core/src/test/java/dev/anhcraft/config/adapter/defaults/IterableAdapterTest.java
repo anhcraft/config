@@ -21,7 +21,7 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testSimplify1D() throws Exception {
+  public void testSimplify1D() {
     List<String> food =
         List.of("Pizza", "Burger", "Salad", "Sushi", "Pasta", "Ice Cream", "Tacos", "Steak");
     Object[] simplified = (Object[]) adapter.simplify(context, List.class, food);
@@ -29,7 +29,7 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testSimplify2D() throws Exception {
+  public void testSimplify2D() {
     List<List<String>> food =
         List.of(
             List.of("Salad", "Sushi", "Fruit Salad"),
@@ -46,12 +46,12 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifyNotArray() throws Exception {
+  public void testComplexifyNotArray() {
     assertNull(adapter.complexify(context, new SchemalessDictionary(), List.class));
   }
 
   @Test
-  public void testComplexifyScalar() throws Exception {
+  public void testComplexifyScalar() {
     assertEquals(List.of(1), adapter.complexify(context, 1, new TypeToken<List<Integer>>() {}));
     assertEquals(
         List.of("foo"), adapter.complexify(context, "foo", new TypeToken<List<String>>() {}));
@@ -62,7 +62,7 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifyList() throws Exception {
+  public void testComplexifyList() {
     assertEquals(
         List.of(1, 2, 3),
         adapter.complexify(context, new int[] {1, 2, 3}, new TypeToken<List<Integer>>() {}));
@@ -79,7 +79,7 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifySet() throws Exception {
+  public void testComplexifySet() {
     assertEquals(
         Set.of(1, 2, 3),
         adapter.complexify(context, new int[] {1, 2, 3}, new TypeToken<Set<Integer>>() {}));
@@ -96,14 +96,14 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifyUseLinkedList() throws Exception {
+  public void testComplexifyUseLinkedList() {
     assertInstanceOf(
         LinkedList.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<LinkedList<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseArrayDeque() throws Exception {
+  public void testComplexifyUseArrayDeque() {
     assertInstanceOf(
         ArrayDeque.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<ArrayDeque<Integer>>() {}));
@@ -113,7 +113,7 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifyUsePriorityQueue() throws Exception {
+  public void testComplexifyUsePriorityQueue() {
     assertInstanceOf(
         PriorityQueue.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<PriorityQueue<Integer>>() {}));
@@ -123,42 +123,42 @@ public class IterableAdapterTest {
   }
 
   @Test
-  public void testComplexifyUseTreeSet() throws Exception {
+  public void testComplexifyUseTreeSet() {
     assertInstanceOf(
         TreeSet.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<TreeSet<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseLinkedHashSet() throws Exception {
+  public void testComplexifyUseLinkedHashSet() {
     assertInstanceOf(
         LinkedHashSet.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<LinkedHashSet<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseHashSet() throws Exception {
+  public void testComplexifyUseHashSet() {
     assertInstanceOf(
         HashSet.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<HashSet<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseStack() throws Exception {
+  public void testComplexifyUseStack() {
     assertInstanceOf(
         Stack.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<Stack<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseVector() throws Exception {
+  public void testComplexifyUseVector() {
     assertInstanceOf(
         Vector.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<Vector<Integer>>() {}));
   }
 
   @Test
-  public void testComplexifyUseArrayList() throws Exception {
+  public void testComplexifyUseArrayList() {
     assertInstanceOf(
         ArrayList.class,
         adapter.complexify(context, new int[] {0}, new TypeToken<ArrayList<Integer>>() {}));

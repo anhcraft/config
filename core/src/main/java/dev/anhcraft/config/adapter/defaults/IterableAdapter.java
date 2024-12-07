@@ -16,8 +16,9 @@ public class IterableAdapter implements TypeAdapter<Iterable> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends Iterable> sourceType, @NotNull Iterable value)
-      throws Exception {
+      @NotNull Context ctx,
+      @NotNull Class<? extends Iterable> sourceType,
+      @NotNull Iterable value) {
     List<Object> list = new ArrayList<>();
     for (Object object : value) {
       list.add(ctx.simplify(ctx, object.getClass(), object));
@@ -27,7 +28,7 @@ public class IterableAdapter implements TypeAdapter<Iterable> {
 
   @Override
   public @Nullable Iterable complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (SimpleTypes.isScalar(value.getClass())) {
       return complexify(ctx, new Object[] {value}, targetType);
     } else if (ComplexTypes.isArray(value)) {
@@ -35,7 +36,12 @@ public class IterableAdapter implements TypeAdapter<Iterable> {
       if (componentType == null) return null;
 
       int length = Array.getLength(value);
-      Class<?> targetClazz = ComplexTypes.erasure(targetType);
+      Class<?> targetClazz;
+      try {
+        targetClazz = ComplexTypes.erasure(targetType);
+      } catch (ClassNotFoundException e) {
+        return null;
+      }
       Collection<Object> collection;
 
       if (LinkedList.class.isAssignableFrom(targetClazz)) {

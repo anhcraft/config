@@ -41,15 +41,14 @@ public class Processor {
    * A normalization process invoker.
    */
   public interface NormalizationInvoker extends Invoker {
-    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance) throws Exception;
+    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance);
   }
 
   /**
    * A denormalization process invoker.
    */
   public interface DenormalizationInvoker extends Invoker {
-    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance, @Nullable Object simple)
-        throws Exception;
+    @Nullable Object invoke(@NotNull Context ctx, @NotNull Object instance, @Nullable Object simple);
   }
 
   /**

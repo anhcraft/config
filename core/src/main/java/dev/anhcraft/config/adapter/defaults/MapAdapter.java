@@ -17,8 +17,7 @@ public class MapAdapter implements TypeAdapter<Map> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends Map> sourceType, @NotNull Map value)
-      throws Exception {
+      @NotNull Context ctx, @NotNull Class<? extends Map> sourceType, @NotNull Map value) {
     Dictionary dict = new SchemalessDictionary();
     Set<Map.Entry> entries = value.entrySet();
     for (Map.Entry object : entries) {
@@ -33,13 +32,18 @@ public class MapAdapter implements TypeAdapter<Map> {
 
   @Override
   public @Nullable Map complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Dictionary) {
       Type keyType = ComplexTypes.getActualTypeArgument(targetType, 0);
       Type valueType = ComplexTypes.getActualTypeArgument(targetType, 1);
       if (keyType == null || valueType == null) return null;
 
-      Class<?> targetClazz = ComplexTypes.erasure(targetType);
+      Class<?> targetClazz;
+      try {
+        targetClazz = ComplexTypes.erasure(targetType);
+      } catch (ClassNotFoundException e) {
+        return null;
+      }
       Map<Object, Object> map;
 
       if (HashMap.class.isAssignableFrom(targetClazz)) {

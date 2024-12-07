@@ -18,7 +18,7 @@ public class EnumAdapterTest {
   }
 
   @Test
-  public void testSimplify() throws Exception {
+  public void testSimplify() {
     assertEquals("apple", adapter.simplify(context, Enum.class, Fruit.APPLE));
     assertEquals("banana", adapter.simplify(context, Enum.class, Fruit.BANANA));
     assertEquals("orange", adapter.simplify(context, Enum.class, Fruit.ORANGE));
@@ -27,7 +27,7 @@ public class EnumAdapterTest {
   }
 
   @Test
-  public void testComplexify() throws Exception {
+  public void testComplexify() {
     assertSame(Fruit.APPLE, adapter.complexify(context, "apple", Fruit.class));
     assertSame(Fruit.BANANA, adapter.complexify(context, " BANANA ", Fruit.class));
     assertSame(Fruit.ORANGE, adapter.complexify(context, "OrangE", Fruit.class));

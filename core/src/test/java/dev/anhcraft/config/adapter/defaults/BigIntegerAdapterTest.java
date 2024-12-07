@@ -21,14 +21,14 @@ public class BigIntegerAdapterTest {
   }
 
   @Test
-  public void testSimplify() throws Exception {
+  public void testSimplify() {
     assertEquals("12345", adapter.simplify(context, BigInteger.class, new BigInteger("12345")));
     assertEquals("-98765", adapter.simplify(context, BigInteger.class, new BigInteger("-98765")));
     assertEquals("0", adapter.simplify(context, BigInteger.class, BigInteger.ZERO));
   }
 
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(BigInteger.valueOf(12345), adapter.complexify(context, 12345, BigInteger.class));
     assertEquals(
         BigInteger.valueOf(-67890), adapter.complexify(context, -67890L, BigInteger.class));
@@ -36,7 +36,7 @@ public class BigIntegerAdapterTest {
   }
 
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals(new BigInteger("12345"), adapter.complexify(context, "12345", BigInteger.class));
     assertEquals(new BigInteger("-98765"), adapter.complexify(context, "-98765", BigInteger.class));
     assertEquals(BigInteger.ZERO, adapter.complexify(context, "0", BigInteger.class));
@@ -48,7 +48,7 @@ public class BigIntegerAdapterTest {
   }
 
   @Test
-  public void testComplexifyUnsupportedType() throws Exception {
+  public void testComplexifyUnsupportedType() {
     assertNull(adapter.complexify(context, new Object(), BigInteger.class));
     assertNull(adapter.complexify(context, true, BigInteger.class));
   }

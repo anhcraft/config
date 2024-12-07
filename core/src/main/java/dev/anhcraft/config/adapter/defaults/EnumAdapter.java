@@ -13,21 +13,22 @@ public class EnumAdapter implements TypeAdapter<Enum> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends Enum> sourceType, @NotNull Enum value)
-      throws Exception {
+      @NotNull Context ctx, @NotNull Class<? extends Enum> sourceType, @NotNull Enum value) {
     return value.name().toLowerCase();
   }
 
   @Override
   public @Nullable Enum complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof String) {
       try {
         //noinspection rawtypes,unchecked
         return Enum.valueOf(
             (Class) ComplexTypes.erasure(targetType), ((String) value).trim().toUpperCase());
-      } catch (IllegalArgumentException ignored) {
-      } // TODO add strict enum parsing
+      } catch (IllegalArgumentException | ClassNotFoundException ignored) {
+
+      }
+      // TODO add strict enum parsing
     }
     return null;
   }

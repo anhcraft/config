@@ -31,7 +31,7 @@ public class DoubleAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyNumber() throws Exception {
+  public void testComplexifyNumber() {
     assertEquals(0.5d, adapter.complexify(context, 0.5d, Double.class), 1e-8);
     assertEquals(2.0000d, adapter.complexify(context, 2, Double.class), 1e-8);
     assertEquals(-0.0005d, adapter.complexify(context, -0.0005f, Double.class), 1e-8);
@@ -40,7 +40,7 @@ public class DoubleAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyString() throws Exception {
+  public void testComplexifyString() {
     assertEquals(3.005d, adapter.complexify(context, "3.005", Double.class), 1e-8);
     assertEquals(2d, adapter.complexify(context, "2 ", Double.class), 1e-8);
     assertEquals(12d, adapter.complexify(context, "0012", Double.class), 1e-8);
@@ -60,7 +60,7 @@ public class DoubleAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyStringStrictly() throws Exception {
+  public void testComplexifyStringStrictly() {
     Context strict =
         ConfigFactory.create()
             .enableDenormalizerSetting(SettingFlag.Denormalizer.STRICT_NUMBER_PARSING)
@@ -85,14 +85,14 @@ public class DoubleAdapterTest {
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyCharacter() throws Exception {
+  public void testComplexifyCharacter() {
     assertEquals('1', adapter.complexify(context, '1', Double.class), 1e-8);
     assertEquals('2', adapter.complexify(context, '2', Double.class), 1e-8);
   }
 
   @SuppressWarnings("DataFlowIssue")
   @Test
-  public void testComplexifyBoolean() throws Exception {
+  public void testComplexifyBoolean() {
     assertEquals(0d, adapter.complexify(context, false, Double.class), 1e-8);
     assertEquals(1d, adapter.complexify(context, true, Double.class), 1e-8);
   }

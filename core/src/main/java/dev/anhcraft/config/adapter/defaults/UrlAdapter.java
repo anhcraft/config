@@ -14,14 +14,13 @@ public class UrlAdapter implements TypeAdapter<URL> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends URL> sourceType, @NotNull URL value)
-      throws Exception {
+      @NotNull Context ctx, @NotNull Class<? extends URL> sourceType, @NotNull URL value) {
     return value.toString();
   }
 
   @Override
   public @Nullable URL complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (!(value instanceof String)) {
       return null;
     }

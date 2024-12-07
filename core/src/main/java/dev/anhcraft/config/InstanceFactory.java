@@ -6,6 +6,7 @@ import dev.anhcraft.config.type.ComplexTypes;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InaccessibleObjectException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -76,9 +77,17 @@ public final class InstanceFactory implements InstanceAssembler {
           new InstanceAssembler() {
             @Override
             public <V> @NotNull V newInstance(@NotNull Context context, @NotNull Class<V> clazz)
-                throws Exception {
-              //noinspection unchecked
-              return (V) c.newInstance();
+                throws InstantiationException {
+              try {
+                //noinspection unchecked
+                return (V) c.newInstance();
+              } catch (IllegalAccessException e) {
+                throw new InstantiationException(
+                    "Cannot access constructor declared in " + c.getDeclaringClass().getName());
+              } catch (InvocationTargetException e) {
+                throw new InstantiationException(
+                    "Cannot invoke constructor declared in " + c.getDeclaringClass().getName());
+              }
             }
           };
       onDemandCache.put(clazz, ic);
@@ -90,7 +99,7 @@ public final class InstanceFactory implements InstanceAssembler {
         new InstanceAssembler() {
           @Override
           public <V> @NotNull V newInstance(@NotNull Context context, @NotNull Class<V> clazz)
-              throws Exception {
+              throws InstantiationException {
             //noinspection unchecked
             return (V) unsafe.allocateInstance(clazz);
           }
@@ -105,7 +114,7 @@ public final class InstanceFactory implements InstanceAssembler {
    */
   @Override
   public <T> @NotNull T newInstance(@NotNull Context context, @NotNull Class<T> clazz)
-      throws Exception {
+      throws InstantiationException {
     return getInstanceAssembler(clazz).newInstance(context, clazz);
   }
 }

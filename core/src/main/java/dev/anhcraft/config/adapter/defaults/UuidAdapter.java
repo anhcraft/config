@@ -13,14 +13,13 @@ public class UuidAdapter implements TypeAdapter<UUID> {
 
   @Override
   public @Nullable Object simplify(
-      @NotNull Context ctx, @NotNull Class<? extends UUID> sourceType, @NotNull UUID value)
-      throws Exception {
+      @NotNull Context ctx, @NotNull Class<? extends UUID> sourceType, @NotNull UUID value) {
     return value.toString();
   }
 
   @Override
   public @Nullable UUID complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (!(value instanceof String)) {
       return null;
     }

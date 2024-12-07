@@ -12,7 +12,7 @@ public class DoubleAdapter implements TypeAnnotator<Double> {
 
   @Override
   public @Nullable Double complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).doubleValue();
     else if (value instanceof String) {
       try {

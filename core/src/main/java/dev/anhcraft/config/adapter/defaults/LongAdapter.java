@@ -13,7 +13,7 @@ public class LongAdapter implements TypeAnnotator<Long> {
 
   @Override
   public @Nullable Long complexify(
-      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) throws Exception {
+      @NotNull Context ctx, @NotNull Object value, @NotNull Type targetType) {
     if (value instanceof Number) return ((Number) value).longValue();
     else if (value instanceof String) {
       try {
