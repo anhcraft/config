@@ -10,6 +10,7 @@ import dev.anhcraft.config.blueprint.ReflectSchemaScanner;
 import dev.anhcraft.config.blueprint.Schema;
 import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
+import dev.anhcraft.config.internal.ConfigDenormalizerImpl;
 import dev.anhcraft.config.internal.ConfigNormalizerImpl;
 import dev.anhcraft.config.internal.ShapeRegistryImpl;
 import dev.anhcraft.config.internal.blueprint.ReflectSchemaScannerImpl;
@@ -45,7 +46,7 @@ public final class ConfigFactory {
             builder.schemaCacheProvider,
             builder.encapsulationEnforced);
     this.normalizer = builder.normalizerProvider.provide(this);
-    this.denormalizer = new ConfigDenormalizer(this, builder.denormalizerSettings);
+    this.denormalizer = builder.denormalizerProvider.provide(this);
     this.contextProvider = builder.contextProvider;
     this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
     this.shapeRegistry = builder.shapeRegistryProvider.provide(this);
@@ -152,6 +153,7 @@ public final class ConfigFactory {
     private UnaryOperator<String> namingPolicy = NamingPolicy.DEFAULT;
     private ContextProvider contextProvider = new ContextProvider() {};
     private ServiceProvider<ConfigNormalizer> normalizerProvider;
+    private ServiceProvider<ConfigDenormalizer> denormalizerProvider;
     private ServiceProvider<ShapeRegistry> shapeRegistryProvider = ShapeRegistryImpl::new; // use
     private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
@@ -250,6 +252,17 @@ public final class ConfigFactory {
     public @NotNull Builder useConfigNormalizer(
         @NotNull ServiceProvider<ConfigNormalizer> normalizerProvider) {
       this.normalizerProvider = normalizerProvider;
+      return this;
+    }
+
+    /**
+     * Sets the provider for the config denormalizer.<br>
+     * @param denormalizerProvider the config denormalizer provider
+     * @return this
+     */
+    public @NotNull Builder useConfigDenormalizer(
+        @NotNull ServiceProvider<ConfigDenormalizer> denormalizerProvider) {
+      this.denormalizerProvider = denormalizerProvider;
       return this;
     }
 
@@ -360,6 +373,14 @@ public final class ConfigFactory {
               @Override
               public @NotNull ConfigNormalizer provide(@NotNull ConfigFactory factory) {
                 return new ConfigNormalizerImpl(factory, normalizerSettings);
+              }
+            };
+      if (denormalizerProvider == null)
+        denormalizerProvider =
+            new ServiceProvider<>() {
+              @Override
+              public @NotNull ConfigDenormalizer provide(@NotNull ConfigFactory factory) {
+                return new ConfigDenormalizerImpl(factory, denormalizerSettings);
               }
             };
 
