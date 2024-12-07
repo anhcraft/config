@@ -26,11 +26,12 @@ public class IndexedAdapterProvider extends SimpleAdapterProvider {
   }
 
   private static class ClassGraph {
-    public LinkedHashSet<Class<?>> roots = new LinkedHashSet<>();
-    public LinkedHashMap<Class<?>, TypeAdapter<?>> decoration = new LinkedHashMap<>();
-    public LinkedHashMap<Class<?>, LinkedHashSet<Class<?>>> parentToChild = new LinkedHashMap<>();
+    private final LinkedHashSet<Class<?>> roots = new LinkedHashSet<>();
+    private final LinkedHashMap<Class<?>, TypeAdapter<?>> decoration = new LinkedHashMap<>();
+    private final LinkedHashMap<Class<?>, LinkedHashSet<Class<?>>> parentToChild =
+        new LinkedHashMap<>();
 
-    public void decorate(Class<?> node, TypeAdapter<?> value) {
+    private void decorate(Class<?> node, TypeAdapter<?> value) {
       decoration.put(node, value);
       discover(node, new HashSet<>());
     }

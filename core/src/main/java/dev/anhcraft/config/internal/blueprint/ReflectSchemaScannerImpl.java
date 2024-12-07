@@ -14,8 +14,10 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+@ApiStatus.Internal
 public class ReflectSchemaScannerImpl implements ReflectSchemaScanner {
   private final UnaryOperator<String> namingPolicy;
   private final ValidationRegistry validationRegistry;
@@ -23,16 +25,16 @@ public class ReflectSchemaScannerImpl implements ReflectSchemaScanner {
   final boolean encapsulationEnforced;
 
   public ReflectSchemaScannerImpl(
-      @NotNull UnaryOperator<String> namingPolicy,
-      @NotNull ValidationRegistry validationRegistry,
-      @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
+      UnaryOperator<String> namingPolicy,
+      ValidationRegistry validationRegistry,
+      Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider) {
     this(namingPolicy, validationRegistry, schemaCacheProvider, true);
   }
 
   public ReflectSchemaScannerImpl(
-      @NotNull UnaryOperator<String> namingPolicy,
-      @NotNull ValidationRegistry validationRegistry,
-      @NotNull Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider,
+      UnaryOperator<String> namingPolicy,
+      ValidationRegistry validationRegistry,
+      Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider,
       boolean encapsulationEnforced) {
     this.namingPolicy = namingPolicy;
     this.validationRegistry = validationRegistry;

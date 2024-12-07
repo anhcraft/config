@@ -155,7 +155,7 @@ public abstract class AbstractDictionary extends AbstractMap<String, Object> imp
   }
 
   private class EntryIterator implements Iterator<Entry<String, Object>> {
-    Iterator<Map.Entry<String, Object>> it = backend.entrySet().iterator();
+    final Iterator<Map.Entry<String, Object>> it = backend.entrySet().iterator();
 
     public boolean hasNext() {
       return it.hasNext();

@@ -7,9 +7,11 @@ import dev.anhcraft.config.blueprint.ClassSchemaScanner;
 import dev.anhcraft.config.type.ComplexTypes;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Internal
 public class ClassSchemaImpl extends AbstractSchema<ClassProperty> implements ClassSchema {
   private final ClassSchemaScanner scanner;
   private final int scannerIdentity;

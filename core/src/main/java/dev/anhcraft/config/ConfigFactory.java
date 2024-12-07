@@ -158,9 +158,9 @@ public final class ConfigFactory {
               }
             };
     private Class<? extends AdapterProvider> adapterProvider = CacheableAdapterProvider.class;
-    private Set<SettingFlag.Normalizer> normalizerSettings =
+    private final Set<SettingFlag.Normalizer> normalizerSettings =
         EnumSet.of(SettingFlag.Normalizer.IGNORE_DEFAULT_VALUES);
-    private Set<SettingFlag.Denormalizer> denormalizerSettings =
+    private final Set<SettingFlag.Denormalizer> denormalizerSettings =
         EnumSet.noneOf(SettingFlag.Denormalizer.class);
     private boolean encapsulationEnforced = true;
 
