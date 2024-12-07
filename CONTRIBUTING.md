@@ -19,13 +19,18 @@
   │       │             │
   │       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
   │       │
-  │       └─⫸ Commit Scope: core|configdoc|example|benchmark
+  │       └─⫸ Commit Scope: core|configdoc|json|example|benchmark|tools
   │
   └─⫸ Commit Type: build|ci|docs|feat|fix|refactor|test
 ```
-- `build`: change to build files, dependencies
+
+- `build`: 
+  - Within a module: `build(<module>)` - change to the module build, dependencies, etc
+  - Outside a module: `build` - changes to the overall project build (e.g. pom.xml)
 - `ci`: change GitHub workflow, other CI services, etc
-- `docs`: update `docs` files
+- `docs`:
+  - Within a module: `docs(<module>)` - change to the Javadoc, comments
+  - Outside a module: `docs` - changes to the project documents, README, etc
 - `feat`: a new feature (corresponds to a minor version)
 - `fix`: a new fix (corresponds to a patch version)
 - `refactor`: refactor code (spotless), optimize code
