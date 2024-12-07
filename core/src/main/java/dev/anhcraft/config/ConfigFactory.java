@@ -12,6 +12,7 @@ import dev.anhcraft.config.context.Context;
 import dev.anhcraft.config.context.ContextProvider;
 import dev.anhcraft.config.internal.ConfigDenormalizerImpl;
 import dev.anhcraft.config.internal.ConfigNormalizerImpl;
+import dev.anhcraft.config.internal.InstanceFactoryImpl;
 import dev.anhcraft.config.internal.ShapeRegistryImpl;
 import dev.anhcraft.config.internal.blueprint.ReflectSchemaScannerImpl;
 import dev.anhcraft.config.validate.ValidationRegistry;
@@ -48,7 +49,7 @@ public final class ConfigFactory {
     this.normalizer = builder.normalizerProvider.provide(this);
     this.denormalizer = builder.denormalizerProvider.provide(this);
     this.contextProvider = builder.contextProvider;
-    this.instanceFactory = new InstanceFactory(builder.instanceAssemblers);
+    this.instanceFactory = builder.instanceFactoryProvider.provide(this);
     this.shapeRegistry = builder.shapeRegistryProvider.provide(this);
     try {
       this.adapterProvider =
@@ -154,6 +155,7 @@ public final class ConfigFactory {
     private ContextProvider contextProvider = new ContextProvider() {};
     private ServiceProvider<ConfigNormalizer> normalizerProvider;
     private ServiceProvider<ConfigDenormalizer> denormalizerProvider;
+    private ServiceProvider<InstanceFactory> instanceFactoryProvider;
     private ServiceProvider<ShapeRegistry> shapeRegistryProvider = ShapeRegistryImpl::new; // use
     private Supplier<Map<Class<?>, Schema<?>>> schemaCacheProvider =
         () ->
@@ -383,6 +385,17 @@ public final class ConfigFactory {
                 return new ConfigDenormalizerImpl(factory, denormalizerSettings);
               }
             };
+      if (instanceFactoryProvider == null) {
+        final Map<Class<?>, InstanceAssembler> _instanceAssemblers =
+            new HashMap<>(instanceAssemblers);
+        instanceFactoryProvider =
+            new ServiceProvider<>() {
+              @Override
+              public @NotNull InstanceFactory provide(@NotNull ConfigFactory factory) {
+                return new InstanceFactoryImpl(_instanceAssemblers);
+              }
+            };
+      }
 
       return new ConfigFactory(this);
     }

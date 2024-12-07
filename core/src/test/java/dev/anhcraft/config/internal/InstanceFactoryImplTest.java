@@ -1,7 +1,10 @@
-package dev.anhcraft.config;
+package dev.anhcraft.config.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import dev.anhcraft.config.ConfigFactory;
+import dev.anhcraft.config.InstanceAssembler;
+import dev.anhcraft.config.InstanceFactory;
 import dev.anhcraft.config.context.Context;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,14 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-class InstanceFactoryTest {
+class InstanceFactoryImplTest {
 
   private InstanceFactory instanceFactory;
 
   @BeforeEach
   void setUp() {
     Map<Class<?>, InstanceAssembler> instanceAssemblers = new HashMap<>();
-    instanceFactory = new InstanceFactory(instanceAssemblers);
+    instanceFactory = new InstanceFactoryImpl(instanceAssemblers);
   }
 
   @Test
