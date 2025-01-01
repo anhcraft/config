@@ -586,8 +586,9 @@ For complex use cases, it is required to handle manually using type adapter
 
 ## Processors
 - In certain use cases, it is unnecessary to create type adapter for a certain type because of following reasons:
-  + Minimize code duplication. For example, there is a validation in the constructor, what if that can also be used in denormalization
-  + Encapsulate the logic in that class and prevent inheritance. On the other hand, type adapter lookup works for subtype.
+  + Minimize code duplication
+  + Encapsulate the logic in the configuration class
+  + Prevent inheritance (since type adapter lookup works for subtype)
   + Validate the value (without using `@Validate`). Using type adapter means to transform the value, so validation is not a suitable use case here.
   + Access to private, package-private class members
 - Processors are annotated instance methods that can process values
@@ -600,10 +601,10 @@ For complex use cases, it is required to handle manually using type adapter
 - Since the processor is an instance method, it can directly get the value from the corresponding field.
 - The syntax of normalization processor is inspired from type adapter with difference:
   - The `context` parameter is optional
-  - **No** `value` parameter: the value can be obtained directly
-  - **No** `type` parameter: the actual type is determined in source code
+  - **No** `value` parameter: instead, obtain the value directly from the corresponding field
+  - **No** `type` parameter: the actual type is pre-determined from source code
   - Return type must be non-void
-- Option `name` to specify the property name
+- Option `name` to specify the field name (Reason: below)
 - Option `strategy` controls how it behaves:
   - `replace`: replaces the automatic type-adapting. This processor must take the value from the corresponding field directly and returns the simplified value. (**default**)
   - `before`: this processor executes before automatic type-adapting, it provides a new complex value. Thereby, the normalizer takes the value from this processor instead of getting from the corresponding field.
@@ -665,7 +666,7 @@ public class Log {
   - The `context` parameter is optional
   - **No** `type` parameter: the actual type is determined in source code
   - If the return type is void, it is possible to set the value directly into the field
-- Option `name` to specify the property name
+- Option `name` to specify the field name (Reason: below)
 - Option `strategy` controls how it behaves:
   - `replace`: replaces the automatic type-adapting. This processor must take the simple value, transform it, then return the value. (**default**)
   - `after`: this processor executes after automatic type-adapting, it takes the complex value that was previously adapted, transform it, then return the value
@@ -853,31 +854,7 @@ public class ItemV2 extends Item {
 ### Dynamic polymorphism
 TODO
 
-## Embedding
-- Embedding is a feature to compose and flatten fields from another schema in a schema without inheritance:
-  - Composition: the composed schema is nested in the code
-  - Flattening: the composed schema is flattened in the configuration
-  - Favor composition over inheritance
-- When flattening, naming conflict can happen; as such, by default, all members of the mixin field is prefixed with the field name. Config follows Java convention which prefers `camelCase`.
-- Embedded fields are inherently unique at runtime. If conflicts occur in configuration, the later one will override prior ones
-- For example:
-  - Note that `Gun#ammoDamage` can override `ammoDamage` composed by `ammo` field plus `damage`
-```java
-public class Gun {
-  private String name = "Desert Eagle";
-  @Embedded private Ammo ammo;
-  private int ammoCount = 7;
-  private int ammoDamage = 50;
-}
+---
 
-public class Ammo {
-  private float damage = 20;
-  private float weight = 0.02;
-}
-```
-```yaml
-name: "Desert Eagle"
-ammoCount: 7
-ammoDamage: 50.0
-ammoWeight: 0.02
-```
+## Development features
+See: `/dev/`
