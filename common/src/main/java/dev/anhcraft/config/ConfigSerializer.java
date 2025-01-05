@@ -15,9 +15,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ConfigSerializer extends ConfigHandler {
     private final List<Middleware> middlewares = new ArrayList<>();
@@ -49,22 +47,20 @@ public class ConfigSerializer extends ConfigHandler {
                     return transformArray(Objects.requireNonNull(TypeUtil.getElementType(sourceType)), object);
                 }
             }
-            Class<?> type = rawType;
-            while (true) {
+            Stack<Class<?>> stack = new Stack<>();
+            stack.add(rawType);
+            while (!stack.isEmpty()) {
+                Class<?> type = stack.pop();
+                if (type == null || type == Object.class)
+                    continue;
                 //noinspection unchecked
                 TypeAdapter<T> typeAdapter = (TypeAdapter<T>) getTypeAdapter(type);
                 if (typeAdapter != null) {
                     return typeAdapter.simplify(this, sourceType, object);
                 }
-                for (Class<?> clazz : type.getInterfaces()) {
-                    typeAdapter = (TypeAdapter<T>) getTypeAdapter(clazz);
-                    if (typeAdapter != null) {
-                        return typeAdapter.simplify(this, sourceType, object);
-                    }
-                }
-                type = type.getSuperclass();
-                if (!shouldCallSuperAdapter() || type == null || type.equals(Object.class)) {
-                    break;
+                stack.addAll(Arrays.asList(type.getInterfaces()));
+                if (shouldCallSuperAdapter()) {
+                    stack.add(type.getSuperclass());
                 }
             }
             return SimpleForm.of(object);
